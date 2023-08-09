@@ -72,4 +72,14 @@ class ExceptionHandlerController {
         )
         return ResponseEntity<ErrorResponse>(response, HttpStatus.BAD_REQUEST)
     }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+        val response = ErrorResponse(
+            message = exception.message ?: "Неверный параметр в запросе!",
+            code = exception.javaClass.simpleName,
+            status = HttpStatus.BAD_REQUEST.value()
+        )
+        return ResponseEntity<ErrorResponse>(response, HttpStatus.BAD_REQUEST)
+    }
 }

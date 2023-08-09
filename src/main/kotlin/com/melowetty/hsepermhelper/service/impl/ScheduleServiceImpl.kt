@@ -37,4 +37,22 @@ class ScheduleServiceImpl(
         val schedule = scheduleRepository.getNextSchedule() ?: throw ScheduleNotFoundException("Расписание на следующую неделю не было найдено!")
         return filterSchedule(schedule, user)
     }
+
+    override fun getAvailableCourses(): List<Int> {
+        return scheduleRepository.getAvailableCourses()
+    }
+
+    override fun getAvailablePrograms(course: Int): List<String> {
+        return scheduleRepository.getAvailablePrograms(course = course)
+    }
+
+    override fun getAvailableGroups(course: Int, program: String): List<String> {
+        return scheduleRepository.getAvailableGroups(course = course, program = program)
+    }
+
+    override fun getAvailableSubgroups(course: Int, program: String, group: String): List<Int> {
+        return scheduleRepository.getAvailableSubgroups(course = course, program = program, group = group)
+    }
+
+
 }
