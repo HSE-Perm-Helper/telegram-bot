@@ -1,17 +1,31 @@
 import telebot
 from telebot import types
 import json
+import requests
+
+with open("./jsons/response_available_courses.json", 'r') as courses:
+    courses_data = json.load(courses)
+
+with open("./jsons/response_available_groups.json", 'r') as groups:
+    groups_data = json.load(groups)
+
+with open("./jsons/response_available_programs.json", 'r') as programs:
+    programs_data = json.load(programs)
+
+with open("./jsons/response_available_subgroups.json", 'r') as subgroups:
+    subgroups_data = json.load(subgroups)
+
 
 bot = telebot.TeleBot('6348506696:AAGHBhAGBYF0I0iHFuzBuPYYdgEYHumg3bQ')
 
 # -----------  Тексты для сообщений бота  ------------- #
 
 # Выбор курса:
-first = 'first'
-second = 'second'
-third = 'third'
-four = 'four'
-five = 'five'
+first = '1'
+second = '2'
+third = '3'
+four = '4'
+five = '5'
 
 # Выбор направления:
 superheroes = 'РИС'
@@ -36,11 +50,11 @@ user_data_list = []   # Данные для идентификации поль�
 @bot.message_handler(commands=['start'])
 def get_menu(message):
     # bot.delete_message(message.chat.id, message.message_id)
-    button_course_1 = types.InlineKeyboardButton('1', callback_data=first)
-    button_course_2 = types.InlineKeyboardButton('2', callback_data=second)
-    button_course_3 = types.InlineKeyboardButton('3', callback_data=third)
-    button_course_4 = types.InlineKeyboardButton('4', callback_data=four)
-    button_course_5 = types.InlineKeyboardButton('5', callback_data=five)
+    button_course_1 = types.InlineKeyboardButton(first, callback_data=first)
+    button_course_2 = types.InlineKeyboardButton(second, callback_data=second)
+    button_course_3 = types.InlineKeyboardButton(third, callback_data=third)
+    button_course_4 = types.InlineKeyboardButton(four, callback_data=four)
+    button_course_5 = types.InlineKeyboardButton(five, callback_data=five)
 
     markup = types.InlineKeyboardMarkup()
     markup.add(button_course_1)
