@@ -16,7 +16,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Component
-class ExcelScheduleRepository: ScheduleRepository {
+class ScheduleRepositoryImpl: ScheduleRepository {
     private var currentSchedule: Schedule? = null
     private var nextSchedule: Schedule? = null
 
@@ -34,6 +34,56 @@ class ExcelScheduleRepository: ScheduleRepository {
         val differentMinutes = (currentTime.minute - nextSchedule?.parsedDate?.minute!!)
         if(differentMinutes > 5) return retrieveNextSchedule()
         return nextSchedule
+    }
+
+    override fun getAvailableCourses(): List<Int> {
+        if(getCurrentSchedule() == null) throw ScheduleNotFoundException("Расписание не найдено!")
+        val courses = currentSchedule!!.lessons.values.flatMap { lessons ->
+            lessons.map { it.course }
+        }.toSortedSet().toList()
+        if(courses.isEmpty()) throw RuntimeException("Возникли проблемы с обработкой расписания!")
+        return courses
+    }
+
+    override fun getAvailablePrograms(course: Int): List<String> {
+        if (getCurrentSchedule() == null) throw ScheduleNotFoundException("Расписание не найдено!")
+        val programs = currentSchedule!!.lessons.values
+            .asSequence()
+            .flatten()
+            .filter { it.course == course }
+            .map { it.programme }
+            .toSortedSet()
+            .toList()
+        if(programs.isEmpty()) throw IllegalArgumentException("Курс не найден в расписании!")
+        return programs
+    }
+
+    override fun getAvailableGroups(course: Int, program: String): List<String> {
+        if (getCurrentSchedule() == null) throw ScheduleNotFoundException("Расписание не найдено!")
+        val groups = currentSchedule!!.lessons.values
+            .asSequence()
+            .flatten()
+            .filter { it.course == course && it.programme == program }
+            .map { it.group }
+            .toSortedSet()
+            .toList()
+        if(groups.isEmpty()) throw IllegalArgumentException("Программа не найдена в расписании!")
+        return groups
+    }
+
+    override fun getAvailableSubgroups(course: Int, program: String, group: String): List<Int> {
+        if (getCurrentSchedule() == null) throw ScheduleNotFoundException("Расписание не найдено!")
+        val groups = getAvailableGroups(course, program)
+        if(groups.isEmpty()) throw IllegalArgumentException("Группа не найдена в расписании!")
+        val groupNumRegex = Regex("[А-Яа-яЁёa-zA-Z]+-\\d*-(\\d*)")
+        try {
+            val matches = groupNumRegex.find(groups.last())
+            val lastGroupNumMatch = matches!!.groups[1]
+            val lastGroupNum = lastGroupNumMatch!!.value.toInt()
+            return (1..lastGroupNum * 2).toList()
+        } catch (e: Exception) {
+            throw RuntimeException("Возникли проблемы с обработкой группы!")
+        }
     }
 
     private fun getFile(path: String): File {
