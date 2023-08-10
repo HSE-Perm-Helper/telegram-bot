@@ -7,6 +7,7 @@ import com.melowetty.hsepermhelper.exceptions.ScheduleNotFoundException
 import com.melowetty.hsepermhelper.repository.ScheduleRepository
 import com.melowetty.hsepermhelper.service.ScheduleService
 import com.melowetty.hsepermhelper.service.UserService
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 
 @Service
@@ -36,6 +37,14 @@ class ScheduleServiceImpl(
         val user = userService.getByTelegramId(telegramId)
         val schedule = scheduleRepository.getNextSchedule() ?: throw ScheduleNotFoundException("Расписание на следующую неделю не было найдено!")
         return filterSchedule(schedule, user)
+    }
+
+    override fun getCurrentScheduleFile(telegramId: Long): Resource {
+        TODO("Not yet implemented")
+    }
+
+    override fun getNextScheduleFile(telegramId: Long): Resource {
+        TODO("Not yet implemented")
     }
 
     override fun getAvailableCourses(): List<Int> {
