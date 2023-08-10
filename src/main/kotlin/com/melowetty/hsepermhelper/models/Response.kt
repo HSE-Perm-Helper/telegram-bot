@@ -1,15 +1,16 @@
 package com.melowetty.hsepermhelper.models
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "Ответ от сервера")
-data class Response(
+@JsonPropertyOrder("error", "response")
+data class Response<T>(
+    @Schema(description = "Тело ответа от сервера")
+    val response: T,
     @Schema(description = "Наличие ошибки", example = "false")
     val error: Boolean = false,
-    @Schema(description = "Тело ответа от сервера")
-    val response: Any,
 ) {
-    constructor(response: Any): this(error = false, response = response)
 }
 
 data class ErrorResponse(

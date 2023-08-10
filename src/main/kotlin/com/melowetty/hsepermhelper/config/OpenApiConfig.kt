@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 @OpenAPIDefinition(
     info = Info(
         title = "HSE Perm Schedule API",
-        description = "Melowetty", version = "1.0.0",
+        description = "Melowetty", version = "1.0.1",
         contact = Contact(
             name = "Denis Malinin",
             email = "melowetty@mail.ru",

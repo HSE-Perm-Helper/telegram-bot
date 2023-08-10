@@ -17,8 +17,8 @@ class UserServiceImpl(
         return user.get().toDto()
     }
 
-    override fun create(dto: UserDto): Long {
-        return userRepository.save(dto.toEntity()).telegramId
+    override fun create(dto: UserDto): UserDto {
+        return userRepository.save(dto.toEntity()).toDto()
     }
 
     fun UserEntity.toDto(): UserDto {

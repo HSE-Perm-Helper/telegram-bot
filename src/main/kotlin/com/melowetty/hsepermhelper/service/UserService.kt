@@ -16,5 +16,5 @@ interface UserService {
      * @param dto User object
      * @return telegram ID
      */
-    fun create(dto: UserDto): Long
+    fun create(dto: UserDto): UserDto
 }
