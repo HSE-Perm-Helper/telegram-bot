@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Пользователи", description = "Взаимодействие с пользователями")
@@ -20,12 +21,14 @@ class UserController(
         summary = "Получение пользователя",
         description = "Позволяет получить пользователя по его Telegram ID"
     )
-    @GetMapping
+    @GetMapping(
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun getUserByTelegramId(
         @Parameter(description = "Telegram ID пользователя")
         @RequestParam("telegramId")
         telegramId: Long,
-    ): Response {
+    ): Response<UserDto> {
         return Response(userService.getByTelegramId(telegramId = telegramId))
     }
 
@@ -34,11 +37,13 @@ class UserController(
         summary = "Регистрация пользователя",
         description = "Позволяет зарегистрировать пользователя"
     )
-    @PostMapping
+    @PostMapping(
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createUser(
         @RequestBody userDto: UserDto,
-    ): Response {
-        val id = userService.create(dto = userDto)
-        return Response(mapOf("id" to id))
+    ): Response<UserDto> {
+        val user = userService.create(dto = userDto)
+        return Response(user)
     }
 }
