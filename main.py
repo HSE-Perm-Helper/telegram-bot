@@ -1,19 +1,7 @@
 import telebot
 from telebot import types
-import json
+
 import requests
-
-with open("./jsons/response_available_courses.json", 'r') as courses:
-    courses_data = json.load(courses)
-
-with open("./jsons/response_available_groups.json", 'r') as groups:
-    groups_data = json.load(groups)
-
-with open("./jsons/response_available_programs.json", 'r') as programs:
-    programs_data = json.load(programs)
-
-with open("./jsons/response_available_subgroups.json", 'r') as subgroups:
-    subgroups_data = json.load(subgroups)
 
 
 bot = telebot.TeleBot('6348506696:AAGHBhAGBYF0I0iHFuzBuPYYdgEYHumg3bQ')
