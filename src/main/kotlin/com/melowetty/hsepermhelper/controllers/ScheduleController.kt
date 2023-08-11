@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.aot.hint.predicate.RuntimeHintsPredicates.resource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -81,7 +80,7 @@ class ScheduleController(
         description = "Позволяет получить расписания следующей недели в виде файла для пользователя по его Telegram ID"
     )
     @GetMapping(
-        "current_schedule/download",
+        "next_schedule/download",
         produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE]
     )
     fun getNextScheduleFile(

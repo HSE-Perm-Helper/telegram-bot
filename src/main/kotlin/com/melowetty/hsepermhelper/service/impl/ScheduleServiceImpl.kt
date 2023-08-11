@@ -40,11 +40,13 @@ class ScheduleServiceImpl(
     }
 
     override fun getCurrentScheduleFile(telegramId: Long): Resource {
-        TODO("Not yet implemented")
+        val schedule = getCurrentSchedule(telegramId)
+        return schedule.toResource()
     }
 
     override fun getNextScheduleFile(telegramId: Long): Resource {
-        TODO("Not yet implemented")
+        val schedule = getNextSchedule(telegramId)
+        return schedule.toResource()
     }
 
     override fun getAvailableCourses(): List<Int> {
