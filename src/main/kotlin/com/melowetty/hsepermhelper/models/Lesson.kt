@@ -1,3 +1,5 @@
+package com.melowetty.hsepermhelper.models
+
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -42,6 +44,7 @@ data class Lesson(
      * @return true if lesson is online else false
      */
     fun isOnline(): Boolean {
+        if(building == null && office == null) return false
         return (building == null || building == 0) && lessonType != LessonType.ENGLISH
     }
 
@@ -60,7 +63,10 @@ data class Lesson(
         if(isOnline()) {
             descriptionLines.add("Место: онлайн")
         } else {
-            descriptionLines.add("Место: $building корпус - ${getOfficeStr()}")
+            if (building == null && office == null)
+                descriptionLines.add("Место: не указано")
+            else
+                descriptionLines.add("Место: $building корпус - ${getOfficeStr()}")
         }
         event.add(
             Description(

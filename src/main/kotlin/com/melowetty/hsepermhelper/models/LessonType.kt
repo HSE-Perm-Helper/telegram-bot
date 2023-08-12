@@ -1,3 +1,5 @@
+package com.melowetty.hsepermhelper.models
+
 enum class LessonType(val type: String, val pattern: String) {
     LECTURE("Лекция", "{type}: {subject}"),
     SEMINAR("Семинар", "{type}: {subject}"),
