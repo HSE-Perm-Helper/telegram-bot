@@ -33,7 +33,7 @@ data class Lesson(
     val lecturer: String?,
     @Schema(description = "Кабинет", example = "121", nullable = true)
     val office: String?,
-    @Schema(description = "Корпус (если null - пара дистанционная)", example = "2", nullable = true)
+    @Schema(description = "Корпус (если 0 - пара дистанционная)", example = "2", nullable = true)
     val building: Int?,
     @Schema(description = "Тип лекции", example = "SEMINAR")
     val lessonType: LessonType,
