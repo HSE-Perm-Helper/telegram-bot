@@ -2,16 +2,15 @@ package com.melowetty.hsepermhelper.controllers
 
 import Schedule
 import com.melowetty.hsepermhelper.models.Response
+import com.melowetty.hsepermhelper.models.ScheduleFile
 import com.melowetty.hsepermhelper.service.ScheduleService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.core.io.Resource
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Расписание", description = "Взаимодействие с расписанием")
 @RestController
 class ScheduleController(
-    private val scheduleService: ScheduleService
+    private val scheduleService: ScheduleService,
 ) {
 
     @SecurityRequirement(name = "X-Secret-Key")
@@ -41,24 +40,6 @@ class ScheduleController(
 
     @SecurityRequirement(name = "X-Secret-Key")
     @Operation(
-        summary = "Получение расписания текущей недели в виде файла",
-        description = "Позволяет получить расписания текущей недели в виде файла для пользователя по его Telegram ID"
-    )
-    @GetMapping(
-        "current_schedule/download",
-        produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE]
-    )
-    fun getCurrentScheduleFile(
-        @Parameter(description = "Telegram ID пользователя")
-        @RequestParam("telegramId")
-        telegramId: Long,
-    ): ResponseEntity<Resource> {
-        val resource = scheduleService.getCurrentScheduleFile(telegramId)
-        return getFileDownloadResponse(resource)
-    }
-
-    @SecurityRequirement(name = "X-Secret-Key")
-    @Operation(
         summary = "Получение расписания следующей недели",
         description = "Позволяет получить расписания следующей недели для пользователя по его Telegram ID"
     )
@@ -76,20 +57,18 @@ class ScheduleController(
 
     @SecurityRequirement(name = "X-Secret-Key")
     @Operation(
-        summary = "Получение расписания следующей недели в виде файла",
-        description = "Позволяет получить расписания следующей недели в виде файла для пользователя по его Telegram ID"
+        summary = "Получение расписания пользователя на 2 недели в виде файла",
+        description = "Позволяет получить расписание на 2 недели в виде файла для пользователя по его Telegram ID"
     )
     @GetMapping(
-        "next_schedule/download",
-        produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE]
+        "schedule/{telegramId}/download",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun getNextScheduleFile(
+    fun getScheduleFile(
         @Parameter(description = "Telegram ID пользователя")
-        @RequestParam("telegramId")
-        telegramId: Long,
-    ): ResponseEntity<Resource> {
-        val resource = scheduleService.getNextScheduleFile(telegramId)
-        return getFileDownloadResponse(resource)
+        @PathVariable telegramId: Long,
+    ): Response<ScheduleFile> {
+        return Response(scheduleService.getScheduleFileByTelegramId(telegramId))
     }
 
     @SecurityRequirement(name = "X-Secret-Key")
@@ -165,19 +144,4 @@ class ScheduleController(
     ): Response<List<Int>> {
         return Response(scheduleService.getAvailableSubgroups(course, program, group))
     }
-
-    private fun getFileDownloadResponse(resource: Resource): ResponseEntity<Resource> {
-        val header = HttpHeaders()
-        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=schedule.ics")
-        header.add("Cache-Control", "no-cache, no-store, must-revalidate")
-        header.add("Pragma", "no-cache")
-        header.add("Expires", "0")
-
-        return ResponseEntity
-            .ok()
-            .headers(header)
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(resource)
-    }
-
 }

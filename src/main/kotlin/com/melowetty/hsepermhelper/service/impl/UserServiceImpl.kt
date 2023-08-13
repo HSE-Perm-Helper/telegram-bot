@@ -28,6 +28,10 @@ class UserServiceImpl(
         return userRepository.save(dto.toEntity()).toDto()
     }
 
+    override fun getAllUsers(): List<UserDto> {
+        return userRepository.findAll().map { it.toDto() }
+    }
+
     fun UserEntity.toDto(): UserDto {
         return UserDto(
             id = id,

@@ -1,9 +1,9 @@
 package com.melowetty.hsepermhelper.repository.impl
 
-import Lesson
-import LessonType
 import Schedule
 import com.melowetty.hsepermhelper.exceptions.ScheduleNotFoundException
+import com.melowetty.hsepermhelper.models.Lesson
+import com.melowetty.hsepermhelper.models.LessonType
 import com.melowetty.hsepermhelper.repository.ScheduleRepository
 import com.melowetty.hsepermhelper.utils.getHash
 import org.apache.poi.ss.usermodel.*

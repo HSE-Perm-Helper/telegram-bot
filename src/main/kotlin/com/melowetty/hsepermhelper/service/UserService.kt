@@ -1,7 +1,7 @@
 package com.melowetty.hsepermhelper.service
 
 import com.melowetty.hsepermhelper.dto.UserDto
-import java.util.UUID
+import java.util.*
 
 interface UserService {
 
@@ -25,4 +25,11 @@ interface UserService {
      * @return telegram ID
      */
     fun create(dto: UserDto): UserDto
+
+    /**
+     * Returns list of all users
+     *
+     * @return list of users
+     */
+    fun getAllUsers(): List<UserDto>
 }
