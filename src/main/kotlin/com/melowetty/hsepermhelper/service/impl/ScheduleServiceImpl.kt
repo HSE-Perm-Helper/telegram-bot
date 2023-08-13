@@ -78,9 +78,9 @@ class ScheduleServiceImpl(
         return schedule.toResource()
     }
 
-    override fun getScheduleFileByTelegramId(id: Long): ScheduleFile {
+    override fun getScheduleFileByTelegramId(baseUrl: String, id: Long): ScheduleFile {
         val schedule = getCurrentSchedule(id)
-        val link = "${env.getProperty("app.baselink")}${env.getProperty("server.servlet.context-path")}/files/${id}/schedule.ics"
+        val link = "${baseUrl}${env.getProperty("server.servlet.context-path")}/files/${id}/schedule.ics"
         return ScheduleFile(
             linkForDownload = link,
             linkForRemoteCalendar = "webcal://${link}"
