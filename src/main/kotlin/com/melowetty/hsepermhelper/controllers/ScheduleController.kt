@@ -4,10 +4,12 @@ import Schedule
 import com.melowetty.hsepermhelper.models.Response
 import com.melowetty.hsepermhelper.models.ScheduleFile
 import com.melowetty.hsepermhelper.service.ScheduleService
+import com.melowetty.hsepermhelper.utils.UrlUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -67,8 +69,10 @@ class ScheduleController(
     fun getScheduleFile(
         @Parameter(description = "Telegram ID пользователя")
         @PathVariable telegramId: Long,
+        request: HttpServletRequest
     ): Response<ScheduleFile> {
-        return Response(scheduleService.getScheduleFileByTelegramId(telegramId))
+        val baseUrl = UrlUtils.getBaseUrl(request)
+        return Response(scheduleService.getScheduleFileByTelegramId(baseUrl, telegramId))
     }
 
     @SecurityRequirement(name = "X-Secret-Key")

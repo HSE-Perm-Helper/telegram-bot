@@ -23,10 +23,11 @@ interface ScheduleService {
 
     /**
      * Returns links for mobile calendar of schedule for user
+     * @param baseUrl base url of server
      * @param id user's telegram id
      * @return schedule file object
      */
-    fun getScheduleFileByTelegramId(id: Long): ScheduleFile
+    fun getScheduleFileByTelegramId(baseUrl: String, id: Long): ScheduleFile
 
     fun getAvailableCourses(): List<Int>
 
