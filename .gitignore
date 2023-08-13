@@ -35,4 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Custom ##
 /secret_key.txt
+/uploads

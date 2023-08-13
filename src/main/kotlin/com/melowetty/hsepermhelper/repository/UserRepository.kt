@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface UserRepository: CrudRepository<UserEntity, Long> {
+interface UserRepository: CrudRepository<UserEntity, UUID> {
     fun findByTelegramId(telegramId: Long): Optional<UserEntity>
 }

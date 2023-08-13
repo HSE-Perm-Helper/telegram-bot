@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.NoHandlerFoundException
+import java.io.FileNotFoundException
 
 @RestControllerAdvice
 class ExceptionHandlerController {
@@ -85,5 +86,15 @@ class ExceptionHandlerController {
             status = HttpStatus.BAD_REQUEST.value()
         )
         return ResponseEntity<ErrorResponse>(response, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(FileNotFoundException::class)
+    fun handleFileNotFoundException(exception: FileNotFoundException): ResponseEntity<ErrorResponse> {
+        val response = ErrorResponse(
+            message = exception.message ?: "Файл не найден!",
+            code = exception.javaClass.simpleName,
+            status = HttpStatus.NOT_FOUND.value()
+        )
+        return ResponseEntity<ErrorResponse>(response, HttpStatus.NOT_FOUND)
     }
 }

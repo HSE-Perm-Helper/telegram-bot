@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebFilter
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.env.Environment
+import org.springframework.core.env.getProperty
 import org.springframework.http.HttpStatus
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -26,14 +27,20 @@ class SecurityFilter(
         filterChain: FilterChain
     ) {
         try {
-            val key = request.getHeader("X-Secret-Key")
-                ?: throw UnauthorizedException("Введите секретный ключ в заголовках запроса!")
-            val hasAccess: Boolean = securityKeyManager.checkKey(key)
-            if (hasAccess) {
+            val rawLine = env.getProperty("app.secret-key.enable") ?: "true"
+            val isSecurityCheckEnabled = rawLine.toBooleanStrictOrNull() ?: true
+            if(isSecurityCheckEnabled) {
+                val key = request.getHeader("X-Secret-Key")
+                    ?: throw UnauthorizedException("Введите секретный ключ в заголовках запроса!")
+                val hasAccess: Boolean = securityKeyManager.checkKey(key)
+                if (hasAccess) {
+                    filterChain.doFilter(request, response)
+                    return
+                }
+                throw PermissionDeniedException("Доступ запрещён!")
+            } else {
                 filterChain.doFilter(request, response)
-                return
             }
-            throw PermissionDeniedException("Доступ запрещён!")
         } catch (e: Exception) {
             response.contentType = "application/json"
             if(e is CustomException) {
@@ -62,6 +69,7 @@ class SecurityFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val basePath = env.getProperty("server.servlet.context-path")
+        if (request.requestURI.startsWith("${basePath}${env.getProperty("file-storage.path")}")) return true
         if(request.requestURI.startsWith("${basePath}${env.getProperty("springdoc.swagger-ui.path")}")) return true
         if(request.requestURI.startsWith("${basePath}/swagger-ui")) return true
         if(request.requestURI.startsWith("${basePath}/v3/api-docs")) return true

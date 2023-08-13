@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import java.util.UUID
 
 @Tag(name = "Пользователи", description = "Взаимодействие с пользователями")
 @RestController
@@ -18,7 +19,7 @@ class UserController(
 ) {
     @SecurityRequirement(name = "X-Secret-Key")
     @Operation(
-        summary = "Получение пользователя",
+        summary = "Получение пользователя по Telegram ID",
         description = "Позволяет получить пользователя по его Telegram ID"
     )
     @GetMapping(
@@ -30,6 +31,23 @@ class UserController(
         telegramId: Long,
     ): Response<UserDto> {
         return Response(userService.getByTelegramId(telegramId = telegramId))
+    }
+
+    @SecurityRequirement(name = "X-Secret-Key")
+    @Operation(
+        summary = "Получение пользователя",
+        description = "Позволяет получить пользователя по его ID"
+    )
+    @GetMapping(
+        "/{id}",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun getUserById(
+        @Parameter(description = "ID пользователя")
+        @PathVariable("id")
+        id: UUID,
+    ): Response<UserDto> {
+        return Response(userService.getById(id))
     }
 
     @SecurityRequirement(name = "X-Secret-Key")
