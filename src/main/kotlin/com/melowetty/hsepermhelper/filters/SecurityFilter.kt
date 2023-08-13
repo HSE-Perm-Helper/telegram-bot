@@ -69,6 +69,7 @@ class SecurityFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val basePath = env.getProperty("server.servlet.context-path")
+        if (request.requestURI.startsWith("${basePath}${env.getProperty("file-storage.path")}")) return true
         if(request.requestURI.startsWith("${basePath}${env.getProperty("springdoc.swagger-ui.path")}")) return true
         if(request.requestURI.startsWith("${basePath}/swagger-ui")) return true
         if(request.requestURI.startsWith("${basePath}/v3/api-docs")) return true
