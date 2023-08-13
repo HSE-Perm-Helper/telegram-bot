@@ -5,6 +5,8 @@ import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.FileReader
+import java.nio.file.Files
+import kotlin.io.path.Path
 
 
 @Component
@@ -20,6 +22,7 @@ class SecretKeyManager(
 
     private fun getSecretKey(): String {
         try {
+            if(Files.exists(Path(path)).not()) Files.createFile(Path(path))
             BufferedReader(FileReader(path)).use { br ->
                 val sb = StringBuilder()
                 var line = br.readLine()
