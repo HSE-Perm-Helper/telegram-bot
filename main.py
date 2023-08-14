@@ -1,7 +1,6 @@
 import telebot
 from telebot import types
 
-import requests
 import json_parsing
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
@@ -11,7 +10,7 @@ bot.can_join_groups = False        # Запрет на приглашения в
 
 # ---------------------------------  Данные пользователя  ----------------------------------- #
 
-user_data_list = [0] * 4  # Данные для идентификации пользователя, 1 - курс, 2 - направление, 3 - группа
+user_data_list = [0] * 4  # Данные для идентификации пользователя, 1 - курс, 2 - направление, 3 - группа, 4 - подгруппа
 
 # ---------------------------------  Функции  ----------------------------------- #
 
@@ -70,32 +69,6 @@ def get_confirmation(message):
 
     bot.send_message(message.chat.id, text_confirmation, reply_markup=markup)
 
-
-# ---------------------------------  Обработка команд  ----------------------------------- #
-
-# Обработка команды /start и /registration
-@bot.message_handler(commands=['start', 'старт', 'поехали', 'registration', 'регистрация'])
-@bot.message_handler(func= lambda message: message.text == 'start' or 'старт' or 'поехали'
-                                           or 'registration' or 'регистрация')
-def get_registration(message):
-    user_data_list = [0] * 4
-    get_course(message)
-
-
-# Обработка команды /help
-@bot.message_handler(commands=['help', 'помощь', 'помоги'])
-@bot.message_handler(func= lambda message: message.text == 'help' or 'помощь' or 'помоги')
-def get_help(message):
-    text_help = ("Вот, что я могу:\n"
-                 "/start - Начало работы. Производится выбор курса, направления, группы и подгруппы\n"
-                 "/registration - Начало работы. Производится выбор курса, направления, группы и подгруппы\n"
-                 "/help - Вывод помощи")
-    bot.send_message(message.chat.id, text_help)
-
-
-# Обработка команды /menu
-@bot.message_handler(commands=['menu', 'меню'])
-@bot.message_handler(func= lambda message: message.text == 'menu' or 'меню')
 def get_menu(message):
     text_schedule = ("Вот, что я могу:\n"
                  "/start - Начало работы. Производится выбор курса, направления, группы и подгруппы\n"
@@ -111,6 +84,44 @@ def get_menu(message):
     bot.send_message(message.chat.id, text_schedule, reply_markup=keyboard_markup)
     # bot.register_next_step_handler(message, click_handler)
 
+# ---------------------------------  Обработка команд  ----------------------------------- #
+
+
+# Обработка команды /start и /registration
+@bot.message_handler(commands=['start', 'старт', 'поехали', 'registration', 'регистрация'])
+@bot.message_handler(func= lambda message: message.text == ('start' or 'старт' or 'поехали'
+                                           or 'registration' or 'регистрация'))
+def get_registration(message):
+    user_data_list = [0] * 4
+    get_course(message)
+
+
+# Обработка команды /help
+@bot.message_handler(commands=['help', 'помощь', 'помоги'])
+@bot.message_handler(func= lambda message: message.text == ('help' or 'помощь' or 'помоги'))
+def get_help(message):
+    text_help = ("Вот, что я могу:\n"
+                 "/start - Начало работы. Производится выбор курса, направления, группы и подгруппы\n"
+                 "/registration - Начало работы. Производится выбор курса, направления, группы и подгруппы\n"
+                 "/help - Вывод помощи")
+    bot.send_message(message.chat.id, text_help)
+
+
+# Обработка команды /menu
+@bot.message_handler(commands=['menu', 'меню'])
+@bot.message_handler(func= lambda message: message.text == ('menu' or 'меню'))
+def start_working(message):
+    get_menu(message)
+
+
+@bot.message_handler(func= lambda message: message.text == "Получить расписание")
+def callback_message(message):
+    bot.send_message(message.chat.id, "Скоро будет!")
+
+
+@bot.message_handler(func= lambda message: message.text == "Проверить дедлайны")
+def callback_message(message):
+    bot.send_message(message.chat.id, "Скоро будет!")
 
 # ---------------------------------  Обработка событий  ----------------------------------- #
 
@@ -170,6 +181,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
     get_menu(callback.message)
+
 
 #Получить файл расписания - скоро будет!
 
