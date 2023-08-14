@@ -84,6 +84,16 @@ def get_menu(message):
     bot.send_message(message.chat.id, text_schedule, reply_markup=keyboard_markup)
     # bot.register_next_step_handler(message, click_handler)
 
+
+def get_file(message):
+    text_get_schedule = "Пожалуйста, выберите способ получения расписания"
+
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь", url="https://www.google.com/"))
+    markup.add(types.InlineKeyboardButton("Получить расписание файлом", callback_data="get_file"))
+
+    bot.send_message(message.chat.id, text_get_schedule, reply_markup=markup)
+
 # ---------------------------------  Обработка команд  ----------------------------------- #
 
 
@@ -116,7 +126,8 @@ def start_working(message):
 
 @bot.message_handler(func= lambda message: message.text == "Получить расписание")
 def callback_message(message):
-    bot.send_message(message.chat.id, "Скоро будет!")
+    get_file(message)
+    #bot.send_message(message.chat.id, "Скоро будет!")
 
 
 @bot.message_handler(func= lambda message: message.text == "Проверить дедлайны")
@@ -183,7 +194,17 @@ def callback_message(callback):
     get_menu(callback.message)
 
 
-#Получить файл расписания - скоро будет!
+# Получить файл расписания
+@bot.callback_query_handler(func=lambda callback: callback.data == "get_file")
+def callback_message(callback):
+    bot.delete_message(callback.message.chat.id, callback.message.message_id)
+    schedule = open('./schedule.ics', 'r', encoding='utf-8')
+    bot.send_document(callback.message.chat.id, schedule)
+
+
+
 
 # Безостановочная работа бота
+
+
 bot.polling(none_stop=True)
