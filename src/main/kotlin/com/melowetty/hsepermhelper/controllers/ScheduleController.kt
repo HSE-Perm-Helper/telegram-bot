@@ -29,12 +29,12 @@ class ScheduleController(
         description = "Позволяет получить расписания текущей недели для пользователя по его Telegram ID"
     )
     @GetMapping(
-        "current_schedule",
+        "current_schedule/{telegramId}",
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun getCurrentSchedule(
         @Parameter(description = "Telegram ID пользователя")
-        @RequestParam("telegramId")
+        @PathVariable("telegramId")
         telegramId: Long,
     ): Response<Schedule> {
         return Response(scheduleService.getCurrentSchedule(telegramId))
@@ -46,12 +46,12 @@ class ScheduleController(
         description = "Позволяет получить расписания следующей недели для пользователя по его Telegram ID"
     )
     @GetMapping(
-        "next_schedule",
+        "next_schedule/{telegramId}",
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun getNextSchedule(
         @Parameter(description = "Telegram ID пользователя")
-        @RequestParam("telegramId")
+        @PathVariable("telegramId")
         telegramId: Long,
     ): Response<Schedule> {
         return Response(scheduleService.getNextSchedule(telegramId))
