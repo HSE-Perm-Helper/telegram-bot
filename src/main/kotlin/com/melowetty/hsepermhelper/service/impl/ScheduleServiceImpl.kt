@@ -2,24 +2,26 @@ package com.melowetty.hsepermhelper.service.impl
 
 import Schedule
 import com.melowetty.hsepermhelper.dto.UserDto
+import com.melowetty.hsepermhelper.events.EventType
+import com.melowetty.hsepermhelper.events.UsersChangedEvent
 import com.melowetty.hsepermhelper.exceptions.ScheduleNotFoundException
 import com.melowetty.hsepermhelper.models.Lesson
 import com.melowetty.hsepermhelper.models.ScheduleFile
 import com.melowetty.hsepermhelper.repository.ScheduleRepository
-import com.melowetty.hsepermhelper.service.FileStorageService
 import com.melowetty.hsepermhelper.service.ScheduleService
+import com.melowetty.hsepermhelper.service.UserFilesService
 import com.melowetty.hsepermhelper.service.UserService
+import org.springframework.context.event.EventListener
 import org.springframework.core.env.Environment
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.io.path.Path
 
 @Service
 class ScheduleServiceImpl(
     private val scheduleRepository: ScheduleRepository,
     private val userService: UserService,
-    private val fileStorageService: FileStorageService,
+    private val userFilesService: UserFilesService,
     private val env: Environment
 ): ScheduleService {
     init {
@@ -78,9 +80,17 @@ class ScheduleServiceImpl(
         return schedule.toResource()
     }
 
+    @EventListener
+    fun handleUsersChanging(event: UsersChangedEvent) {
+        if(event.type == EventType.ADDED) {
+            refreshScheduleFile(user = event.source)
+        }
+    }
+
     override fun getScheduleFileByTelegramId(baseUrl: String, id: Long): ScheduleFile {
         val schedule = getCurrentSchedule(id)
-        val link = "${baseUrl}${env.getProperty("server.servlet.context-path")}/files/${id}/schedule.ics"
+        val user = userService.getByTelegramId(id)
+        val link = "${baseUrl}${env.getProperty("server.servlet.context-path")}/files/user_files/${user.id}/${SCHEDULE_FILE}"
         return ScheduleFile(
             linkForDownload = link,
             linkForRemoteCalendar = "webcal://${link}"
@@ -105,8 +115,16 @@ class ScheduleServiceImpl(
 
     final override fun refreshScheduleFiles() {
         userService.getAllUsers().forEach {
-            val path = Path(it.id.toString())
-            fileStorageService.storeFile(path, getScheduleResource(it.id), "schedule.ics")
+            refreshScheduleFile(user = it)
         }
     }
+
+    override fun refreshScheduleFile(user: UserDto) {
+        userFilesService.storeFile(user, getScheduleResource(user.id), SCHEDULE_FILE)
+    }
+
+    companion object {
+        const val SCHEDULE_FILE = "schedule.ics"
+    }
+
 }

@@ -2,15 +2,19 @@ package com.melowetty.hsepermhelper.service.impl
 
 import com.melowetty.hsepermhelper.dto.UserDto
 import com.melowetty.hsepermhelper.entity.UserEntity
+import com.melowetty.hsepermhelper.events.EventType
+import com.melowetty.hsepermhelper.events.UsersChangedEvent
 import com.melowetty.hsepermhelper.exceptions.UserNotFoundException
 import com.melowetty.hsepermhelper.repository.UserRepository
 import com.melowetty.hsepermhelper.service.UserService
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class UserServiceImpl(
-    private val userRepository: UserRepository
+    private val eventPublisher: ApplicationEventPublisher,
+    private val userRepository: UserRepository,
 ): UserService {
     override fun getByTelegramId(telegramId: Long): UserDto {
         val user = userRepository.findByTelegramId(telegramId)
@@ -25,7 +29,24 @@ class UserServiceImpl(
     }
 
     override fun create(dto: UserDto): UserDto {
-        return userRepository.save(dto.toEntity()).toDto()
+        val user = userRepository.save(dto.toEntity()).toDto()
+        val event = UsersChangedEvent(
+            user = user,
+            type = EventType.ADDED
+        )
+        eventPublisher.publishEvent(event)
+        return user
+    }
+
+    override fun deleteById(id: UUID) {
+        val user = userRepository.findById(id)
+        if (user.isEmpty) throw UserNotFoundException("Пользователь с таким ID не найден!")
+        userRepository.delete(user.get())
+        val event = UsersChangedEvent(
+            user = user.get().toDto(),
+            type = EventType.DELETED
+        )
+        eventPublisher.publishEvent(event)
     }
 
     override fun getAllUsers(): List<UserDto> {

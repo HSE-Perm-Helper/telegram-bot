@@ -2,7 +2,7 @@ package com.melowetty.hsepermhelper.entity
 
 import com.melowetty.hsepermhelper.models.Settings
 import jakarta.persistence.*
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "users")

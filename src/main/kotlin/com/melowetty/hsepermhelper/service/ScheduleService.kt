@@ -1,6 +1,7 @@
 package com.melowetty.hsepermhelper.service
 
 import Schedule
+import com.melowetty.hsepermhelper.dto.UserDto
 import com.melowetty.hsepermhelper.models.ScheduleFile
 import org.springframework.core.io.Resource
 import java.util.*
@@ -42,4 +43,11 @@ interface ScheduleService {
      *
      */
     fun refreshScheduleFiles()
+
+    /**
+     * Refresh schedule for user
+     *
+     * @param user user
+     */
+    fun refreshScheduleFile(user: UserDto)
 }

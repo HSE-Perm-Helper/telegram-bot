@@ -5,6 +5,7 @@ import com.melowetty.hsepermhelper.repository.FilesRepository
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.springframework.stereotype.Component
+import org.springframework.util.FileSystemUtils
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.MalformedURLException
@@ -23,11 +24,14 @@ class FilesRepositoryImpl(
 
     init {
         try {
-            Files.createDirectories(fileStorageLocation)
+            if (Files.exists(fileStorageLocation).not()) {
+                Files.createDirectories(fileStorageLocation)
+            }
         } catch (e: Exception) {
             throw RuntimeException("Не удалось создать директорию для хранения файлов.", e)
         }
     }
+
     override fun storeFile(path: Path, resource: Resource, fileName: String): String {
         return try {
             if (fileName.contains("..")) {
@@ -48,6 +52,11 @@ class FilesRepositoryImpl(
         }
     }
 
+    override fun deleteFile(path: Path) {
+        val isSuccess = FileSystemUtils.deleteRecursively(fileStorageLocation.resolve(path))
+        if (isSuccess.not()) throw FileNotFoundException("Файл по по пути $path не найден!")
+    }
+
     override fun getFileAsResource(path: Path): Resource {
         return try {
             val filePath: Path = fileStorageLocation.resolve(path).normalize()
@@ -62,4 +71,15 @@ class FilesRepositoryImpl(
         }
     }
 
+    override fun createDirectory(path: Path) {
+        Files.createDirectory(fileStorageLocation.resolve(path))
+    }
+
+    override fun isExists(path: Path): Boolean {
+        return Files.exists(fileStorageLocation.resolve(path))
+    }
+
+    override fun getFilesPath(): Path {
+        return fileStorageLocation
+    }
 }

@@ -32,4 +32,11 @@ interface UserService {
      * @return list of users
      */
     fun getAllUsers(): List<UserDto>
+
+    /**
+     * Delete user by id
+     *
+     * @param id user UUID
+     */
+    fun deleteById(id: UUID)
 }
