@@ -23,11 +23,14 @@ class FilesRepositoryImpl(
 
     init {
         try {
-            Files.createDirectories(fileStorageLocation)
+            if (Files.exists(fileStorageLocation).not()) {
+                Files.createDirectories(fileStorageLocation)
+            }
         } catch (e: Exception) {
             throw RuntimeException("Не удалось создать директорию для хранения файлов.", e)
         }
     }
+
     override fun storeFile(path: Path, resource: Resource, fileName: String): String {
         return try {
             if (fileName.contains("..")) {
