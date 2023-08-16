@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import kotlin.io.path.Path
+import kotlin.io.path.name
 
 
 @Controller
@@ -20,6 +21,7 @@ class FileStorageController(
     fun getFile(request: HttpServletRequest): ResponseEntity<Resource> {
         val path = FileUtils.extractFilePath(request)
         val filePath = Path(path)
-        return fileStorageService.getFile(filePath)
+        val resource = fileStorageService.getFile(filePath)
+        return FileUtils.getFileDownloadResponse(resource, filePath.fileName.name)
     }
 }
