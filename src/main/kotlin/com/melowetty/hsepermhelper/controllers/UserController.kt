@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
-import java.util.UUID
+import java.util.*
 
 @Tag(name = "Пользователи", description = "Взаимодействие с пользователями")
 @RestController
@@ -48,6 +48,24 @@ class UserController(
         id: UUID,
     ): Response<UserDto> {
         return Response(userService.getById(id))
+    }
+
+    @SecurityRequirement(name = "X-Secret-Key")
+    @Operation(
+        summary = "Удаление пользователя",
+        description = "Позволяет удалиить пользователя по его ID"
+    )
+    @DeleteMapping(
+        "/{id}",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun deleteUserById(
+        @Parameter(description = "ID пользователя")
+        @PathVariable("id")
+        id: UUID,
+    ): Response<String> {
+        userService.deleteById(id)
+        return Response("Пользователь успешно удалён!")
     }
 
     @SecurityRequirement(name = "X-Secret-Key")
