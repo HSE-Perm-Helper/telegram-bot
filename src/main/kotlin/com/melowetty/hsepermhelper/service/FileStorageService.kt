@@ -9,4 +9,5 @@ interface FileStorageService {
     fun getFile(path: Path): Resource
     fun createDirectory(path: Path)
     fun isExists(path: Path): Boolean
+    fun getFilesPath(): Path
 }

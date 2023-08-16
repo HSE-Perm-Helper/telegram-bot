@@ -45,4 +45,11 @@ interface FilesRepository {
      * @param path directory or file path
      */
     fun isExists(path: Path): Boolean
+
+    /**
+     * Returns path, where files are contained
+     *
+     * @return work path
+     */
+    fun getFilesPath(): Path
 }

@@ -29,4 +29,8 @@ class FileStorageServiceImpl(
     override fun isExists(path: Path): Boolean {
         return fileStorageRepository.isExists(path)
     }
+
+    override fun getFilesPath(): Path {
+        return getFilesPath()
+    }
 }

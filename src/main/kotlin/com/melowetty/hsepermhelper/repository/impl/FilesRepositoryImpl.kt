@@ -78,4 +78,8 @@ class FilesRepositoryImpl(
     override fun isExists(path: Path): Boolean {
         return Files.exists(fileStorageLocation.resolve(path))
     }
+
+    override fun getFilesPath(): Path {
+        return fileStorageLocation
+    }
 }
