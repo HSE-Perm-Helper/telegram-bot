@@ -6,10 +6,8 @@ import com.melowetty.hsepermhelper.events.UsersChangedEvent
 import com.melowetty.hsepermhelper.service.FileStorageService
 import com.melowetty.hsepermhelper.service.UserFilesService
 import org.springframework.context.event.EventListener
-import org.springframework.core.annotation.Order
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
-import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -48,6 +46,18 @@ class UserFilesServiceImpl(
     override fun deleteFile(user: UserDto, path: Path) {
         val userPath = basePath.resolve(user.id.toString()).resolve(path)
         fileStorageService.deleteFile(userPath)
+    }
+
+    override fun getFilesPath(): Path {
+        return fileStorageService.getFilesPath().resolve(basePath)
+    }
+
+    override fun getUserFilesPath(user: UserDto): Path {
+        return getFilesPath().resolve(user.id.toString())
+    }
+
+    override fun getFile(path: Path): Resource {
+        return fileStorageService.getFile(basePath.resolve(path))
     }
 
     private fun deleteUserFolder(user: UserDto) {

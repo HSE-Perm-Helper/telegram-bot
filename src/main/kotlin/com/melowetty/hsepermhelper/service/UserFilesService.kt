@@ -35,4 +35,27 @@ interface UserFilesService {
      * @param path file path (contain file name)
      */
     fun deleteFile(user: UserDto, path: Path)
+
+    /**
+     * Returns files path
+     *
+     * @return files path
+     */
+    fun getFilesPath(): Path
+
+    /**
+     * Returns user files path
+     *
+     * @param user user
+     * @return user files path
+     */
+    fun getUserFilesPath(user: UserDto): Path
+
+    /**
+     * Gets user file via path
+     *
+     * @param path path in user files directory
+     * @return file as resource
+     */
+    fun getFile(path: Path): Resource
 }
