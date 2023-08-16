@@ -51,6 +51,11 @@ class FilesRepositoryImpl(
         }
     }
 
+    override fun deleteFile(path: Path) {
+        val isSuccess = Files.deleteIfExists(path)
+        if (isSuccess.not()) throw FileNotFoundException("Файл по по пути $path не найден!")
+    }
+
     override fun getFileAsResource(path: Path): Resource {
         return try {
             val filePath: Path = fileStorageLocation.resolve(path).normalize()
