@@ -1,35 +1,35 @@
 import telebot
 from telebot import types
 
-import json_parsing
+import api
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
 bot = telebot.TeleBot('6348506696:AAGHBhAGBYF0I0iHFuzBuPYYdgEYHumg3bQ')
 bot.can_join_groups = False        # Запрет на приглашения в группы (ему пофиг)
 
-# ---------------------------------  Данные пользователя  ----------------------------------- #
-
-user_data_list = [0] * 4  # Данные для идентификации пользователя, 1 - курс, 2 - направление, 3 - группа, 4 - подгруппа
-
 # ---------------------------------  Функции  ----------------------------------- #
+
 
 # Создание кнопок выбора курса
 def get_course(message):
     text_hello = "Давай познакомися! На каком курсе ты учишься?"
+    courses = api.get_courses()
     markup = types.InlineKeyboardMarkup()
-    for i in range(len(json_parsing.courses)):
-        markup.add(types.InlineKeyboardButton(json_parsing.courses[i], callback_data="course_" + str(json_parsing.courses[i])))
+    for i in range(len(courses)):
+        markup.add(types.InlineKeyboardButton(courses[i], callback_data="course_" + str(courses[i])))
 
     bot.send_message(message.chat.id, text_hello, reply_markup=markup)
 
 
 # Создание кнопок выбора программы
 def get_program(message):
-    text_get_course = "Ты выбрал " + str(user_data_list[0]) + " курс! На каком направлении ты учишься?"
+    text_get_course = "Ты выбрал " + str(api.user_data_list[0]) + " курс! На каком направлении ты учишься?"
+
+    programs = api.get_programs()
     markup = types.InlineKeyboardMarkup()
-    for i in range(len(json_parsing.programs)):
-        markup.add(types.InlineKeyboardButton(json_parsing.programs[i], callback_data="program_" + str(json_parsing.programs[i])))
+    for i in range(len(programs)):
+        markup.add(types.InlineKeyboardButton(programs[i], callback_data="program_" + str(programs[i])))
     markup.add(types.InlineKeyboardButton("<- Назад", callback_data="back_to_course"))
 
     bot.send_message(message.chat.id, text_get_course, reply_markup=markup)
@@ -37,10 +37,12 @@ def get_program(message):
 
 # Создание кнопок выбора группы
 def get_group(message):
-    text_get_group = "Отлично, ты выбрал " + str(user_data_list[1]) + " направление! Теперь давай выберем группу!"
+    text_get_group = "Отлично, ты выбрал " + str(api.user_data_list[1]) + " направление! Теперь давай выберем группу!"
+
+    groups = api.get_groups()
     markup = types.InlineKeyboardMarkup()
-    for i in range(len(json_parsing.groups)):
-        markup.add(types.InlineKeyboardButton(json_parsing.groups[i], callback_data="group_" + str(json_parsing.groups[i])))
+    for i in range(len(groups)):
+        markup.add(types.InlineKeyboardButton(groups[i], callback_data="group_" + str(groups[i])))
     markup.add(types.InlineKeyboardButton("<- Назад", callback_data="back_to_program"))
 
     bot.send_message(message.chat.id, text_get_group, reply_markup=markup)
@@ -48,10 +50,12 @@ def get_group(message):
 
 # Создание кнопок выбора подгруппы
 def get_subgroup(message):
-    text_get_subgroup = str(user_data_list[2]) + " - твоя группа. Осталось определиться с подгруппой!"
+    text_get_subgroup = str(api.user_data_list[2]) + " - твоя группа. Осталось определиться с подгруппой!"
+
+    subgroups = api.get_subgroups()
     markup = types.InlineKeyboardMarkup()
-    for i in range(len(json_parsing.subgroups)):
-        markup.add(types.InlineKeyboardButton(json_parsing.subgroups[i], callback_data="subgroup_" + str(json_parsing.subgroups[i])))
+    for i in range(len(subgroups)):
+        markup.add(types.InlineKeyboardButton(subgroups[i], callback_data="subgroup_" + str(subgroups[i])))
     markup.add(types.InlineKeyboardButton("<- Назад", callback_data="back_to_group"))
 
     bot.send_message(message.chat.id, text_get_subgroup, reply_markup=markup)
@@ -60,8 +64,8 @@ def get_subgroup(message):
 # Создание кнопок для подтверждения выбора
 def get_confirmation(message):
     text_confirmation = ("Отлично! Теперь давай проверим, всё ли верно:\n" +
-                         f"{user_data_list[0]} - курс\n{user_data_list[1]} - направление\n"
-                         f"{user_data_list[2]} - группа\n{user_data_list[3]} - подгруппа.\n\nВсе верно?")
+                         f"{api.user_data_list[0]} - курс\n{api.user_data_list[1]} - направление\n"
+                         f"{api.user_data_list[2]} - группа\n{api.user_data_list[3]} - подгруппа.\n\nВсе верно?")
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Все верно!", callback_data="start_working"))
     markup.add(types.InlineKeyboardButton("Редактировать", callback_data="back_to_start"))
@@ -142,7 +146,7 @@ def callback_message(message):
 def course_query_handler(callback_query: types.CallbackQuery):
     data = int(callback_query.data.replace("course_", ""))
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    user_data_list[0] = data
+    api.user_data_list[0] = data
     get_program(callback_query.message)
 
 
@@ -151,7 +155,7 @@ def course_query_handler(callback_query: types.CallbackQuery):
 def program_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("program_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    user_data_list[1] = data
+    api.user_data_list[1] = data
     get_group(callback_query.message)
 
 
@@ -160,7 +164,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    user_data_list[2] = data
+    api.user_data_list[2] = data
     get_subgroup(callback_query.message)
 
 
@@ -169,7 +173,7 @@ def group_query_handler(callback_query: types.CallbackQuery):
 def subgroup_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("subgroup_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    user_data_list[3] = data
+    api.user_data_list[3] = data
     get_confirmation(callback_query.message)
 
 
