@@ -21,4 +21,12 @@ class FileStorageServiceImpl(
     override fun getFile(path: Path): Resource {
         return fileStorageRepository.getFileAsResource(path)
     }
+
+    override fun createDirectory(path: Path) {
+        fileStorageRepository.createDirectory(path)
+    }
+
+    override fun isExists(path: Path): Boolean {
+        return fileStorageRepository.isExists(path)
+    }
 }

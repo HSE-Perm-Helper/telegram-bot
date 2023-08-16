@@ -71,4 +71,11 @@ class FilesRepositoryImpl(
         }
     }
 
+    override fun createDirectory(path: Path) {
+        Files.createDirectory(fileStorageLocation.resolve(path))
+    }
+
+    override fun isExists(path: Path): Boolean {
+        return Files.exists(fileStorageLocation.resolve(path))
+    }
 }

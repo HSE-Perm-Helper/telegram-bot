@@ -31,4 +31,18 @@ interface FilesRepository {
      * @return file as resource
      */
     fun getFileAsResource(path: Path): Resource
+
+    /**
+     * Creates directory on path
+     *
+     * @param path directory path
+     */
+    fun createDirectory(path: Path)
+
+    /**
+     * Returns true if directory or file is existing
+     *
+     * @param path directory or file path
+     */
+    fun isExists(path: Path): Boolean
 }
