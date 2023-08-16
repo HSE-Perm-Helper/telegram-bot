@@ -5,6 +5,7 @@ import com.melowetty.hsepermhelper.repository.FilesRepository
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.springframework.stereotype.Component
+import org.springframework.util.FileSystemUtils
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.MalformedURLException
@@ -52,7 +53,7 @@ class FilesRepositoryImpl(
     }
 
     override fun deleteFile(path: Path) {
-        val isSuccess = Files.deleteIfExists(path)
+        val isSuccess = FileSystemUtils.deleteRecursively(fileStorageLocation.resolve(path))
         if (isSuccess.not()) throw FileNotFoundException("Файл по по пути $path не найден!")
     }
 
