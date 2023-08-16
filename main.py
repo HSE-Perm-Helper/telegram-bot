@@ -17,61 +17,104 @@ def get_course(message):
     courses = api.get_courses()
     markup = types.InlineKeyboardMarkup()
     for i in range(len(courses)):
-        markup.add(types.InlineKeyboardButton(courses[i], callback_data="course_" + str(courses[i])))
+        markup.add(types.InlineKeyboardButton(courses[i],
+                                              callback_data=f"course_{courses[i]}"))
 
-    bot.send_message(message.chat.id, text_hello, reply_markup=markup)
+    bot.send_message(message.chat.id,
+                     text_hello,
+                     reply_markup=markup)
 
 
 # Создание кнопок выбора программы
-def get_program(message):
-    text_get_course = "Ты выбрал " + str(api.user_data_list[0]) + " курс! На каком направлении ты учишься?"
+def get_program(message, data):
+    number_course = int(data)
+    text_get_course = f"Ты выбрал {number_course} курс! На каком направлении ты учишься?"
 
-    programs = api.get_programs()
+    programs = api.get_programs(number_course)
+
     markup = types.InlineKeyboardMarkup()
     for i in range(len(programs)):
-        markup.add(types.InlineKeyboardButton(programs[i], callback_data="program_" + str(programs[i])))
-    markup.add(types.InlineKeyboardButton("<- Назад", callback_data="back_to_course"))
+        markup.add(types.InlineKeyboardButton(programs[i],
+                                              callback_data=f"program_{programs[i]}"
+                                                            f"^{number_course}"))
+    markup.add(types.InlineKeyboardButton("<- Назад",
+                                          callback_data=f"back_to_start"))
 
-    bot.send_message(message.chat.id, text_get_course, reply_markup=markup)
+    bot.send_message(message.chat.id,
+                     text_get_course,
+                     reply_markup=markup)
 
 
 # Создание кнопок выбора группы
-def get_group(message):
-    text_get_group = "Отлично, ты выбрал " + str(api.user_data_list[1]) + " направление! Теперь давай выберем группу!"
+def get_group(message, data):
+    number_program, number_course = data.split('^')
 
-    groups = api.get_groups()
+    text_get_group = f"Отлично, ты выбрал {number_program} направление! Теперь давай выберем группу!"
+
+    groups = api.get_groups(number_course,
+                            number_program)
+
     markup = types.InlineKeyboardMarkup()
     for i in range(len(groups)):
-        markup.add(types.InlineKeyboardButton(groups[i], callback_data="group_" + str(groups[i])))
-    markup.add(types.InlineKeyboardButton("<- Назад", callback_data="back_to_program"))
+        markup.add(types.InlineKeyboardButton(groups[i],
+                                              callback_data=f"group_{groups[i]}"
+                                                            f"^{number_program}"
+                                                            f"^{number_course}"))
+    markup.add(types.InlineKeyboardButton("<- Назад",
+                                          callback_data=f"back_to_program{number_course}"))
 
-    bot.send_message(message.chat.id, text_get_group, reply_markup=markup)
+    bot.send_message(message.chat.id,
+                     text_get_group,
+                     reply_markup=markup)
 
 
 # Создание кнопок выбора подгруппы
-def get_subgroup(message):
-    text_get_subgroup = str(api.user_data_list[2]) + " - твоя группа. Осталось определиться с подгруппой!"
+def get_subgroup(message, data):
+    number_group, number_program, number_course = data.split('^')
 
-    subgroups = api.get_subgroups()
+    text_get_subgroup = f"{number_group} - твоя группа. Осталось определиться с подгруппой!"
+
+    subgroups = api.get_subgroups(number_course,
+                                  number_program,
+                                  number_group)
     markup = types.InlineKeyboardMarkup()
     for i in range(len(subgroups)):
-        markup.add(types.InlineKeyboardButton(subgroups[i], callback_data="subgroup_" + str(subgroups[i])))
-    markup.add(types.InlineKeyboardButton("<- Назад", callback_data="back_to_group"))
+        markup.add(types.InlineKeyboardButton(subgroups[i],
+                                              callback_data=f"subgroup_{subgroups[i]}"
+                                                            f"^{number_group}"
+                                                            f"^{number_program}"
+                                                            f"^{number_course}"))
+    markup.add(types.InlineKeyboardButton("<- Назад",
+                                          callback_data=f"back_to_group{number_program}"
+                                                        f"^{number_course}"))
 
-    bot.send_message(message.chat.id, text_get_subgroup, reply_markup=markup)
+    bot.send_message(message.chat.id,
+                     text_get_subgroup,
+                     reply_markup=markup)
 
 
 # Создание кнопок для подтверждения выбора
-def get_confirmation(message):
-    text_confirmation = ("Отлично! Теперь давай проверим, всё ли верно:\n" +
-                         f"{api.user_data_list[0]} - курс\n{api.user_data_list[1]} - направление\n"
-                         f"{api.user_data_list[2]} - группа\n{api.user_data_list[3]} - подгруппа.\n\nВсе верно?")
-    markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("Все верно!", callback_data="start_working"))
-    markup.add(types.InlineKeyboardButton("Редактировать", callback_data="back_to_start"))
-    markup.add(types.InlineKeyboardButton("<- Назад", callback_data="back_to_subgroup"))
+def get_confirmation(message, data):
+    number_subgroup, number_group, number_program, number_course = data.split('^')
 
-    bot.send_message(message.chat.id, text_confirmation, reply_markup=markup)
+    text_confirmation = ("Отлично! Теперь давай проверим, всё ли верно:\n" +
+                         f"{number_course} - курс\n"
+                         f"{number_program} - направление\n"
+                         f"{number_group} - группа\n"
+                         f"{number_subgroup} - подгруппа.\n\nВсе верно?")
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Все верно!",
+                                          callback_data=f"start_working"))
+    markup.add(types.InlineKeyboardButton("Редактировать",
+                                          callback_data=f"back_to_start"))
+    markup.add(types.InlineKeyboardButton("<- Назад",
+                                          callback_data=f"back_to_subgroup{number_group}"
+                                                        f"^{number_program}"
+                                                        f"^{number_course}"))
+
+    bot.send_message(message.chat.id,
+                     text_confirmation,
+                     reply_markup=markup)
 
 def get_menu(message):
     text_schedule = ("Вот, что я могу:\n"
@@ -85,7 +128,9 @@ def get_menu(message):
     keyboard_markup.row(get_deadlines_button, get_schedule_button)
     keyboard_markup.row_width = 5
 
-    bot.send_message(message.chat.id, text_schedule, reply_markup=keyboard_markup)
+    bot.send_message(message.chat.id,
+                     text_schedule,
+                     reply_markup=keyboard_markup)
     # bot.register_next_step_handler(message, click_handler)
 
 
@@ -93,10 +138,14 @@ def get_file(message):
     text_get_schedule = "Выбери способ получения расписания:"
 
     markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь (сейчас заглушка)", url="https://www.google.com/"))
-    markup.add(types.InlineKeyboardButton("Получить расписание файлом", callback_data="get_file"))
+    markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь (сейчас заглушка)",
+                                          url="https://www.google.com/"))
+    markup.add(types.InlineKeyboardButton("Получить расписание файлом",
+                                          callback_data="get_file"))
 
-    bot.send_message(message.chat.id, text_get_schedule, reply_markup=markup)
+    bot.send_message(message.chat.id,
+                     text_get_schedule,
+                     reply_markup=markup)
 
 # ---------------------------------  Обработка команд  ----------------------------------- #
 
@@ -146,8 +195,7 @@ def callback_message(message):
 def course_query_handler(callback_query: types.CallbackQuery):
     data = int(callback_query.data.replace("course_", ""))
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    api.user_data_list[0] = data
-    get_program(callback_query.message)
+    get_program(callback_query.message, data)
 
 
 # Обработка события нажатия на кнопку выбора программы
@@ -155,8 +203,7 @@ def course_query_handler(callback_query: types.CallbackQuery):
 def program_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("program_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    api.user_data_list[1] = data
-    get_group(callback_query.message)
+    get_group(callback_query.message, data)
 
 
 # Обработка события нажатия на кнопку выбора группы
@@ -164,8 +211,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    api.user_data_list[2] = data
-    get_subgroup(callback_query.message)
+    get_subgroup(callback_query.message, data)
 
 
 # Обработка события нажатия на кнопку выбора подгруппы
@@ -173,22 +219,49 @@ def group_query_handler(callback_query: types.CallbackQuery):
 def subgroup_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("subgroup_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    api.user_data_list[3] = data
-    get_confirmation(callback_query.message)
+    get_confirmation(callback_query.message, data)
 
 
 # Обработка события нажатия на кнопку возврата
-@bot.callback_query_handler(lambda c: c.data.startswith('back_to_'))
+# @bot.callback_query_handler(lambda c: c.data.startswith('back_to_'))
+# def program_query_handler(callback_query: types.CallbackQuery):
+#     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+#     print(callback_query.data)
+#     if callback_query.data.startswith == 'back_to_program':
+#         data = callback_query.data.replace('back_to_program', "")
+#         get_program(callback_query.message, data)
+#     elif callback_query.data.startswith == 'back_to_group':
+#         data = callback_query.data.replace('back_to_group', "")
+#         get_group(callback_query.message, data)
+#     elif callback_query.data.startswith == 'back_to_subgroup':
+#         data = callback_query.data.replace('back_to_subgroup', "")
+#         get_subgroup(callback_query.message, data)
+#     elif callback_query.data.startswith == 'back_to_start':
+#         get_course(callback_query.message)
+
+@bot.callback_query_handler(lambda c: c.data.startswith('back_to_program'))
 def program_query_handler(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    if callback_query.data == 'back_to_program':
-        get_program(callback_query.message)
-    elif callback_query.data == 'back_to_group':
-        get_group(callback_query.message)
-    elif callback_query.data == 'back_to_subgroup':
-        get_subgroup(callback_query.message)
-    else:
-        get_course(callback_query.message)
+    data = callback_query.data.replace('back_to_program', "")
+    get_program(callback_query.message, data)
+
+@bot.callback_query_handler(lambda c: c.data.startswith('back_to_group'))
+def group_query_handler(callback_query: types.CallbackQuery):
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    data = callback_query.data.replace('back_to_group', "")
+    get_group(callback_query.message, data)
+
+@bot.callback_query_handler(lambda c: c.data.startswith('back_to_subgroup'))
+def subgroup_query_handler(callback_query: types.CallbackQuery):
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    data = callback_query.data.replace('back_to_subgroup', "")
+    get_subgroup(callback_query.message, data)
+
+@bot.callback_query_handler(lambda c: c.data.startswith('back_to_start'))
+def start_query_handler(callback_query: types.CallbackQuery):
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    data = callback_query.data.replace('back_to_start', "")
+    get_course(callback_query.message)
 
 
 # Обработка события нажатия на кнопку подтверждения данных

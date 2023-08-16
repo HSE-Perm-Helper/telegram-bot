@@ -28,10 +28,10 @@ def get_courses():
 
 # -----------  Программы  ------------- #
 
-def get_programs():
+def get_programs(number_course):
     programs = []
     programs_json = requests.get(
-        url=f"{base_url}/schedule/available_programs?course={user_data_list[0]}",
+        url=f"{base_url}/schedule/available_programs?course={number_course}",
         headers=headers)
     programs_data = programs_json.json()
     for i in programs_data["response"]:
@@ -42,11 +42,11 @@ def get_programs():
 
 # -----------  Группы  ------------- #
 
-def get_groups():
+def get_groups(number_course, number_program):
     groups = []
     groups_json = requests.get(
-        url=f"{base_url}/schedule/available_groups?course={user_data_list[0]}"
-            f"&program={user_data_list[1]}",
+        url=f"{base_url}/schedule/available_groups?course={number_course}"
+            f"&program={number_program}",
         headers=headers)
     groups_data = groups_json.json()
     print(groups_data)
@@ -58,11 +58,11 @@ def get_groups():
 
 # -----------  Подгруппы  ------------- #
 
-def get_subgroups():
+def get_subgroups(number_course, number_program, number_group):
     subgroups = []
     subgroups_json = requests.get(
-        url=f"{base_url}/schedule/available_subgroups?course={user_data_list[0]}"
-            f"&program={user_data_list[1]}&group={user_data_list[2]}",
+        url=f"{base_url}/schedule/available_subgroups?course={number_course}"
+            f"&program={number_program}&group={number_group}",
         headers=headers)
     subgroups_data = subgroups_json.json()
     for i in subgroups_data["response"]:
