@@ -86,10 +86,10 @@ def get_menu(message):
 
 
 def get_file(message):
-    text_get_schedule = "Пожалуйста, выберите способ получения расписания"
+    text_get_schedule = "Выбери способ получения расписания:"
 
     markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь", url="https://www.google.com/"))
+    markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь (сейчас заглушка)", url="https://www.google.com/"))
     markup.add(types.InlineKeyboardButton("Получить расписание файлом", callback_data="get_file"))
 
     bot.send_message(message.chat.id, text_get_schedule, reply_markup=markup)
