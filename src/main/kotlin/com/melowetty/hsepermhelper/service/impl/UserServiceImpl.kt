@@ -52,6 +52,17 @@ class UserServiceImpl(
         eventPublisher.publishEvent(event)
     }
 
+    override fun deleteByTelegramId(telegramId: Long) {
+        val user = userRepository.findByTelegramId(telegramId)
+        if (user.isEmpty) throw UserNotFoundException("Пользователь с таким Telegram ID не найден!")
+        userRepository.delete(user.get())
+        val event = UsersChangedEvent(
+            user = user.get().toDto(),
+            type = EventType.DELETED
+        )
+        eventPublisher.publishEvent(event)
+    }
+
     override fun getAllUsers(): List<UserDto> {
         return userRepository.findAll().map { it.toDto() }
     }

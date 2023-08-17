@@ -39,4 +39,11 @@ interface UserService {
      * @param id user UUID
      */
     fun deleteById(id: UUID)
+
+    /**
+     * Delete user by telegram id
+     *
+     * @param telegramId user telegram id
+     */
+    fun deleteByTelegramId(telegramId: Long)
 }

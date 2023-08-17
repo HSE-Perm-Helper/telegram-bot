@@ -58,4 +58,13 @@ interface UserFilesService {
      * @return file as resource
      */
     fun getFile(path: Path): Resource
+
+    /**
+     * Gets user file via path and user object
+     *
+     * @param user user
+     * @param path file path
+     * @return file as resource
+     */
+    fun getUserFile(user: UserDto, path: Path): Resource
 }

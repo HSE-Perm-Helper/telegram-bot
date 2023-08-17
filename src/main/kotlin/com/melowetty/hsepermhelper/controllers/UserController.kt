@@ -21,7 +21,7 @@ import kotlin.io.path.name
 
 @Tag(name = "Пользователи", description = "Взаимодействие с пользователями")
 @RestController
-@RequestMapping("users")
+@RequestMapping()
 class UserController(
     private val userService: UserService,
     private val userFilesService: UserFilesService,
@@ -32,6 +32,7 @@ class UserController(
         description = "Позволяет получить пользователя по его Telegram ID"
     )
     @GetMapping(
+        "user",
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun getUserByTelegramId(
@@ -48,7 +49,7 @@ class UserController(
         description = "Позволяет получить пользователя по его ID"
     )
     @GetMapping(
-        "/{id}",
+        "user/{id}",
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun getUserById(
@@ -65,7 +66,7 @@ class UserController(
         description = "Позволяет удалиить пользователя по его ID"
     )
     @DeleteMapping(
-        "/{id}",
+        "user/{id}",
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun deleteUserById(
@@ -79,11 +80,43 @@ class UserController(
 
     @SecurityRequirement(name = "X-Secret-Key")
     @Operation(
+        summary = "Удаление пользователя",
+        description = "Позволяет удалиить пользователя по его Telegram ID"
+    )
+    @DeleteMapping(
+        "user",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun deleteUserByTelegramId(
+        @Parameter(description = "Telegram ID пользователя")
+        @RequestParam("telegramId")
+        telegramId: Long,
+    ): Response<String> {
+        userService.deleteByTelegramId(telegramId)
+        return Response("Пользователь успешно удалён!")
+    }
+
+    @SecurityRequirement(name = "X-Secret-Key")
+    @Operation(
+        summary = "Получение всех пользователей",
+        description = "Позволяет получить всех пользователей"
+    )
+    @GetMapping(
+        "users",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getUsers(): Response<List<UserDto>> {
+        val users = userService.getAllUsers()
+        return Response(users)
+    }
+
+    @SecurityRequirement(name = "X-Secret-Key")
+    @Operation(
         summary = "Регистрация пользователя",
         description = "Позволяет зарегистрировать пользователя"
     )
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(
+        "users",
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createUser(
@@ -93,11 +126,22 @@ class UserController(
         return Response(user)
     }
 
-    @GetMapping("/files/**")
-    fun getUserFile(request: HttpServletRequest): ResponseEntity<Resource> {
+    @SecurityRequirement(name = "X-Secret-Key")
+    @Operation(
+        summary = "Файлы пользователя",
+        description = "Позволяет получить файлы пользователя по пути"
+    )
+    @GetMapping("user/{id}/files/**")
+    fun getUserFile(
+        @Parameter(description = "ID пользователя")
+        @PathVariable("id")
+        id: UUID,
+        request: HttpServletRequest
+    ): ResponseEntity<Resource> {
         val path = FileUtils.extractFilePath(request)
         val filePath = Path(path)
-        val resource = userFilesService.getFile(filePath)
+        val user = userService.getById(id)
+        val resource = userFilesService.getUserFile(user, filePath)
         return FileUtils.getFileDownloadResponse(resource, filePath.fileName.name)
     }
 }
