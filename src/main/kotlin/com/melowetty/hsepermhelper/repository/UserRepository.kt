@@ -8,4 +8,5 @@ import java.util.*
 @Repository
 interface UserRepository: CrudRepository<UserEntity, UUID> {
     fun findByTelegramId(telegramId: Long): Optional<UserEntity>
+    fun existsByTelegramId(telegramId: Long): Boolean
 }

@@ -30,7 +30,7 @@ class UserServiceImpl(
     }
 
     override fun create(dto: UserDto): UserDto {
-        val isExists = userRepository.findByTelegramId(dto.telegramId).isEmpty.not()
+        val isExists = userRepository.existsByTelegramId(dto.telegramId)
         if(isExists) throw UserIsExistsException("Пользователь с таким Telegram ID уже существует!")
         val user = userRepository.save(dto.toEntity()).toDto()
         val event = UsersChangedEvent(
