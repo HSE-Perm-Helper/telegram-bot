@@ -145,8 +145,18 @@ class ExceptionHandlerController(
             status = HttpStatus.NOT_FOUND.value()
         )
         if (isDebug) {
+            exception.printStackTrace()
             response = (response as ErrorResponse).toDebugResponse(exception)
         }
         return ResponseEntity(response, HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(UserIsExistsException::class)
+    fun handleUserIsExistsException(exception: UserIsExistsException): ResponseEntity<Any> {
+        if (isDebug) {
+            exception.printStackTrace()
+            return exception.toDebugResponseEntity()
+        }
+        return exception.toResponseEntity()
     }
 }

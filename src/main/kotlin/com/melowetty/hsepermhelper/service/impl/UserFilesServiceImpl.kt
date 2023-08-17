@@ -8,6 +8,7 @@ import com.melowetty.hsepermhelper.service.UserFilesService
 import org.springframework.context.event.EventListener
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
+import java.io.FileNotFoundException
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -58,6 +59,17 @@ class UserFilesServiceImpl(
 
     override fun getFile(path: Path): Resource {
         return fileStorageService.getFile(basePath.resolve(path))
+    }
+
+    override fun getUserFile(user: UserDto, path: Path): Resource {
+        try {
+            val userPath = Path(user.id.toString()).resolve(path)
+            return getFile(userPath)
+        } catch (e: FileNotFoundException) {
+            throw FileNotFoundException("Файл в пользовательской папке по пути $path не найден!")
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     private fun deleteUserFolder(user: UserDto) {

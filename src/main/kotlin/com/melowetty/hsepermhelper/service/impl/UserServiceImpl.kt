@@ -4,7 +4,9 @@ import com.melowetty.hsepermhelper.dto.UserDto
 import com.melowetty.hsepermhelper.entity.UserEntity
 import com.melowetty.hsepermhelper.events.EventType
 import com.melowetty.hsepermhelper.events.UsersChangedEvent
+import com.melowetty.hsepermhelper.exceptions.UserIsExistsException
 import com.melowetty.hsepermhelper.exceptions.UserNotFoundException
+import com.melowetty.hsepermhelper.models.Settings
 import com.melowetty.hsepermhelper.repository.UserRepository
 import com.melowetty.hsepermhelper.service.UserService
 import org.springframework.context.ApplicationEventPublisher
@@ -29,6 +31,8 @@ class UserServiceImpl(
     }
 
     override fun create(dto: UserDto): UserDto {
+        val isExists = userRepository.existsByTelegramId(dto.telegramId)
+        if(isExists) throw UserIsExistsException("Пользователь с таким Telegram ID уже существует!")
         val user = userRepository.save(dto.toEntity()).toDto()
         val event = UsersChangedEvent(
             user = user,
@@ -49,6 +53,31 @@ class UserServiceImpl(
         eventPublisher.publishEvent(event)
     }
 
+    override fun deleteByTelegramId(telegramId: Long) {
+        val user = userRepository.findByTelegramId(telegramId)
+        if (user.isEmpty) throw UserNotFoundException("Пользователь с таким Telegram ID не найден!")
+        userRepository.delete(user.get())
+        val event = UsersChangedEvent(
+            user = user.get().toDto(),
+            type = EventType.DELETED
+        )
+        eventPublisher.publishEvent(event)
+    }
+
+    override fun updateUser(user: UserDto): UserDto {
+        val userId = getByTelegramId(user.telegramId).id
+        return userRepository.save(
+            user.copy(id = userId).toEntity()
+        ).toDto()
+    }
+
+    override fun updateUserSettings(telegramId: Long, settings: Settings): UserDto {
+        val user = getByTelegramId(telegramId)
+        return userRepository.save(
+            user.copy(settings = settings).toEntity()
+        ).toDto()
+    }
+
     override fun getAllUsers(): List<UserDto> {
         return userRepository.findAll().map { it.toDto() }
     }
@@ -63,7 +92,7 @@ class UserServiceImpl(
 
     fun UserDto.toEntity(): UserEntity {
         return UserEntity(
-            id = UUID.randomUUID(),
+            id = id,
             telegramId = telegramId,
             settings = settings,
         )
