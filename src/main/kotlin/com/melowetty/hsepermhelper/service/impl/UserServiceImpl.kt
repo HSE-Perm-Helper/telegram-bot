@@ -4,6 +4,7 @@ import com.melowetty.hsepermhelper.dto.UserDto
 import com.melowetty.hsepermhelper.entity.UserEntity
 import com.melowetty.hsepermhelper.events.EventType
 import com.melowetty.hsepermhelper.events.UsersChangedEvent
+import com.melowetty.hsepermhelper.exceptions.UserIsExistsException
 import com.melowetty.hsepermhelper.exceptions.UserNotFoundException
 import com.melowetty.hsepermhelper.repository.UserRepository
 import com.melowetty.hsepermhelper.service.UserService
@@ -29,6 +30,8 @@ class UserServiceImpl(
     }
 
     override fun create(dto: UserDto): UserDto {
+        val isExists = userRepository.findByTelegramId(dto.telegramId).isEmpty.not()
+        if(isExists) throw UserIsExistsException("Пользователь с таким Telegram ID уже существует!")
         val user = userRepository.save(dto.toEntity()).toDto()
         val event = UsersChangedEvent(
             user = user,
