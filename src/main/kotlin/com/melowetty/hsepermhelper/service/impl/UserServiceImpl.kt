@@ -6,6 +6,7 @@ import com.melowetty.hsepermhelper.events.EventType
 import com.melowetty.hsepermhelper.events.UsersChangedEvent
 import com.melowetty.hsepermhelper.exceptions.UserIsExistsException
 import com.melowetty.hsepermhelper.exceptions.UserNotFoundException
+import com.melowetty.hsepermhelper.models.Settings
 import com.melowetty.hsepermhelper.repository.UserRepository
 import com.melowetty.hsepermhelper.service.UserService
 import org.springframework.context.ApplicationEventPublisher
@@ -63,6 +64,20 @@ class UserServiceImpl(
         eventPublisher.publishEvent(event)
     }
 
+    override fun updateUser(user: UserDto): UserDto {
+        val userId = getByTelegramId(user.telegramId).id
+        return userRepository.save(
+            user.copy(id = userId).toEntity()
+        ).toDto()
+    }
+
+    override fun updateUserSettings(telegramId: Long, settings: Settings): UserDto {
+        val user = getByTelegramId(telegramId)
+        return userRepository.save(
+            user.copy(settings = settings).toEntity()
+        ).toDto()
+    }
+
     override fun getAllUsers(): List<UserDto> {
         return userRepository.findAll().map { it.toDto() }
     }
@@ -77,7 +92,7 @@ class UserServiceImpl(
 
     fun UserDto.toEntity(): UserEntity {
         return UserEntity(
-            id = UUID.randomUUID(),
+            id = id,
             telegramId = telegramId,
             settings = settings,
         )

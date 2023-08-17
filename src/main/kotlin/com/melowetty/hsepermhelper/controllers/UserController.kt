@@ -2,6 +2,7 @@ package com.melowetty.hsepermhelper.controllers
 
 import com.melowetty.hsepermhelper.dto.UserDto
 import com.melowetty.hsepermhelper.models.Response
+import com.melowetty.hsepermhelper.models.Settings
 import com.melowetty.hsepermhelper.service.UserFilesService
 import com.melowetty.hsepermhelper.service.UserService
 import com.melowetty.hsepermhelper.utils.FileUtils
@@ -81,7 +82,7 @@ class UserController(
     @SecurityRequirement(name = "X-Secret-Key")
     @Operation(
         summary = "Удаление пользователя",
-        description = "Позволяет удалиить пользователя по его Telegram ID"
+        description = "Позволяет удалить пользователя по его Telegram ID"
     )
     @DeleteMapping(
         "user",
@@ -94,6 +95,27 @@ class UserController(
     ): Response<String> {
         userService.deleteByTelegramId(telegramId)
         return Response("Пользователь успешно удалён!")
+    }
+
+    @SecurityRequirement(name = "X-Secret-Key")
+    @Operation(
+        summary = "Изменение настроек пользователя",
+        description = "Позволяет изменить настройки пользователя по Telegram ID"
+    )
+    @PatchMapping(
+        "user",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun updateUserByTelegramId(
+        @Parameter(description = "Telegram ID пользователя")
+        @RequestParam("telegramId")
+        telegramId: Long,
+        @RequestBody
+        settings: Settings,
+    ): Response<UserDto> {
+        val user = userService.updateUserSettings(telegramId, settings)
+        return Response(user)
     }
 
     @SecurityRequirement(name = "X-Secret-Key")
@@ -123,6 +145,22 @@ class UserController(
         @RequestBody userDto: UserDto,
     ): Response<UserDto> {
         val user = userService.create(dto = userDto)
+        return Response(user)
+    }
+
+    @SecurityRequirement(name = "X-Secret-Key")
+    @Operation(
+        summary = "Обновление пользователя",
+        description = "Позволяет обновить данные пользователя"
+    )
+    @PutMapping(
+        "users",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun updateUser(
+        @RequestBody userDto: UserDto,
+    ): Response<UserDto> {
+        val user = userService.updateUser(userDto)
         return Response(user)
     }
 
