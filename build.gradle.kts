@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.melowetty"
-version = "0.9.3-ALPHA"
+version = "0.9.4-ALPHA"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
