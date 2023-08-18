@@ -36,12 +36,14 @@ data class Schedule(
     }
 
     fun toResource(): Resource {
-        val calendar = Calendar()
+        val calendar = Calendar().withDefaults().fluentTarget
         calendar.add(ProdId("-//HSE Perm Schedule Bot//Расписание пар 1.0//RU"))
 
         val name = "Расписание"
         calendar.add(Name(name))
         calendar.add(XProperty("X-WR-CALNAME", name))
+
+        calendar.add(Method(Method.VALUE_PUBLISH))
 
         val description = "Расписание пар в НИУ ВШЭ - Пермь by HSE Perm Schedule Bot"
         calendar.add(Description(description))
