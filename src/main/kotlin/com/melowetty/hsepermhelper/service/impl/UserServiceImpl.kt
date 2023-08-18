@@ -66,16 +66,30 @@ class UserServiceImpl(
 
     override fun updateUser(user: UserDto): UserDto {
         val userId = getByTelegramId(user.telegramId).id
-        return userRepository.save(
+        val newUser = userRepository.save(
             user.copy(id = userId).toEntity()
         ).toDto()
+
+        val event = UsersChangedEvent(
+            user = newUser,
+            type = EventType.EDITED
+        )
+        eventPublisher.publishEvent(event)
+        return newUser
     }
 
     override fun updateUserSettings(telegramId: Long, settings: Settings): UserDto {
         val user = getByTelegramId(telegramId)
-        return userRepository.save(
+        val newUser = userRepository.save(
             user.copy(settings = settings).toEntity()
         ).toDto()
+
+        val event = UsersChangedEvent(
+            user = newUser,
+            type = EventType.EDITED
+        )
+        eventPublisher.publishEvent(event)
+        return newUser
     }
 
     override fun getAllUsers(): List<UserDto> {

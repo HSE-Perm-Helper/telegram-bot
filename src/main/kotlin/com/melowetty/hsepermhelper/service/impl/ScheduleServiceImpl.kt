@@ -85,6 +85,9 @@ class ScheduleServiceImpl(
         if(event.type == EventType.ADDED) {
             refreshScheduleFile(user = event.source)
         }
+        else if(event.type == EventType.EDITED) {
+            refreshScheduleFile(user = event.source)
+        }
     }
 
     override fun getScheduleFileByTelegramId(baseUrl: String, id: Long): ScheduleFile {
