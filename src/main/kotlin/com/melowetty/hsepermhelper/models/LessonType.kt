@@ -1,8 +1,19 @@
 package com.melowetty.hsepermhelper.models
 
 enum class LessonType(val type: String, private val scheduleFilePattern: String) {
-    LECTURE("Лекция", "{type}: {subject}"),
-    SEMINAR("Семинар", "{type}: {subject}"),
+    LECTURE("Лекция", "{type}: {subject}") {
+        override fun reformatSubject(subject: String): String {
+            return subject
+                .replace("(лекция)", "")
+                .replace("(лекции)", "")
+                .trim()
+        }
+    },
+    SEMINAR("Семинар", "{type}: {subject}") {
+        override fun reformatSubject(subject: String): String {
+            return subject.replace("(семинар)", "").trim()
+        }
+    },
     EXAM("Экзамен", "{type}: {subject}") {
         override fun reformatSubject(subject: String): String {
             return subject.replace("ЭКЗАМЕН", "").trim()

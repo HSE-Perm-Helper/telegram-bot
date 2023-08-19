@@ -458,7 +458,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     companion object {
-        const val CURRENT_SCHEDULE_FILE = "rasp2.xls"
+        const val CURRENT_SCHEDULE_FILE = "rasp3.xls"
         const val NEXT_SCHEDULE_FILE = "rasp.xls"
     }
 }
