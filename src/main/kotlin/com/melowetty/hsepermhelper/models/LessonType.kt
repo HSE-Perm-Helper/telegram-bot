@@ -34,7 +34,15 @@ enum class LessonType(val type: String, private val scheduleFilePattern: String)
     MINOR("Майнор", "{type}"),
     ENGLISH("Английский", "{type}"),
     STATEMENT("Ведомость", "{type}: {subject}"),
-    ICC("МКД", "{type}: {subject}");
+    ICC("МКД", "{type}: {subject}"),
+    AED("ДОЦ", "{subject}") {
+        override fun reformatSubject(subject: String): String {
+            return subject
+                .replace("[", "")
+                .replace("]", "")
+                .trim()
+        }
+    };
     fun toEventSubject(subject: String): String {
         return scheduleFilePattern
             .replace("{type}", type)

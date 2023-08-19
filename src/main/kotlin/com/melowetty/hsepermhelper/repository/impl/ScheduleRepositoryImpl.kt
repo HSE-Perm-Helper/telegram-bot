@@ -436,6 +436,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         if (pureLessonInfo?.contains("мкд") == true) return LessonType.ICC
         if (pureSubject.contains("лекция") || pureSubject.contains("лекции")) return LessonType.LECTURE
         if (pureSubject.contains("семинар") || pureSubject.contains("семинары")) return LessonType.SEMINAR
+        if(pureSubject.contains("доц по выбору")) return LessonType.AED
         if (isUnderlined) return LessonType.LECTURE
         return LessonType.SEMINAR
     }
