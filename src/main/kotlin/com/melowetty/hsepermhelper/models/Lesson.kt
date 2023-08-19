@@ -78,7 +78,10 @@ data class Lesson(
 
     private fun getOfficeStr(): String? {
         if(office == null) return null
-        return if(office.toIntOrNull() == null) office
+        return if(office.toIntOrNull() == null) {
+            if (office.contains(",")) return "кабинеты $office"
+            office
+        }
         else "кабинет $office"
     }
 }

@@ -327,7 +327,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         isUnderlined: Boolean,
         line: String
     ): Lesson {
-        var subject = line
+        var subject = line.replace("  ", " ")
         val lessonType = getLessonType(
             subject = subject,
             isUnderlined = isUnderlined,
@@ -365,17 +365,22 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         isUnderlined: Boolean,
         lines: List<String>,
     ): Lesson {
-        var subject = lines[0].strip()
+        var subject = lines[0].strip().replace("  ", " ")
         val lessonInfo = lines[1].strip()
         val lessonInfoRegex = Regex("([^\\/]*)\\((.*)\\)")
         val lessonInfoMatch = lessonInfoRegex.find(lessonInfo)
         val lessonInfoGroups = lessonInfoMatch?.groups
         val lecturer = getLecturer(lessonInfoGroups?.get(1)?.value?.strip())
         val info = lessonInfoGroups?.get(2)?.value
-        val infoRegex = Regex("([^\\[\\]\\,]+)")
+        val infoRegex = Regex("^([а-яА-ЯеЕёЁ\\s\\d,^]+)|([\\d+])")
         val infoMatches = info?.let { infoRegex.findAll(it) }
-        val office = infoMatches?.elementAt(0)?.groups?.get(1)?.value?.strip()
-        val building = (infoMatches?.elementAt(1)?.groups?.get(1)?.value)?.toIntOrNull()
+        var office = infoMatches?.elementAt(0)?.groups?.get(1)?.value?.strip()
+        if (office != null
+            && office.contains(",")) {
+            office = office.replace(" ", "")
+            office = office.split(",").joinToString(", ")
+        }
+        val building = (infoMatches?.elementAt(1)?.groups?.get(2)?.value)?.toIntOrNull()
         val subGroup = (getSubGroup(infoMatches)?.strip())?.toIntOrNull()
         val lessonType = getLessonType(
             isSessionWeek = isSessionWeek,
@@ -407,7 +412,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         if (matchResult.count() < 3) {
             return null
         }
-        return matchResult.elementAt(2).groups.get(1)?.value
+        return matchResult.elementAt(2).groups.get(2)?.value
     }
 
     private fun getLessonType(
