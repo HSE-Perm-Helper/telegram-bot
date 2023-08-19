@@ -180,6 +180,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
                                 val font = workbook.getFontAt(cell.cellStyle.fontIndex)
                                 val isUnderlined = font.underline != Font.U_NONE
                                 val lessons = getLesson(
+                                    isSessionWeek = isSession,
                                     course = course,
                                     programme = programme,
                                     group = group,
@@ -226,6 +227,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     private fun getLesson(
+        isSessionWeek: Boolean,
         course: Int,
         programme: String,
         group: String,
@@ -243,6 +245,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             val lessons = mutableListOf<Lesson>()
             lessons.add(
                 parseLesson(
+                    isSessionWeek = isSessionWeek,
                     course = course,
                     programme = programme,
                     group = group,
@@ -259,6 +262,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             newCell.removeAt(1)
             lessons.add(
                 parseLesson(
+                    isSessionWeek = isSessionWeek,
                     course = course,
                     programme = programme,
                     group = group,
@@ -277,6 +281,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             for (i in 0 until splitCell.size / 2) {
                 lessons.add(
                     parseLesson(
+                        isSessionWeek = isSessionWeek,
                         course = course,
                         programme = programme,
                         group = group,
@@ -294,6 +299,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         }
         return listOf(
             parseLesson(
+                isSessionWeek = isSessionWeek,
                 course = course,
                 programme = programme,
                 group = group,
@@ -309,6 +315,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     private fun parseLesson(
+        isSessionWeek: Boolean,
         course: Int,
         programme: String,
         group: String,
@@ -320,11 +327,13 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         isUnderlined: Boolean,
         line: String
     ): Lesson {
-        val subject = line
+        var subject = line.replace("  ", " ")
         val lessonType = getLessonType(
             subject = subject,
-            isUnderlined = isUnderlined
+            isUnderlined = isUnderlined,
+            isSessionWeek = isSessionWeek
         )
+        subject = lessonType.reformatSubject(subject)
         return Lesson(
             subject = subject,
             course = course,
@@ -344,6 +353,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     private fun parseLesson(
+        isSessionWeek: Boolean,
         course: Int,
         programme: String,
         group: String,
@@ -355,23 +365,30 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         isUnderlined: Boolean,
         lines: List<String>,
     ): Lesson {
-        val subject = lines[0].strip()
+        var subject = lines[0].strip().replace("  ", " ")
         val lessonInfo = lines[1].strip()
         val lessonInfoRegex = Regex("([^\\/]*)\\((.*)\\)")
         val lessonInfoMatch = lessonInfoRegex.find(lessonInfo)
         val lessonInfoGroups = lessonInfoMatch?.groups
-        val lecturer = getLecturer(lessonInfoGroups?.get(1)?.value?.strip())
+        val lecturer = getLecturer(lessonInfoGroups?.get(1)?.value?.strip())?.replace("  ", " ")
         val info = lessonInfoGroups?.get(2)?.value
-        val infoRegex = Regex("([^\\[\\]\\,]+)")
+        val infoRegex = Regex("^([а-яА-ЯеЕёЁ\\s\\d,^]+)|([\\d+])")
         val infoMatches = info?.let { infoRegex.findAll(it) }
-        val office = infoMatches?.elementAt(0)?.groups?.get(1)?.value?.strip()
-        val building = (infoMatches?.elementAt(1)?.groups?.get(1)?.value)?.toIntOrNull()
+        var office = infoMatches?.elementAt(0)?.groups?.get(1)?.value?.strip()
+        if (office != null
+            && office.contains(",")) {
+            office = office.replace(" ", "")
+            office = office.split(",").joinToString(", ")
+        }
+        val building = (infoMatches?.elementAt(1)?.groups?.get(2)?.value)?.toIntOrNull()
         val subGroup = (getSubGroup(infoMatches)?.strip())?.toIntOrNull()
         val lessonType = getLessonType(
+            isSessionWeek = isSessionWeek,
             subject = subject,
             lessonInfo = lecturer,
             isUnderlined = isUnderlined
         )
+        subject = lessonType.reformatSubject(subject)
         return Lesson(
             subject = subject,
             course = course,
@@ -395,10 +412,11 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         if (matchResult.count() < 3) {
             return null
         }
-        return matchResult.elementAt(2).groups.get(1)?.value
+        return matchResult.elementAt(2).groups.get(2)?.value
     }
 
     private fun getLessonType(
+        isSessionWeek: Boolean,
         subject: String,
         lessonInfo: String? = "",
         isUnderlined: Boolean,
@@ -406,16 +424,19 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         val pureSubject = subject.lowercase()
         val pureLessonInfo = lessonInfo?.lowercase()
         if (pureSubject.contains("(ведомост")) return LessonType.STATEMENT
-        if (pureSubject.contains("экзамен")
-            || pureSubject.contains("зачёт")
-            || pureSubject.contains("зачет")
-            ) return LessonType.EXAM
+        if (pureSubject.contains("независимый экзамен")) return LessonType.INDEPENDENT_EXAM
+        if (pureSubject.contains("экзамен")) return LessonType.EXAM
+        if (pureSubject.contains("зачёт") || pureSubject.contains("зачет")) return LessonType.TEST
         if (pureSubject.contains("английский язык")) return LessonType.ENGLISH
-        if (pureSubject.contains("майнор")) return LessonType.MINOR
+        if (pureSubject.contains("майнор")) {
+            if (isSessionWeek) return LessonType.EXAM
+            return LessonType.MINOR
+        }
         if (pureSubject == "практика") return LessonType.PRACTICE
         if (pureLessonInfo?.contains("мкд") == true) return LessonType.ICC
         if (pureSubject.contains("лекция") || pureSubject.contains("лекции")) return LessonType.LECTURE
         if (pureSubject.contains("семинар") || pureSubject.contains("семинары")) return LessonType.SEMINAR
+        if(pureSubject.contains("доц по выбору")) return LessonType.AED
         if (isUnderlined) return LessonType.LECTURE
         return LessonType.SEMINAR
     }
@@ -438,7 +459,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     companion object {
-        const val CURRENT_SCHEDULE_FILE = "rasp2.xls"
+        const val CURRENT_SCHEDULE_FILE = "rasp3.xls"
         const val NEXT_SCHEDULE_FILE = "rasp.xls"
     }
 }
