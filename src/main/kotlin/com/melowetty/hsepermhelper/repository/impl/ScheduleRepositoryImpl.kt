@@ -180,6 +180,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
                                 val font = workbook.getFontAt(cell.cellStyle.fontIndex)
                                 val isUnderlined = font.underline != Font.U_NONE
                                 val lessons = getLesson(
+                                    isSessionWeek = isSession,
                                     course = course,
                                     programme = programme,
                                     group = group,
@@ -226,6 +227,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     private fun getLesson(
+        isSessionWeek: Boolean,
         course: Int,
         programme: String,
         group: String,
@@ -243,6 +245,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             val lessons = mutableListOf<Lesson>()
             lessons.add(
                 parseLesson(
+                    isSessionWeek = isSessionWeek,
                     course = course,
                     programme = programme,
                     group = group,
@@ -259,6 +262,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             newCell.removeAt(1)
             lessons.add(
                 parseLesson(
+                    isSessionWeek = isSessionWeek,
                     course = course,
                     programme = programme,
                     group = group,
@@ -277,6 +281,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             for (i in 0 until splitCell.size / 2) {
                 lessons.add(
                     parseLesson(
+                        isSessionWeek = isSessionWeek,
                         course = course,
                         programme = programme,
                         group = group,
@@ -294,6 +299,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         }
         return listOf(
             parseLesson(
+                isSessionWeek = isSessionWeek,
                 course = course,
                 programme = programme,
                 group = group,
@@ -309,6 +315,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     private fun parseLesson(
+        isSessionWeek: Boolean,
         course: Int,
         programme: String,
         group: String,
@@ -323,7 +330,8 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         val subject = line
         val lessonType = getLessonType(
             subject = subject,
-            isUnderlined = isUnderlined
+            isUnderlined = isUnderlined,
+            isSessionWeek = isSessionWeek
         )
         return Lesson(
             subject = subject,
@@ -344,6 +352,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     private fun parseLesson(
+        isSessionWeek: Boolean,
         course: Int,
         programme: String,
         group: String,
@@ -368,6 +377,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         val building = (infoMatches?.elementAt(1)?.groups?.get(1)?.value)?.toIntOrNull()
         val subGroup = (getSubGroup(infoMatches)?.strip())?.toIntOrNull()
         val lessonType = getLessonType(
+            isSessionWeek = isSessionWeek,
             subject = subject,
             lessonInfo = lecturer,
             isUnderlined = isUnderlined
@@ -399,6 +409,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
     }
 
     private fun getLessonType(
+        isSessionWeek: Boolean,
         subject: String,
         lessonInfo: String? = "",
         isUnderlined: Boolean,
@@ -411,7 +422,10 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             || pureSubject.contains("зачет")
             ) return LessonType.EXAM
         if (pureSubject.contains("английский язык")) return LessonType.ENGLISH
-        if (pureSubject.contains("майнор")) return LessonType.MINOR
+        if (pureSubject.contains("майнор")) {
+            if (isSessionWeek) return LessonType.EXAM
+            return LessonType.MINOR
+        }
         if (pureSubject == "практика") return LessonType.PRACTICE
         if (pureLessonInfo?.contains("мкд") == true) return LessonType.ICC
         if (pureSubject.contains("лекция") || pureSubject.contains("лекции")) return LessonType.LECTURE
