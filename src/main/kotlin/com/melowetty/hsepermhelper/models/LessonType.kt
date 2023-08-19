@@ -8,6 +8,7 @@ enum class LessonType(val type: String, private val scheduleFilePattern: String)
             return subject.replace("ЭКЗАМЕН", "").trim()
         }
     },
+    INDEPENDENT_EXAM("Независимый экзамен", "{subject}"),
     TEST("Зачёт", "{type}: {subject}") {
         override fun reformatSubject(subject: String): String {
             return subject.replace("ЗАЧЕТ", "").trim()

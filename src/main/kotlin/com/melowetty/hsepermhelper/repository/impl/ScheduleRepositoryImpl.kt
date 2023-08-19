@@ -424,6 +424,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         val pureSubject = subject.lowercase()
         val pureLessonInfo = lessonInfo?.lowercase()
         if (pureSubject.contains("(ведомост")) return LessonType.STATEMENT
+        if (pureSubject.contains("независимый экзамен")) return LessonType.INDEPENDENT_EXAM
         if (pureSubject.contains("экзамен")) return LessonType.EXAM
         if (pureSubject.contains("зачёт") || pureSubject.contains("зачет")) return LessonType.TEST
         if (pureSubject.contains("английский язык")) return LessonType.ENGLISH
