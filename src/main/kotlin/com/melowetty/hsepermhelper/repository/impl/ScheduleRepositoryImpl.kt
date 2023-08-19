@@ -327,12 +327,13 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         isUnderlined: Boolean,
         line: String
     ): Lesson {
-        val subject = line
+        var subject = line
         val lessonType = getLessonType(
             subject = subject,
             isUnderlined = isUnderlined,
             isSessionWeek = isSessionWeek
         )
+        subject = lessonType.reformatSubject(subject)
         return Lesson(
             subject = subject,
             course = course,
@@ -364,7 +365,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         isUnderlined: Boolean,
         lines: List<String>,
     ): Lesson {
-        val subject = lines[0].strip()
+        var subject = lines[0].strip()
         val lessonInfo = lines[1].strip()
         val lessonInfoRegex = Regex("([^\\/]*)\\((.*)\\)")
         val lessonInfoMatch = lessonInfoRegex.find(lessonInfo)
@@ -382,6 +383,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             lessonInfo = lecturer,
             isUnderlined = isUnderlined
         )
+        subject = lessonType.reformatSubject(subject)
         return Lesson(
             subject = subject,
             course = course,
