@@ -370,7 +370,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
         val lessonInfoRegex = Regex("([^\\/]*)\\((.*)\\)")
         val lessonInfoMatch = lessonInfoRegex.find(lessonInfo)
         val lessonInfoGroups = lessonInfoMatch?.groups
-        val lecturer = getLecturer(lessonInfoGroups?.get(1)?.value?.strip())
+        val lecturer = getLecturer(lessonInfoGroups?.get(1)?.value?.strip())?.replace("  ", " ")
         val info = lessonInfoGroups?.get(2)?.value
         val infoRegex = Regex("^([а-яА-ЯеЕёЁ\\s\\d,^]+)|([\\d+])")
         val infoMatches = info?.let { infoRegex.findAll(it) }
