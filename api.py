@@ -1,4 +1,3 @@
-import json
 import requests
 
 base_url = "https://hse-schedule-bot.xenforo-studio.ru/api"
@@ -6,12 +5,7 @@ x_secret_key = "56mx-0=l08u58%i&tp-@xz*2&d0tyhjn#^l3qk&ch@z)9foc"
 accept_data = "application/json"
 headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data, "Content-Type": "application/json; charset=utf-8"}
 
-# ---------------------------------  Данные пользователя  ----------------------------------- #
-
-user_data_list = [0] * 4  # Данные для идентификации пользователя, 1 - курс, 2 - направление, 3 - группа, 4 - подгруппа
-
-
-# -----------  Курсы  ------------- #
+# -------------  Курсы  ------------- #
 
 def get_courses():
     courses = []
@@ -26,7 +20,7 @@ def get_courses():
     return courses
 
 
-# -----------  Программы  ------------- #
+# -------------  Программы  ------------- #
 
 def get_programs(number_course):
     programs = []
@@ -40,7 +34,7 @@ def get_programs(number_course):
     return programs
 
 
-# -----------  Группы  ------------- #
+# -------------  Группы  ------------- #
 
 def get_groups(number_course, number_program):
     groups = []
@@ -49,14 +43,13 @@ def get_groups(number_course, number_program):
             f"&program={number_program}",
         headers=headers)
     groups_data = groups_json.json()
-    print(groups_data)
     for i in groups_data["response"]:
         groups.append(i)
 
     return groups
 
 
-# -----------  Подгруппы  ------------- #
+# -------------  Подгруппы  ------------- #
 
 def get_subgroups(number_course, number_program, number_group):
     subgroups = []
@@ -69,3 +62,22 @@ def get_subgroups(number_course, number_program, number_group):
         subgroups.append(i)
 
     return subgroups
+
+# -------------  Регистрация пользователя  ------------- #
+
+
+def registration_user(data):
+    course, program, group, subgroup, telegram_id = data.split("^")
+    print(telegram_id)
+    if subgroup != "None":
+        subgroup = int(subgroup)
+    else:
+        subgroup = None
+    return requests.post(url=f"{base_url}/users",
+                  json={
+                      "telegramId": int(telegram_id),
+                      "settings": {
+                          "group": group,
+                          "subGroup": subgroup
+                      }
+                  }, headers=headers)
