@@ -5,6 +5,7 @@ x_secret_key = "56mx-0=l08u58%i&tp-@xz*2&d0tyhjn#^l3qk&ch@z)9foc"
 accept_data = "application/json"
 headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data, "Content-Type": "application/json; charset=utf-8"}
 
+
 # -------------  Курсы  ------------- #
 
 def get_courses():
@@ -63,21 +64,34 @@ def get_subgroups(number_course, number_program, number_group):
 
     return subgroups
 
+
 # -------------  Регистрация пользователя  ------------- #
 
 
 def registration_user(data):
-    course, program, group, subgroup, telegram_id = data.split("^")
-    print(telegram_id)
+    course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
     if subgroup != "None":
         subgroup = int(subgroup)
     else:
         subgroup = None
     return requests.post(url=f"{base_url}/users",
-                  json={
-                      "telegramId": int(telegram_id),
-                      "settings": {
-                          "group": group,
-                          "subGroup": subgroup
-                      }
-                  }, headers=headers)
+                         json={
+                             "telegramId": int(telegram_id),
+                             "settings": {
+                                 "group": group,
+                                 "subGroup": subgroup
+                             }
+                         }, headers=headers)
+
+
+def edit_user(data):
+    course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
+    if subgroup != "None":
+        subgroup = int(subgroup)
+    else:
+        subgroup = None
+    return requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
+                          json={
+                              "group": group,
+                              "subGroup": subgroup
+                          }, headers=headers)
