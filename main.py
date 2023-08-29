@@ -17,7 +17,7 @@ bot.can_join_groups = False        # Запрет на приглашения в
 
 
 # Создание кнопок выбора курса
-def get_course(message, type):
+def get_course(message):
     text_hello = "Давай познакомися! На каком курсе ты учишься?"
     courses = api.get_courses()
     markup = types.InlineKeyboardMarkup()
