@@ -4,7 +4,6 @@ import random
 import telebot
 from telebot import types
 
-
 import api
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
@@ -46,8 +45,7 @@ def get_program(message, data):
                                                             f"^{number_course}"
                                                             f"^{is_new_user}"))
     markup.add(types.InlineKeyboardButton("<- Назад",
-                                          callback_data=f"back_to_start"
-                                                        f"^{is_new_user}"))
+                                          callback_data=f"back_to_start{is_new_user}"))
 
     bot.send_message(message.chat.id,
                      text_get_course,
@@ -172,8 +170,10 @@ def get_file(message):
     text_get_schedule = "Выбери способ получения расписания:"
 
     markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь (сейчас заглушка)",
-                                          url="https://www.google.com/"))
+    # markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь",
+    #                                       url="webcal://https://hse-schedule-bot.xenforo-studio.ru/api/files/user_files/db625264-0a6c-4b25-b074-4f2f290e76fe/schedule.ics"))
+    markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь",
+                                          callback_data="add_calendar"))
     markup.add(types.InlineKeyboardButton("Получить расписание файлом",
                                           callback_data="get_file"))
 
@@ -311,11 +311,15 @@ def callback_message(callback_query: types.CallbackQuery):
     get_menu(callback_query.message)
 
 
-# Получить файл расписания
-@bot.callback_query_handler(func=lambda callback: callback.data == "get_file")
+# Добавить автообновляемый календарь
+@bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
     schedule = open('./schedule.ics', 'r', encoding='utf-8')
+    bot.send_message(callback.message.chat.id, "Инструкция по установке:\n\n"
+                                               "1. Скачай файл ниже;\n"
+                                               "2. Запусти его;\n"
+                                               "3. Прими изменения для используемого тобой календаря.")
     bot.send_document(callback.message.chat.id, schedule)
 
 
@@ -326,7 +330,6 @@ bot.set_my_commands([
     types.BotCommand('help', 'Помощь с работой бота'),
     types.BotCommand('settings', 'Изменить данные о себе'),
     types.BotCommand('menu', 'Вызвать меню'),
-    types.BotCommand('gay', 'Узнать, кто на самом деле гей'),
 ], scope=types.BotCommandScopeDefault())
 
 
