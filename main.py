@@ -1,10 +1,10 @@
-import time
 import random
 
 import telebot
 from telebot import types
 
 import api
+import scheduler
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -176,6 +176,8 @@ def get_file(message):
                                           callback_data="add_calendar"))
     markup.add(types.InlineKeyboardButton("Получить расписание файлом",
                                           callback_data="get_file"))
+    markup.add(types.InlineKeyboardButton("Отправлять расписание текстом",
+                                          callback_data="get_text_schedule"))
 
     bot.send_message(message.chat.id,
                      text_get_schedule,
@@ -302,13 +304,28 @@ def callback_message(callback_query: types.CallbackQuery):
     data = callback_query.data.replace('start_working', "")
     list_data = data.split("^")
     is_new_user = list_data[len(list_data) - 1]
-    print(is_new_user)
-    if is_new_user:
-        result = api.registration_user(data)
+    if is_new_user == "True":
+        is_error = api.registration_user(data)
     else:
-        result = api.edit_user(data)
-    print(result.json())
-    get_menu(callback_query.message)
+        is_error = api.edit_user(data)
+
+    if not is_error:
+        get_menu(callback_query.message)
+
+    else:
+        bot.send_message(callback_query.message.chat.id, "Произошла ошибка при внесении данных. Повторите попытку")
+
+
+# Добавить автообновляемый календарь
+@bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
+def callback_message(callback):
+    bot.delete_message(callback.message.chat.id, callback.message.message_id)
+    schedule = open('./schedule.ics', 'r', encoding='utf-8')
+    bot.send_message(callback.message.chat.id, "Инструкция по установке:\n\n"
+                                               "1. Скачай файл ниже;\n"
+                                               "2. Запусти его;\n"
+                                               "3. Прими изменения для используемого тобой календаря.")
+    bot.send_document(callback.message.chat.id, schedule)
 
 
 # Добавить автообновляемый календарь
@@ -333,7 +350,12 @@ bot.set_my_commands([
 ], scope=types.BotCommandScopeDefault())
 
 
-# Безостановочная работа бота
+# Модульное расписание - показывать или нет (расписание на модуль), сделать заготовку настройки
+# Придумать, как будет выводиться расписание
 
+# Запуск запланированных задач в отдельном потоке
+scheduler.run()
+
+# Безостановочная работа бота
 
 bot.polling(none_stop=True)

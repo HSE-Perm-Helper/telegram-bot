@@ -74,7 +74,7 @@ def registration_user(data):
         subgroup = int(subgroup)
     else:
         subgroup = None
-    return requests.post(url=f"{base_url}/users",
+    answer = requests.post(url=f"{base_url}/users",
                          json={
                              "telegramId": int(telegram_id),
                              "settings": {
@@ -82,7 +82,8 @@ def registration_user(data):
                                  "subGroup": subgroup
                              }
                          }, headers=headers)
-
+    answer = answer.json()
+    return answer['error']
 
 def edit_user(data):
     course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
@@ -90,8 +91,26 @@ def edit_user(data):
         subgroup = int(subgroup)
     else:
         subgroup = None
-    return requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
+    answer = requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
                           json={
                               "group": group,
                               "subGroup": subgroup
                           }, headers=headers)
+    answer = answer.json()
+    print(answer['error'])
+    return answer['error']
+
+
+# -------------  Получение расписания  ------------- #
+
+def get_schedule(telegram_id):
+    answer = requests.get(url=f"{base_url}/schedule/{telegram_id}",
+                          headers=headers)
+    answer = answer.json()
+    return answer['response']
+
+
+# -------------  Проверка обновления расписания  ------------- #
+
+def check_new_schedule():
+    print("Проверка расписания отработала")
