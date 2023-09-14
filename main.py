@@ -1,4 +1,5 @@
 import random
+import datetime
 
 import telebot
 from telebot import types
@@ -12,8 +13,18 @@ bot = telebot.TeleBot('6348506696:AAGHBhAGBYF0I0iHFuzBuPYYdgEYHumg3bQ')
 bot.can_join_groups = False        # Запрет на приглашения в группы (ему пофиг)
 
 
-# ---------------------------------  Функции  ----------------------------------- #
+# ---------------------------------  Данные  ----------------------------------- #
 
+days_of_week = ['Понедельник',
+                'Вторник',
+                'Среда',
+                'Четверг',
+                'Пятница',
+                'Суббота',
+                'Воскресенье']
+
+
+# ---------------------------------  Функции  ----------------------------------- #
 
 # Создание кнопок выбора курса
 def get_course(message, is_new_user):
@@ -316,16 +327,38 @@ def callback_message(callback_query: types.CallbackQuery):
         bot.send_message(callback_query.message.chat.id, "Произошла ошибка при внесении данных. Повторите попытку")
 
 
-# Добавить автообновляемый календарь
-@bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
+# Отправить расписание текстом
+@bot.callback_query_handler(func=lambda callback: callback.data == "get_text_schedule")
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    schedule = open('./schedule.ics', 'r', encoding='utf-8')
-    bot.send_message(callback.message.chat.id, "Инструкция по установке:\n\n"
-                                               "1. Скачай файл ниже;\n"
-                                               "2. Запусти его;\n"
-                                               "3. Прими изменения для используемого тобой календаря.")
-    bot.send_document(callback.message.chat.id, schedule)
+    schedule_dict = api.get_schedule(callback.message.chat.id)
+    for week in schedule_dict:
+        lessons = week['lessons']
+        if lessons != []:
+            text_for_message = ''
+            for day in lessons:
+                keys = day.keys()
+                for key in keys:
+
+                    '''Определение дня недели'''
+                    date_string = key
+                    day_, month, year = date_string.split('.')
+                    day_ = int(day_)
+                    month = int(month)
+                    year = int(year)
+                    date = datetime.datetime(year, month, day_)
+                    day_of_the_week = days_of_week[date.isoweekday() - 1]
+                    '''Конец определения дня недели'''
+
+                    text_for_message = f"{day_of_the_week}, {date_string}\n"
+                    daily_schedule_list = day[key]
+                    for lesson in daily_schedule_list:
+                        text_for_message += (f"{lesson['subject']} - {lesson['lessonType']} \n"
+                                             f"{lesson['startTime']} - {lesson['endTime']} "
+                                             f"Аудитория {lesson['office']}, корпус {lesson['building']} \n"
+                                             f"Преподаватель - {lesson['lecturer']} \n\n")
+                    bot.send_message(callback.message.chat.id, text_for_message)
+
 
 
 # Добавить автообновляемый календарь

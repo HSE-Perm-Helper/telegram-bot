@@ -11,4 +11,4 @@ def run():
 def check_schedule_updates():
     while True:
         api.check_new_schedule()
-        time.sleep(5)
+        time.sleep(300)
