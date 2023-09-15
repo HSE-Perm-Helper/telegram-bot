@@ -23,6 +23,12 @@ days_of_week = ['Понедельник',
                 'Суббота',
                 'Воскресенье']
 
+type_of_lessons = {
+    'LECTURE' : 'лекция',
+    'SEMINAR' : 'семинар',
+    'COMMON_MINOR' : 'майнор',
+    'ENGLISH' : 'английский',
+}
 
 # ---------------------------------  Функции  ----------------------------------- #
 
@@ -169,7 +175,7 @@ def get_menu(message):
     get_schedule_button = types.KeyboardButton("Получить расписание")
     get_deadlines_button = types.KeyboardButton("Проверить дедлайны")
     keyboard_markup.row(get_deadlines_button, get_schedule_button)
-    keyboard_markup.row_width = 5
+    keyboard_markup.row_width = 4
 
     bot.send_message(message.chat.id,
                      text_schedule,
@@ -177,7 +183,7 @@ def get_menu(message):
 
 
 
-def get_file(message):
+def get_schedule(message):
     text_get_schedule = "Выбери способ получения расписания:"
 
     markup = types.InlineKeyboardMarkup()
@@ -244,13 +250,14 @@ def get_settings(message):
 
 @bot.message_handler(func= lambda message: message.text == "Получить расписание")
 def callback_message(message):
-    get_file(message)
+    get_schedule(message)
 
 
 
 @bot.message_handler(func= lambda message: message.text == "Проверить дедлайны")
 def callback_message(message):
     bot.send_message(message.chat.id, "Скоро будет!")
+
 
 # ---------------------------------  Обработка событий  ----------------------------------- #
 
@@ -348,36 +355,6 @@ def callback_message(callback):
                          text_message,
                          reply_markup=markup)
 
-        # schedule_dict = schedule_json['response']
-        # for week in schedule_dict:
-        #     lessons = week['lessons']
-        #     if lessons != []:
-        #         text_for_message = ''
-        #         for day in lessons:
-        #             keys = day.keys()
-        #             for key in keys:
-        #
-        #                 '''Определение дня недели'''
-        #                 date_string = key
-        #                 day_, month, year = date_string.split('.')
-        #                 day_ = int(day_)
-        #                 month = int(month)
-        #                 year = int(year)
-        #                 date = datetime.datetime(year, month, day_)
-        #                 day_of_the_week = days_of_week[date.isoweekday() - 1]
-        #                 '''Конец определения дня недели'''
-        #
-        #                 text_for_message = f"<u><b>{day_of_the_week}, {date_string}</b></u>\n"
-        #
-        #                 daily_schedule_list = day[key]
-        #                 for lesson in daily_schedule_list:
-        #                     text_for_message += (f"{lesson['subject']} - {lesson['lessonType']} \n"
-        #                                          f"{lesson['startTime']} - {lesson['endTime']} "
-        #                                          f"Аудитория {lesson['office']}, корпус {lesson['building']} \n"
-        #                                          f"Преподаватель - {lesson['lecturer']} \n\n")
-        #                 bot.send_message(callback.message.chat.id, text_for_message, parse_mode='HTML')
-
-
 
 # Добавить автообновляемый календарь
 @bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
@@ -404,7 +381,6 @@ def callback_message(callback_query: types.CallbackQuery):
         if week['weekNumber'] == data:
             lessons = week['lessons']
             if lessons != []:
-                text_for_message = ''
                 for day in lessons:
                     keys = day.keys()
                     for key in keys:
@@ -419,14 +395,28 @@ def callback_message(callback_query: types.CallbackQuery):
                         day_of_the_week = days_of_week[date.isoweekday() - 1]
                         '''Конец определения дня недели'''
 
-                        text_for_message = f"<u><b>{day_of_the_week}, {date_string}</b></u>\n"
+                        text_for_message = f"<u><b>{day_of_the_week}, {date_string}</b></u>\n\n"
 
                         daily_schedule_list = day[key]
                         for lesson in daily_schedule_list:
-                            text_for_message += (f"{lesson['subject']} - {lesson['lessonType']} \n"
-                                                 f"{lesson['startTime']} - {lesson['endTime']} "
-                                                 f"Аудитория {lesson['office']}, корпус {lesson['building']} \n"
-                                                 f"Преподаватель - {lesson['lecturer']} \n\n")
+                            if lesson['lessonType'] == 'COMMON_MINOR':
+                                text_for_message += 'Майнор'
+                            else:
+                                text_for_message += (f"{lesson['subject']} - "
+                                                     f"<u>{type_of_lessons[lesson['lessonType']]}</u> \n")
+
+                                text_for_message += (f"<b>{lesson['startTime']} - {lesson['endTime']}</b> ")
+
+                                if lesson['isOnline']:
+                                    if lesson['link'] == None:
+                                        text_for_message += (f"Дистанционная пара, ссылка отсутствует \n")
+                                    else:
+                                        text_for_message += (f"Дистанционная пара, ссылка:\n"
+                                                             f"{lesson['link']}")
+                                else:
+                                    text_for_message += (f"Корпус {lesson['building']}, аудитория {lesson['office']} \n")
+
+                                text_for_message += (f"Преподаватель - <i>{lesson['lecturer']}</i> \n\n")
                         bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
 # Команды бота в списке
