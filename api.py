@@ -107,7 +107,7 @@ def get_schedule(telegram_id):
     answer = requests.get(url=f"{base_url}/schedule/{telegram_id}",
                           headers=headers)
     answer = answer.json()
-    return answer['response']
+    return answer
 
 
 # -------------  Проверка обновления расписания  ------------- #

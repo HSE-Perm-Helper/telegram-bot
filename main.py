@@ -331,33 +331,51 @@ def callback_message(callback_query: types.CallbackQuery):
 @bot.callback_query_handler(func=lambda callback: callback.data == "get_text_schedule")
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    schedule_dict = api.get_schedule(callback.message.chat.id)
-    for week in schedule_dict:
-        lessons = week['lessons']
-        if lessons != []:
-            text_for_message = ''
-            for day in lessons:
-                keys = day.keys()
-                for key in keys:
+    schedule_json = api.get_schedule(callback.message.chat.id)
 
-                    '''Определение дня недели'''
-                    date_string = key
-                    day_, month, year = date_string.split('.')
-                    day_ = int(day_)
-                    month = int(month)
-                    year = int(year)
-                    date = datetime.datetime(year, month, day_)
-                    day_of_the_week = days_of_week[date.isoweekday() - 1]
-                    '''Конец определения дня недели'''
+    if schedule_json['error'] is True:
+        bot.send_message(callback.message.chat.id, 'Для тебя почему-то нет расписания :(\nНастрой группу заново '
+                                                   'командой /settings!')
+    else:
+        schedule_dict = schedule_json['response']
+        text_message = "Выбери неделю, за которую хочешь видеть расписание:"
+        markup = types.InlineKeyboardMarkup()
+        for week in schedule_dict:
+            markup.add(types.InlineKeyboardButton(f"Неделя {week['weekNumber']}, "
+                                                  f"{week['weekStart']} - {week['weekEnd']}",
+                                                  callback_data=f"number_of_week_schedule{week['weekNumber']}"))
+        bot.send_message(callback.message.chat.id,
+                         text_message,
+                         reply_markup=markup)
 
-                    text_for_message = f"{day_of_the_week}, {date_string}\n"
-                    daily_schedule_list = day[key]
-                    for lesson in daily_schedule_list:
-                        text_for_message += (f"{lesson['subject']} - {lesson['lessonType']} \n"
-                                             f"{lesson['startTime']} - {lesson['endTime']} "
-                                             f"Аудитория {lesson['office']}, корпус {lesson['building']} \n"
-                                             f"Преподаватель - {lesson['lecturer']} \n\n")
-                    bot.send_message(callback.message.chat.id, text_for_message)
+        # schedule_dict = schedule_json['response']
+        # for week in schedule_dict:
+        #     lessons = week['lessons']
+        #     if lessons != []:
+        #         text_for_message = ''
+        #         for day in lessons:
+        #             keys = day.keys()
+        #             for key in keys:
+        #
+        #                 '''Определение дня недели'''
+        #                 date_string = key
+        #                 day_, month, year = date_string.split('.')
+        #                 day_ = int(day_)
+        #                 month = int(month)
+        #                 year = int(year)
+        #                 date = datetime.datetime(year, month, day_)
+        #                 day_of_the_week = days_of_week[date.isoweekday() - 1]
+        #                 '''Конец определения дня недели'''
+        #
+        #                 text_for_message = f"<u><b>{day_of_the_week}, {date_string}</b></u>\n"
+        #
+        #                 daily_schedule_list = day[key]
+        #                 for lesson in daily_schedule_list:
+        #                     text_for_message += (f"{lesson['subject']} - {lesson['lessonType']} \n"
+        #                                          f"{lesson['startTime']} - {lesson['endTime']} "
+        #                                          f"Аудитория {lesson['office']}, корпус {lesson['building']} \n"
+        #                                          f"Преподаватель - {lesson['lecturer']} \n\n")
+        #                 bot.send_message(callback.message.chat.id, text_for_message, parse_mode='HTML')
 
 
 
@@ -372,6 +390,44 @@ def callback_message(callback):
                                                "3. Прими изменения для используемого тобой календаря.")
     bot.send_document(callback.message.chat.id, schedule)
 
+
+
+# Пользователем выбрано расписание для отправки
+@bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
+def callback_message(callback_query: types.CallbackQuery):
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    data = callback_query.data.replace('number_of_week_schedule', "")
+    data = int(data)
+    schedule_json = api.get_schedule(callback_query.message.chat.id)
+    schedule_dict = schedule_json['response']
+    for week in schedule_dict:
+        if week['weekNumber'] == data:
+            lessons = week['lessons']
+            if lessons != []:
+                text_for_message = ''
+                for day in lessons:
+                    keys = day.keys()
+                    for key in keys:
+
+                        '''Определение дня недели'''
+                        date_string = key
+                        day_, month, year = date_string.split('.')
+                        day_ = int(day_)
+                        month = int(month)
+                        year = int(year)
+                        date = datetime.datetime(year, month, day_)
+                        day_of_the_week = days_of_week[date.isoweekday() - 1]
+                        '''Конец определения дня недели'''
+
+                        text_for_message = f"<u><b>{day_of_the_week}, {date_string}</b></u>\n"
+
+                        daily_schedule_list = day[key]
+                        for lesson in daily_schedule_list:
+                            text_for_message += (f"{lesson['subject']} - {lesson['lessonType']} \n"
+                                                 f"{lesson['startTime']} - {lesson['endTime']} "
+                                                 f"Аудитория {lesson['office']}, корпус {lesson['building']} \n"
+                                                 f"Преподаватель - {lesson['lecturer']} \n\n")
+                        bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
 # Команды бота в списке
 
