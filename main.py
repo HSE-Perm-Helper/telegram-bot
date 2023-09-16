@@ -2,6 +2,7 @@ import random
 import datetime
 import telebot
 from telebot import types
+import wget
 
 import api
 import scheduler
@@ -10,7 +11,6 @@ import scheduler
 
 bot = telebot.TeleBot('6348506696:AAGHBhAGBYF0I0iHFuzBuPYYdgEYHumg3bQ')
 bot.can_join_groups = False        # Запрет на приглашения в группы (ему пофиг)
-
 
 # ---------------------------------  Данные  ----------------------------------- #
 
@@ -23,34 +23,38 @@ days_of_week = ['Понедельник',
                 'Воскресенье']
 
 type_of_lessons = {
-    'LECTURE' : 'лекция 😴',
-    'SEMINAR' : 'семинар 📗',
-    'COMMON_MINOR' : 'Майнор Ⓜ',
-    'ENGLISH' : 'английский 🆎',
+    'LECTURE': 'лекция 😴',
+    'SEMINAR': 'семинар 📗',
+    'COMMON_MINOR': 'Майнор Ⓜ',
+    'ENGLISH': 'английский 🆎',
 }
 
 type_of_program = {
-    'МБ' : 'Международный бакалавриат по бизнесу и экономике',
-    'РИС' : 'Разработка информационных систем для бизнеса',
-    'И' : 'История',
-    'ИЯ' : 'Лингвистика',
-    'Ю' : 'Юриспруденция',
-    'УБ' : 'Управление бизнесом',
-    'Э' : 'Экономика',
-    'ПИ' : 'Программная инженерия',
-    'БИ' : 'Бизнес-информатика'
+    'МБ': 'Международный бакалавриат по бизнесу и экономике',
+    'РИС': 'Разработка информационных систем для бизнеса',
+    'И': 'История',
+    'ИЯ': 'Лингвистика',
+    'Ю': 'Юриспруденция',
+    'УБ': 'Управление бизнесом',
+    'Э': 'Экономика',
+    'ПИ': 'Программная инженерия',
+    'БИ': 'Бизнес-информатика'
 }
 
-emojies_for_course = ['📒', '📓', '📔', '📕', '📗',  '📘', '📙']
+emojies_for_course = ['📒', '📓', '📔', '📕', '📗', '📘', '📙']
 emojies_for_programs = ['💶', '💵', '💷', '💸',  '💪', '💻', '💼', '📊', '🥇', '🤡', '☠', '💩', '♿']
 emojies_for_groups = ['⚪', '🔴', '🟡', '🟢', '🟣',  '🟤', '🔵', '⚫']
 emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆',  '🌇', '🌉']
 
+version = "0.0.1 ALPHA"
+
 # ---------------------------------  Функции  ----------------------------------- #
+
 
 # Рандомный номер эмодзи для быстрого получения из списка
 def rand_emj(count):
     return random.randint(0, count - 1)
+
 
 # Создание кнопок выбора курса
 def get_course(message, is_new_user):
@@ -61,7 +65,7 @@ def get_course(message, is_new_user):
     courses = api.get_courses()
     markup = types.InlineKeyboardMarkup()
     for i in range(len(courses)):
-        emoji_for_button = f"{emojies_for_course[rand_emj(len(emojies_for_course))]} {courses[i]}"
+        emoji_for_button = f"{emojies_for_course[rand_emj(len(emojies_for_course))]} {courses[i]} курс"
         markup.add(types.InlineKeyboardButton(emoji_for_button,
                                               callback_data=f"course_{courses[i]}"
                                                             f"^{is_new_user}"))
@@ -192,9 +196,9 @@ def get_confirmation(message, data):
                                                         f"^{number_subgroup}"
                                                         f"^{message.chat.id}"
                                                         f"^{is_new_user}"))
-    markup.add(types.InlineKeyboardButton("Редактировать ✏",
+    markup.add(types.InlineKeyboardButton("Начать сначала ✏",
                                           callback_data=f"back_to_start"
-                                                        f"^{is_new_user}"))
+                                                        f"{is_new_user}"))
     markup.add(types.InlineKeyboardButton("🔙 Назад",
                                           callback_data=f"back_to_subgroup{number_group}"
                                                         f"^{number_program}"
@@ -206,6 +210,7 @@ def get_confirmation(message, data):
                      reply_markup=markup)
 
 
+# Вывод меню для выбора способа получения расписания
 def get_menu(message):
     text_schedule = ("<b>Команды для работы:</b>\n\n"
                  "🔹 /settings - <i>Изменение информации о себе</i>\n\n"
@@ -228,7 +233,7 @@ def get_menu(message):
                      reply_markup=keyboard_markup_up, parse_mode='HTML')
 
 
-
+# Получение расписания для календаря
 def get_schedule(message):
     bot.delete_message(message.chat.id, message.message_id)
     text_get_schedule = "🔵 Выбери способ получения расписания:"
@@ -247,6 +252,8 @@ def get_schedule(message):
                      text_get_schedule,
                      reply_markup=markup)
 
+
+# Получение текстового расписания
 def get_text_schedule(message):
     bot.delete_message(message.chat.id, message.message_id)
     schedule_json = api.get_schedule(message.chat.id)
@@ -287,7 +294,9 @@ def get_help(message):
                  "🔹 /start - <i>Начало работы. Производится выбор курса, направления, группы и подгруппы</i>\n\n"
                  "🔹 /settings - <i>Изменение информации о себе</i>\n\n"
                  "🔹 /menu - <i>Получить меню для работы</i>\n\n"
-                 "🔹 /help - <i>Вывод помощи</i>")
+                 "Канал для обратной связи - <b>@hse_perm_helper_feedback</b>\n"
+                 "Будем рады твоему отзыву или предложению!\n\n"
+                 f"Версия <i>{version}</i>")
     bot.send_message(message.chat.id, text_help, parse_mode='HTML')
 
 
@@ -302,7 +311,7 @@ def start_working(message):
 # Леха, удали это потом, это наш стажёр так шутит
 # Обработка команды /gay
 @bot.message_handler(commands=['gay', 'гей'])
-@bot.message_handler(func= lambda message: message.text == ('gay' or 'гей'))
+@bot.message_handler(func=lambda message: message.text == ('gay' or 'гей'))
 def who_is_gay(message):
     bot.delete_message(message.chat.id, message.message_id)
     if random.randint(0, 9) < 5:
@@ -313,17 +322,19 @@ def who_is_gay(message):
 
 # Обработка команды /settings
 @bot.message_handler(commands=['settings', 'настройки'])
-@bot.message_handler(func= lambda message: message.text == ('settings' or 'настройки'))
+@bot.message_handler(func=lambda message: message.text == ('settings' or 'настройки'))
 def get_settings(message):
     bot.delete_message(message.chat.id, message.message_id)
     get_course(message, False)
 
 
-
+# Обработка сообщения добавления календаря
 @bot.message_handler(func= lambda message: message.text == "Добавить обновляемый календарь")
 def callback_message(message):
     get_schedule(message)
 
+
+# Обработка сообщения получения текстового расписания
 @bot.message_handler(func= lambda message: message.text == "Получить текстовое расписание")
 def callback_message(message):
     get_text_schedule(message)
@@ -374,7 +385,6 @@ def subgroup_query_handler(callback_query: types.CallbackQuery):
 
 
 # Обработка события возврата на предыдущий выбор
-
 @bot.callback_query_handler(lambda c: c.data.startswith('back_to_'))
 def program_query_handler(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -391,7 +401,6 @@ def program_query_handler(callback_query: types.CallbackQuery):
     elif callback_query.data.startswith('back_to_start'):
         data = callback_query.data.replace('back_to_start', "")
         get_course(callback_query.message, data)
-
 
 
 # Обработка события нажатия на кнопку подтверждения данных
@@ -416,28 +425,6 @@ def callback_message(callback_query: types.CallbackQuery):
                                                          "/settings !")
 
 
-# # Отправить расписание текстом
-# @bot.callback_query_handler(func=lambda callback: callback.data == "get_text_schedule")
-# def callback_message(callback):
-#     bot.delete_message(callback.message.chat.id, callback.message.message_id)
-#     schedule_json = api.get_schedule(callback.message.chat.id)
-#
-#     if schedule_json['error'] is True:
-#         bot.send_message(callback.message.chat.id, 'Для тебя почему-то нет расписания :(\nНастрой группу заново '
-#                                                    'командой /settings!')
-#     else:
-#         schedule_dict = schedule_json['response']
-#         text_message = "Выбери неделю, за которую хочешь видеть расписание:"
-#         markup = types.InlineKeyboardMarkup()
-#         for week in schedule_dict:
-#             markup.add(types.InlineKeyboardButton(f"Неделя {week['weekNumber']}, "
-#                                                   f"{week['weekStart']} - {week['weekEnd']}",
-#                                                   callback_data=f"number_of_week_schedule{week['weekNumber']}"))
-#         bot.send_message(callback.message.chat.id,
-#                          text_message,
-#                          reply_markup=markup)
-
-
 # Добавить автообновляемый календарь
 @bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
 def callback_message(callback):
@@ -448,7 +435,6 @@ def callback_message(callback):
                                                "2. Запусти его;\n"
                                                "3. Прими изменения для используемого тобой календаря.")
     bot.send_document(callback.message.chat.id, schedule)
-
 
 
 # Пользователем выбрано расписание для отправки
@@ -501,17 +487,15 @@ def callback_message(callback_query: types.CallbackQuery):
                                 text_for_message += (f"Преподаватель - <i>{lesson['lecturer']}</i> \n\n")
                         bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
-# Команды бота в списке
 
+# Команды бота в списке
 bot.set_my_commands([
     types.BotCommand('help', 'Помощь с работой бота'),
     types.BotCommand('settings', 'Изменить данные о себе'),
     types.BotCommand('menu', 'Вызвать меню'),
 ], scope=types.BotCommandScopeDefault())
 
-
 # Модульное расписание - показывать или нет (расписание на модуль), сделать заготовку настройки
-# Придумать, как будет выводиться расписание
 
 # Запуск запланированных задач в отдельном потоке
 scheduler.run()
