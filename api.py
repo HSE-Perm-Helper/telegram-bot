@@ -15,6 +15,7 @@ def get_courses():
     courses_json = requests.get(
         url=f"{base_url}/schedule/available_courses",
         headers=headers,
+        verify=False
     )
     courses_data = courses_json.json()
     for i in courses_data["response"]:
@@ -29,7 +30,8 @@ def get_programs(number_course):
     programs = []
     programs_json = requests.get(
         url=f"{base_url}/schedule/available_programs?course={number_course}",
-        headers=headers)
+        headers=headers,
+        verify=False)
     programs_data = programs_json.json()
     for i in programs_data["response"]:
         programs.append(i)
@@ -44,7 +46,8 @@ def get_groups(number_course, number_program):
     groups_json = requests.get(
         url=f"{base_url}/schedule/available_groups?course={number_course}"
             f"&program={number_program}",
-        headers=headers)
+        headers=headers,
+        verify=False)
     groups_data = groups_json.json()
     for i in groups_data["response"]:
         groups.append(i)
@@ -59,7 +62,8 @@ def get_subgroups(number_course, number_program, number_group):
     subgroups_json = requests.get(
         url=f"{base_url}/schedule/available_subgroups?course={number_course}"
             f"&program={number_program}&group={number_group}",
-        headers=headers)
+        headers=headers,
+        verify=False)
     subgroups_data = subgroups_json.json()
     for i in subgroups_data["response"]:
         subgroups.append(i)
@@ -83,7 +87,8 @@ def registration_user(data):
                                  "group": group,
                                  "subGroup": subgroup
                              }
-                         }, headers=headers)
+                         }, headers=headers,
+                         verify=False)
     answer = answer.json()
     return answer['error']
 
@@ -97,7 +102,8 @@ def edit_user(data):
                           json={
                               "group": group,
                               "subGroup": subgroup
-                          }, headers=headers)
+                          }, headers=headers,
+                          verify=False)
     answer = answer.json()
     print(answer['error'])
     return answer['error']
@@ -107,7 +113,8 @@ def edit_user(data):
 
 def get_schedule(telegram_id):
     answer = requests.get(url=f"{base_url}/schedule/{telegram_id}",
-                          headers=headers)
+                          headers=headers,
+                          verify=False)
     answer = answer.json()
     return answer
 
