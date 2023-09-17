@@ -2,7 +2,7 @@ import random
 import datetime
 import telebot
 from telebot import types
-import wget
+# import wget
 
 import api
 import scheduler
@@ -14,7 +14,7 @@ bot.can_join_groups = False        # Запрет на приглашения в
 
 # ---------------------------------  Данные  ----------------------------------- #
 
-days_of_week = ['Понедельник',
+days_of_week_dict = ['Понедельник',
                 'Вторник',
                 'Среда',
                 'Четверг',
@@ -22,31 +22,54 @@ days_of_week = ['Понедельник',
                 'Суббота',
                 'Воскресенье']
 
-type_of_lessons = {
+type_of_lessons_dict = {
     'LECTURE': 'лекция 😴',
     'SEMINAR': 'семинар 📗',
     'COMMON_MINOR': 'Майнор Ⓜ',
     'ENGLISH': 'английский 🆎',
 }
 
-type_of_program = {
-    'МБ': 'Международный бакалавриат по бизнесу и экономике',
-    'РИС': 'Разработка информационных систем для бизнеса',
-    'И': 'История',
-    'ИЯ': 'Лингвистика',
-    'Ю': 'Юриспруденция',
-    'УБ': 'Управление бизнесом',
-    'Э': 'Экономика',
-    'ПИ': 'Программная инженерия',
-    'БИ': 'Бизнес-информатика'
+type_of_program_dict = {
+    'МБ': '🥬 Международный бакалавриат по бизнесу и экономике',
+    'РИС': '💻 Разработка информационных систем для бизнеса',
+    'И': '🗿 История',
+    'ИЯ': '🔤 Лингвистика',
+    'Ю': '⚖ Юриспруденция',
+    'УБ': '💼 Управление бизнесом',
+    'Э': '📈 Экономика',
+    'ПИ': '🖥 Программная инженерия',
+    'БИ': '💷 Бизнес-информатика'
+}
+
+number_of_pair_dict = {
+    '8:10': '1-ая пара',
+    '9:40': '2-ая пара',
+    '11:30': '3-ая пара',
+    '13:10': '4-ая пара',
+    '15:00': '5-ая пара',
+    '16:40': '6-ая пара',
+    '18:20': '7-ая пара',
+    '20:10': '8-ая пара'
+}
+
+count_pairs_dict = {
+    '1': '1 пара 🥳',
+    '2': '2 пары 🙂',
+    '3': '3 пары 😐',
+    '4': '4 пары 😟',
+    '5': '5 пар 😨',
+    '6': '6 пар 😱',
+    '7': '7 пар 😵',
+    '8': '8 пар ☠'
 }
 
 emojies_for_course = ['📒', '📓', '📔', '📕', '📗', '📘', '📙']
-emojies_for_programs = ['💶', '💵', '💷', '💸',  '💪', '💻', '💼', '📊', '🥇', '🤡', '☠', '💩', '♿']
+# emojies_for_programs = ['💶', '💵', '💷', '💸',  '💪', '💻', '💼', '📊', '🥇', '🤡', '☠', '💩', '♿']
 emojies_for_groups = ['⚪', '🔴', '🟡', '🟢', '🟣',  '🟤', '🔵', '⚫']
 emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆',  '🌇', '🌉']
+# emojies_for_number_of_pair = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 
-version = "0.0.1 ALPHA"
+version = "1.0.0 beta"
 
 # ---------------------------------  Функции  ----------------------------------- #
 
@@ -85,15 +108,15 @@ def get_program(message, data):
 
     markup = types.InlineKeyboardMarkup()
     for i in range(len(programs)):
-        if programs[i] in type_of_program.keys():
-            emoji_for_button = f"{emojies_for_programs[rand_emj(len(emojies_for_programs))]} {type_of_program[programs[i]]}"
+        if programs[i] in type_of_program_dict.keys():
+            emoji_for_button = f"{type_of_program_dict[programs[i]]}"
         else:
-            emoji_for_button = f"{emojies_for_programs[rand_emj(len(emojies_for_programs))]} {programs[i]}"
+            emoji_for_button = f"{programs[i]}"
         markup.add(types.InlineKeyboardButton(emoji_for_button,
                                               callback_data=f"program_{programs[i]}"
                                                             f"^{number_course}"
                                                             f"^{is_new_user}"))
-    markup.add(types.InlineKeyboardButton("🔙 Назад",
+    markup.add(types.InlineKeyboardButton("⬅ Назад",
                                           callback_data=f"back_to_start{is_new_user}"))
 
     bot.send_message(message.chat.id,
@@ -104,8 +127,8 @@ def get_program(message, data):
 # Создание кнопок выбора группы
 def get_group(message, data):
     number_program, number_course, is_new_user = data.split('^')
-    if number_program in type_of_program.keys():
-        text_get_group = f"Отлично, ты выбрал: \n{type_of_program[number_program]} 😎\nТеперь давай выберем группу!"
+    if number_program in type_of_program_dict.keys():
+        text_get_group = f"Отлично, ты выбрал: \n{type_of_program_dict[number_program]} 😎\nТеперь давай выберем группу!"
     else:
         text_get_group = f"Отлично, ты выбрал {number_program} направление! 😎\nТеперь давай выберем группу!"
 
@@ -121,7 +144,7 @@ def get_group(message, data):
                                                             f"^{number_program}"
                                                             f"^{number_course}"
                                                             f"^{is_new_user}"))
-    markup.add(types.InlineKeyboardButton("🔙 Назад",
+    markup.add(types.InlineKeyboardButton("⬅ Назад",
                                           callback_data=f"back_to_program{number_course}"
                                                         f"^{is_new_user}"))
 
@@ -154,7 +177,7 @@ def get_subgroup(message, data):
                                                             f"^{number_program}"
                                                             f"^{number_course}"
                                                             f"^{is_new_user}"))
-    markup.add(types.InlineKeyboardButton("🔙 Назад",
+    markup.add(types.InlineKeyboardButton("⬅ Назад",
                                           callback_data=f"back_to_group{number_program}"
                                                         f"^{number_course}"
                                                         f"^{is_new_user}"))
@@ -169,8 +192,8 @@ def get_confirmation(message, data):
     number_subgroup, number_group, number_program, number_course, is_new_user = data.split('^')
 
     '''Заводим новую переменную номера группы, чтобы в сообщение выводилось полное название направления'''
-    if number_program in type_of_program.keys():
-        number_program_for_message = type_of_program[number_program]
+    if number_program in type_of_program_dict.keys():
+        number_program_for_message = type_of_program_dict[number_program]
     else:
         number_program_for_message = number_program
 
@@ -199,7 +222,7 @@ def get_confirmation(message, data):
     markup.add(types.InlineKeyboardButton("Начать сначала ✏",
                                           callback_data=f"back_to_start"
                                                         f"{is_new_user}"))
-    markup.add(types.InlineKeyboardButton("🔙 Назад",
+    markup.add(types.InlineKeyboardButton("⬅ Назад",
                                           callback_data=f"back_to_subgroup{number_group}"
                                                         f"^{number_program}"
                                                         f"^{number_course}"
@@ -429,13 +452,13 @@ def callback_message(callback_query: types.CallbackQuery):
 @bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    schedule = open('./schedule.ics', 'r', encoding='utf-8')
-    bot.send_message(callback.message.chat.id, "Инструкция по установке:\n\n"
-                                               "1. Скачай файл ниже;\n"
-                                               "2. Запусти его;\n"
-                                               "3. Прими изменения для используемого тобой календаря.")
-    bot.send_document(callback.message.chat.id, schedule)
-
+    # schedule = open('calendar/schedule.ics', 'r', encoding='utf-8')
+    # bot.send_message(callback.message.chat.id, "Инструкция по установке:\n\n"
+    #                                            "1. Скачай файл ниже;\n"
+    #                                            "2. Запусти его;\n"
+    #                                            "3. Прими изменения для используемого тобой календаря.")
+    # bot.send_document(callback.message.chat.id, schedule)
+    bot.send_message(callback.message.chat.id, 'Будет позже!')
 
 # Пользователем выбрано расписание для отправки
 @bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
@@ -452,7 +475,8 @@ def callback_message(callback_query: types.CallbackQuery):
                 for day in lessons:
                     keys = day.keys()
                     for key in keys:
-
+                        '''Служебная переменная для определения начала пар'''
+                        isPairsStart = False
                         '''Определение дня недели'''
                         date_string = key
                         day_, month, year = date_string.split('.')
@@ -460,31 +484,69 @@ def callback_message(callback_query: types.CallbackQuery):
                         month = int(month)
                         year = int(year)
                         date = datetime.datetime(year, month, day_)
-                        day_of_the_week = days_of_week[date.isoweekday() - 1]
+                        day_of_the_week = days_of_week_dict[date.isoweekday() - 1]
                         '''Конец определения дня недели'''
 
-                        text_for_message = f"<u><b>{day_of_the_week}, {date_string}</b></u>\n\n"
 
                         daily_schedule_list = day[key]
+                        count_pairs = str(len(daily_schedule_list))
+
+                        text_for_message = (f"<u><b>{day_of_the_week}, {date_string} - "
+                                            f"{count_pairs_dict[count_pairs]}</b></u>\n\n")
+
+                        # start_of_pairs = list(number_of_pair_dict.keys())
+                        #
+                        # j = 0
+                        # for i in range(0, len(start_of_pairs) - 1):
+                        #     if start_of_pairs[i] == daily_schedule_list[j]['startTime']:
+                        #         pass
+
+                        '''Проходим по всем парам в данный день'''
                         for lesson in daily_schedule_list:
+
+                            '''Если вид пары - майнор'''
                             if lesson['lessonType'] == 'COMMON_MINOR':
-                                text_for_message += type_of_lessons[lesson['lessonType']]
+                                text_for_message += type_of_lessons_dict[lesson['lessonType']]
+
                             else:
+                                '''Вычисляем время пары'''
+                                time_of_pair = f"{lesson['startTime']} - {lesson['endTime']}"
+
+                                '''Добавляем в сообщение номер пары'''
+                                text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> - "
+
+                                '''Добавляем в сообщение название пары и ее тип'''
                                 text_for_message += (f"{lesson['subject']} - "
-                                                     f"<u>{type_of_lessons[lesson['lessonType']]}</u> \n")
+                                                     f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u> \n")
 
-                                text_for_message += (f"<b>{lesson['startTime']} - {lesson['endTime']}</b> ")
+                                '''Добавляем в сообщение время пары'''
+                                text_for_message += (f"<b>{time_of_pair}</b> ")
 
+                                '''Проверяем, дистант или очная'''
                                 if lesson['isOnline']:
-                                    if lesson['link'] == None:
-                                        text_for_message += (f"Дистанционная пара, ссылка отсутствует \n")
+
+                                    '''- Если очная, добавляем ссылки'''
+                                    if lesson['links'] == None:
+                                        text_for_message += (f"Дистанционная пара, ссылки отсутствуют \n")
+
                                     else:
-                                        text_for_message += (f"Дистанционная пара, ссылка:\n"
-                                                             f"{lesson['link']}")
+                                        text_for_message += (f"Дистанционная пара, ссылки:\n")
+                                        for link in lesson['links']:
+                                            text_for_message += (f"{link}\n")
+
                                 else:
+                                    '''- Иначе добавляем номер корпуса и аудиторию'''
                                     text_for_message += (f"Корпус {lesson['building']}, аудитория {lesson['office']} \n")
 
-                                text_for_message += (f"Преподаватель - <i>{lesson['lecturer']}</i> \n\n")
+                                '''Добавляем преподавателя пары'''
+                                text_for_message += (f"Преподаватель - <i>{lesson['lecturer']}</i> \n")
+
+                                '''Проверяем наличие дополнительной информации к паре'''
+                                if lesson['additionalInfo'] != None:
+                                    text_for_message += (f"<i>Доп.информация: - {lesson['additionalInfo']}</i> \n")
+
+                                text_for_message += "\n"
+
                         bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
 
