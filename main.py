@@ -6,10 +6,11 @@ from telebot import types
 
 import api
 import scheduler
+import secrets
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
-bot = telebot.TeleBot('6348506696:AAGHBhAGBYF0I0iHFuzBuPYYdgEYHumg3bQ')
+bot = telebot.TeleBot(secrets.bot_token)
 bot.can_join_groups = False        # Запрет на приглашения в группы (ему пофиг)
 
 # ---------------------------------  Данные  ----------------------------------- #
@@ -30,15 +31,15 @@ type_of_lessons_dict = {
 }
 
 type_of_program_dict = {
-    'МБ': '🥬 Международный бакалавриат по бизнесу и экономике',
-    'РИС': '💻 Разработка информационных систем для бизнеса',
-    'И': '🗿 История',
-    'ИЯ': '🔤 Лингвистика',
-    'Ю': '⚖ Юриспруденция',
-    'УБ': '💼 Управление бизнесом',
-    'Э': '📈 Экономика',
-    'ПИ': '🖥 Программная инженерия',
-    'БИ': '💷 Бизнес-информатика'
+    'МБ': 'Международный бакалавриат по бизнесу и экономике',
+    'РИС': 'Разработка информационных систем для бизнеса',
+    'И': 'История',
+    'ИЯ': 'Лингвистика',
+    'Ю': 'Юриспруденция',
+    'УБ': 'Управление бизнесом',
+    'Э': 'Экономика',
+    'ПИ': 'Программная инженерия',
+    'БИ': 'Бизнес-информатика'
 }
 
 number_of_pair_dict = {
@@ -64,7 +65,7 @@ count_pairs_dict = {
 }
 
 emojies_for_course = ['📒', '📓', '📔', '📕', '📗', '📘', '📙']
-# emojies_for_programs = ['💶', '💵', '💷', '💸',  '💪', '💻', '💼', '📊', '🥇', '🤡', '☠', '💩', '♿']
+emojies_for_programs = ['🌶', '🍑', '🍉', '🍏',  '🍍', '🥭', '🍆', '🍐', '🍋', '🍇', '🍒', '🥝', '🥥']
 emojies_for_groups = ['⚪', '🔴', '🟡', '🟢', '🟣',  '🟤', '🔵', '⚫']
 emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆',  '🌇', '🌉']
 # emojies_for_number_of_pair = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
@@ -87,8 +88,10 @@ def get_course(message, is_new_user):
         text_hello = "Немного изменим данные. ✏ На каком курсе ты учишься?"
     courses = api.get_courses()
     markup = types.InlineKeyboardMarkup()
+    random.shuffle(emojies_for_course)
     for i in range(len(courses)):
-        emoji_for_button = f"{emojies_for_course[rand_emj(len(emojies_for_course))]} {courses[i]} курс"
+
+        emoji_for_button = f"{emojies_for_course[i]} {courses[i]} курс"
         markup.add(types.InlineKeyboardButton(emoji_for_button,
                                               callback_data=f"course_{courses[i]}"
                                                             f"^{is_new_user}"))
@@ -107,11 +110,14 @@ def get_program(message, data):
     programs = api.get_programs(number_course)
 
     markup = types.InlineKeyboardMarkup()
+    random.shuffle(emojies_for_programs)
     for i in range(len(programs)):
         if programs[i] in type_of_program_dict.keys():
-            emoji_for_button = f"{type_of_program_dict[programs[i]]}"
+            emoji_for_button = (f"{emojies_for_programs[i]} "
+                                f"{type_of_program_dict[programs[i]]}")
         else:
-            emoji_for_button = f"{programs[i]}"
+            emoji_for_button = (f"{emojies_for_programs[i]}"
+                                f"{programs[i]}")
         markup.add(types.InlineKeyboardButton(emoji_for_button,
                                               callback_data=f"program_{programs[i]}"
                                                             f"^{number_course}"
@@ -137,8 +143,9 @@ def get_group(message, data):
                             number_program)
 
     markup = types.InlineKeyboardMarkup()
+    random.shuffle(emojies_for_groups)
     for i in range(len(groups)):
-        emoji_for_button = f"{emojies_for_groups[rand_emj(len(emojies_for_groups))]} {groups[i]}"
+        emoji_for_button = f"{emojies_for_groups[i]} {groups[i]}"
         markup.add(types.InlineKeyboardButton(emoji_for_button,
                                               callback_data=f"group_{groups[i]}"
                                                             f"^{number_program}"

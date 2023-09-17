@@ -1,7 +1,9 @@
 import requests
 
+import secrets
+
 base_url = "https://hse-schedule-bot.xenforo-studio.ru/api"
-x_secret_key = "56mx-0=l08u58%i&tp-@xz*2&d0tyhjn#^l3qk&ch@z)9foc"
+x_secret_key = secrets.x_secret_key
 accept_data = "application/json"
 headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data, "Content-Type": "application/json; charset=utf-8"}
 
