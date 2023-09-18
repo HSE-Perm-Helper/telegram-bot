@@ -251,10 +251,10 @@ def get_menu(message):
 
     keyboard_markup_up = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard_markup_down = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    add_schedule_calendar_button = types.KeyboardButton("Добавить обновляемый календарь")
+    # add_schedule_calendar_button = types.KeyboardButton("Добавить обновляемый календарь")
     get_schedule_text_button = types.KeyboardButton("Получить текстовое расписание")
     # get_deadlines_button = types.KeyboardButton("Проверить дедлайны")
-    keyboard_markup_up.row(add_schedule_calendar_button)
+    # keyboard_markup_up.row(add_schedule_calendar_button)
     keyboard_markup_up.row(get_schedule_text_button)
     keyboard_markup_up.row_width = 4
 
@@ -312,7 +312,10 @@ def get_text_schedule(message):
                                            or 'registration' or 'регистрация'))
 def get_registration(message):
     bot.delete_message(message.chat.id, message.message_id)
-    get_course(message, True)
+    if api.check_registration_user(message.chat.id):
+        get_menu(message)
+    else:
+        get_course(message, True)
 
 
 # Обработка команды /help
@@ -340,14 +343,14 @@ def start_working(message):
 
 # Леха, удали это потом, это наш стажёр так шутит
 # Обработка команды /gay
-@bot.message_handler(commands=['gay', 'гей'])
-@bot.message_handler(func=lambda message: message.text == ('gay' or 'гей'))
-def who_is_gay(message):
-    bot.delete_message(message.chat.id, message.message_id)
-    if random.randint(0, 9) < 5:
-        bot.send_message(message.chat.id, "Денис Малинин гей 👬")
-    else:
-        bot.send_message(message.chat.id, "Данил Кунакбаев гей 👬")
+# @bot.message_handler(commands=['gay', 'гей'])
+# @bot.message_handler(func=lambda message: message.text == ('gay' or 'гей'))
+# def who_is_gay(message):
+#     bot.delete_message(message.chat.id, message.message_id)
+#     if random.randint(0, 9) < 5:
+#         bot.send_message(message.chat.id, "Денис Малинин гей 👬")
+#     else:
+#         bot.send_message(message.chat.id, "Данил Кунакбаев гей 👬")
 
 
 # Обработка команды /settings
@@ -359,9 +362,9 @@ def get_settings(message):
 
 
 # Обработка сообщения добавления календаря
-@bot.message_handler(func= lambda message: message.text == "Добавить обновляемый календарь")
-def callback_message(message):
-    get_schedule(message)
+# @bot.message_handler(func= lambda message: message.text == "Добавить обновляемый календарь")
+# def callback_message(message):
+#     get_schedule(message)
 
 
 # Обработка сообщения получения текстового расписания
@@ -571,4 +574,4 @@ scheduler.run()
 
 # Безостановочная работа бота
 
-bot.polling(none_stop=True)
+bot.infinity_polling(timeout=10, long_polling_timeout = 5)

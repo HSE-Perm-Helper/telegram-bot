@@ -98,28 +98,36 @@ def edit_user(data):
         subgroup = int(subgroup)
     else:
         subgroup = None
-    answer = requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
+    response = requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
                           json={
                               "group": group,
                               "subGroup": subgroup
                           }, headers=headers,
                           verify=False)
-    answer = answer.json()
-    print(answer['error'])
-    return answer['error']
+    response = response.json()
+    print(response['error'])
+    return response['error']
 
 
 # -------------  Получение расписания  ------------- #
 
 def get_schedule(telegram_id):
-    answer = requests.get(url=f"{base_url}/schedule/{telegram_id}",
+    response = requests.get(url=f"{base_url}/schedule/{telegram_id}",
                           headers=headers,
                           verify=False)
-    answer = answer.json()
-    return answer
+    response = response.json()
+    return response
 
 
 # -------------  Проверка обновления расписания  ------------- #
 
 def check_new_schedule():
     print("Проверка расписания отработала")
+
+
+def check_registration_user(telegram_id):
+    response = requests.get(
+        url=f"{base_url}/user?telegramId={telegram_id}",
+        headers=headers,
+        verify=False)
+    return response.status_code == 200
