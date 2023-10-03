@@ -1,4 +1,4 @@
-import api
+from notifications import check_new_schedule
 from threading import Thread
 import time
 
@@ -10,5 +10,5 @@ def run():
 
 def check_schedule_updates():
     while True:
-        api.check_new_schedule()
+        check_new_schedule()
         time.sleep(300)

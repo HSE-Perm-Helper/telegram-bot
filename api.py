@@ -121,9 +121,6 @@ def get_schedule(telegram_id):
 
 # -------------  Проверка обновления расписания  ------------- #
 
-def check_new_schedule():
-    print("Проверка расписания отработала")
-
 
 def check_registration_user(telegram_id):
     response = requests.get(
@@ -131,3 +128,4 @@ def check_registration_user(telegram_id):
         headers=headers,
         verify=False)
     return response.status_code == 200
+
