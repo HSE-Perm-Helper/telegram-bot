@@ -26,6 +26,16 @@ type_of_lessons_dict = {
     'SEMINAR': 'семинар 📗',
     'COMMON_MINOR': 'Майнор Ⓜ',
     'ENGLISH': 'английский 🆎',
+    'EXAM': 'экзамен ☠️',
+    'INDEPENDENT_EXAM': 'независимый экзамен ☠️☠️',
+    'TEST': 'зачёт ☠️',
+    'PRACTICE': 'практика 💼',
+    'MINOR': 'Майнор Ⓜ',
+    'COMMON_ENGLISH': 'английский 🆎',
+    'STATEMENT': 'Ведомость 📜',
+    'ICC': 'МКД 📙',
+    'UNDEFINED_AED': 'ДОЦ по выбору 📕',
+    'AED': 'ДОЦ 📕'
 }
 
 type_of_program_dict = {
@@ -545,8 +555,12 @@ def callback_message(callback_query: types.CallbackQuery):
                                     text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> - "
 
                                     '''Добавляем в сообщение название пары и ее тип'''
-                                    text_for_message += (f"{lesson['subject']} - "
-                                                         f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u> \n")
+                                    if lesson['lessonType'] in type_of_lessons_dict.keys():
+                                        text_for_message += (f"{lesson['subject']} - "
+                                                             f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u> \n")
+                                    else:
+                                        text_for_message += (f"{lesson['subject']} - "
+                                                             f"<u>{lesson['lessonType']}</u> \n")
 
                                     '''Добавляем в сообщение время пары'''
                                     text_for_message += (f"<b>{time_of_pair}</b> ")
