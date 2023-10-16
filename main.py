@@ -34,7 +34,8 @@ type_of_lessons_dict = {
     'STATEMENT': 'Ведомость 📜',
     'ICC': 'МКД 📙',
     'UNDEFINED_AED': 'ДОЦ по выбору 📕',
-    'AED': 'ДОЦ 📕'
+    'AED': 'ДОЦ 📕',
+    'EVENT': 'мероприятие'
 }
 
 type_of_program_dict = {
@@ -601,7 +602,9 @@ def callback_message(callback_query: types.CallbackQuery):
                         # text_for_message   += '🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰\n'
 
                         bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
-
+            else:
+                text_for_message = f"<b>В эту неделю у тебя нет пар! 🎉🎊</b> \n"
+                bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
 # Команды бота в списке
 bot.scheduler.set_my_commands([
