@@ -302,10 +302,25 @@ def get_text_schedule(message):
         schedule_dict = schedule_json['response']
         text_message = "🔵 Выбери неделю, за которую хочешь видеть расписание:"
         markup = types.InlineKeyboardMarkup()
+
+        dates_of_session = []
+        sessionExist = False
+
         for week in schedule_dict:
-            markup.add(types.InlineKeyboardButton(f"Неделя {week['weekNumber']}, "
-                                                  f"{week['weekStart']} - {week['weekEnd']}",
-                                                  callback_data=f"number_of_week_schedule{week['weekNumber']}"))
+            if str(week['weekNumber']) != 'None':
+                markup.add(types.InlineKeyboardButton(f"Неделя {week['weekNumber']}, "
+                                                    f"{week['weekStart']} - {week['weekEnd']}",
+                                                    callback_data=f"number_of_week_schedule{week['weekNumber']}"))
+            else:
+                sessionExist = True
+                dates_of_session.append(week['weekStart'])
+                dates_of_session.append(week['weekEnd'])
+        if sessionExist:
+            list_length = len(dates_of_session)
+            markup.add(types.InlineKeyboardButton(f"Сессия, "
+                                                  f"{dates_of_session[0]} - {dates_of_session[list_length - 1]}",
+                                                  callback_data=f"number_of_week_scheduleNone"))
+
         bot.scheduler.send_message(message.chat.id,
                                    text_message,
                                    reply_markup=markup)
@@ -492,7 +507,12 @@ def callback_message(callback):
 def callback_message(callback_query: types.CallbackQuery):
     bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('number_of_week_schedule', "")
-    data = int(data)
+    isSession = False
+    if data != 'None':
+        data = int(data)
+    else:
+        data = None
+        isSession = True
     schedule_json = api.get_schedule(callback_query.message.chat.id)
     schedule_dict = schedule_json['response']
     for week in schedule_dict:
@@ -526,8 +546,11 @@ def callback_message(callback_query: types.CallbackQuery):
                         # else:
                         #     text_for_message += "      "
 
-                        text_for_message += (f"<u><b>{day_of_the_week}, {date_string} - "
-                                             f"{count_pairs_dict[count_pairs]}</b></u>\n")
+                        if isSession:
+                            text_for_message += (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
+                        else:
+                            text_for_message += (f"<u><b>{day_of_the_week}, {date_string} - "
+                                                 f"{count_pairs_dict[count_pairs]}</b></u>\n")
 
                         text_for_message += "\n"
 
@@ -558,10 +581,7 @@ def callback_message(callback_query: types.CallbackQuery):
                                     '''Добавляем в сообщение название пары и ее тип'''
                                     if lesson['lessonType'] in type_of_lessons_dict.keys():
                                         text_for_message += (f"{lesson['subject']} - "
-                                                             f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u> \n")
-                                    else:
-                                        text_for_message += (f"{lesson['subject']} - "
-                                                             f"<u>{lesson['lessonType']}</u> \n")
+                                                             f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u>\n")
 
                                     '''Добавляем в сообщение время пары'''
                                     text_for_message += (f"<b>{time_of_pair}</b> ")
@@ -603,8 +623,9 @@ def callback_message(callback_query: types.CallbackQuery):
 
                         bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
             else:
-                text_for_message = f"<b>В эту неделю у тебя нет пар! 🎉🎊</b> \n"
-                bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
+                if data != None:
+                    text_for_message = f"<b>В эту неделю у тебя нет пар! 🎉🎊</b> \n"
+                    bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
 # Команды бота в списке
 bot.scheduler.set_my_commands([
