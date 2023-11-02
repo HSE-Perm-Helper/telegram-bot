@@ -627,7 +627,7 @@ def callback_message(callback_query: types.CallbackQuery):
 
                         bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
             else:
-                if data != None:
+                if data == None:
                     text_for_message = f"<b>В эту неделю у тебя нет пар! 🎉🎊</b> \n"
                     bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
