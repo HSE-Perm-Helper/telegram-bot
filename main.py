@@ -12,7 +12,7 @@ bot.scheduler.can_join_groups = False  # Запрет на приглашени�
 
 # ---------------------------------  Данные  ----------------------------------- #
 
-days_of_week_dict = ['Понедельник',
+days_of_week_list = ['Понедельник',
                      'Вторник',
                      'Среда',
                      'Четверг',
@@ -531,7 +531,7 @@ def callback_message(callback_query: types.CallbackQuery):
                         month = int(month)
                         year = int(year)
                         date = datetime.datetime(year, month, day_)
-                        day_of_the_week = days_of_week_dict[date.isoweekday() - 1]
+                        day_of_the_week = days_of_week_list[date.isoweekday() - 1]
                         '''Конец определения дня недели'''
 
                         text_for_message = ""

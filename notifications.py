@@ -33,9 +33,14 @@ def check_new_schedule():
 
     for telegram_id in schedule_changing_set:
         try:
-            if telegram_id == 774471737:
-                bot.scheduler.send_message(telegram_id, f"Твое расписание было изменено 🫣\n"
-                                                        f"Получи его командой /schedule !")
+            # if telegram_id == 774471737 or telegram_id == 646596194:
+            #     bot.scheduler.send_message(telegram_id, f"Твое расписание было изменено 🫣\n"
+            #                                             f"Получи его командой /schedule !")
+
+            # bot.scheduler.send_message(telegram_id, f"Твое расписание было изменено 🫣\n"
+            #                                         f"Получи его командой /schedule !")
+
+            bot.scheduler.send_message(774471737, f"Расписание {telegram_id} было изменено 🫣\n")
 
         except Exception:
             print(f'Уведомление об изменениях не было отправлено пользователю {telegram_id}. '
@@ -43,11 +48,15 @@ def check_new_schedule():
 
     for telegram_id in new_schedule_set:
         try:
-            if telegram_id == 774471737:
-                bot.scheduler.send_message(telegram_id, f"Было добавлено новое расписание 😎👍\n"
-                                                        f"Получи его командой /schedule !")
+            # if telegram_id == 774471737 or telegram_id == 646596194:
+            #     bot.scheduler.send_message(telegram_id, f"Было добавлено новое расписание 😎👍\n"
+            #                                             f"Получи его командой /schedule !")
 
-            pass
+            # bot.scheduler.send_message(telegram_id, f"Было добавлено новое расписание 😎👍\n"
+            #                                         f"Получи его командой /schedule !")
+
+            bot.scheduler.send_message(774471737, f"Расписание для {telegram_id} обновилось! 🫣\n")
+
         except Exception:
             print(f'Уведомление о новом расписании не было отправлено пользователю {telegram_id}. '
                   f'Возможно, он заблокал бота. Ошибка: {Exception}')
