@@ -79,7 +79,7 @@ def registration_user(data):
     if subgroup != "None":
         subgroup = int(subgroup)
     else:
-        subgroup = None
+        subgroup = 0
     answer = requests.post(url=f"{base_url}/users",
                          json={
                              "telegramId": int(telegram_id),
@@ -97,7 +97,7 @@ def edit_user(data):
     if subgroup != "None":
         subgroup = int(subgroup)
     else:
-        subgroup = 0
+        subgroup = None
     response = requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
                           json={
                               "group": group,
@@ -105,6 +105,7 @@ def edit_user(data):
                           }, headers=headers,
                           verify=False)
     response = response.json()
+    print(response['error'])
     return response['error']
 
 
@@ -127,4 +128,5 @@ def check_registration_user(telegram_id):
         headers=headers,
         verify=False)
     return response.status_code == 200
+    
 
