@@ -302,7 +302,7 @@ def get_text_schedule(message):
                                           'командой /settings!')
     else:
         schedule_dict = schedule_json['response']
-        text_message = "🔵 Выбери неделю, за которую хочешь видеть расписание:"
+        text_message = "🔵 Выбери неделю, за которую хочешь увидеть расписание:"
         markup = types.InlineKeyboardMarkup()
 
         dates_of_session = []
