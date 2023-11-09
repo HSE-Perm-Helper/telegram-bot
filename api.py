@@ -81,14 +81,14 @@ def registration_user(data):
     else:
         subgroup = 0
     answer = requests.post(url=f"{base_url}/users",
-                           json={
-                               "telegramId": int(telegram_id),
-                               "settings": {
-                                   "group": group,
-                                   "subGroup": subgroup
-                               }
-                           }, headers=headers,
-                           verify=False)
+                         json={
+                             "telegramId": int(telegram_id),
+                             "settings": {
+                                 "group": group,
+                                 "subGroup": subgroup
+                             }
+                         }, headers=headers,
+                         verify=False)
     answer = answer.json()
     return answer['error']
 
@@ -99,26 +99,25 @@ def edit_user(data):
         subgroup = int(subgroup)
     else:
         subgroup = None
-    response = requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
-                              json={
-                                  "group": group,
-                                  "subGroup": subgroup
-                              }, headers=headers,
-                              verify=False)
-    response = response.json()
-    print(response['error'])
-    return response['error']
+    answer = requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
+                          json={
+                              "group": group,
+                              "subGroup": subgroup
+                          }, headers=headers,
+                          verify=False)
+    answer = answer.json()
+    print(answer['error'])
+    return answer['error']
 
 
 # -------------  Получение расписания  ------------- #
 
 def get_schedule(telegram_id):
-    response = requests.get(url=f"{base_url}/schedule/{telegram_id}",
-                            headers=headers,
-                            verify=False)
-    response = response.json()
-    return response
-
+    answer = requests.get(url=f"{base_url}/schedule/{telegram_id}",
+                          headers=headers,
+                          verify=False)
+    answer = answer.json()
+    return answer
 
 # -------------  Проверка обновления расписания  ------------- #
 
