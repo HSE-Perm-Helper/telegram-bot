@@ -1,5 +1,4 @@
 import telebot
-import secrets
+import venv
 
-scheduler = telebot.TeleBot(secrets.bot_token)
-
+bot = telebot.TeleBot(venv.bot_token)

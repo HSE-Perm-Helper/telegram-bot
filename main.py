@@ -3,12 +3,12 @@ import datetime
 from telebot import types
 
 import api
-import scheduler
-import bot
+from bot import bot
 
+import scheduler
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
-bot.scheduler.can_join_groups = False  # Запрет на приглашения в группы (ему пофиг)
+bot.can_join_groups = False  # Запрет на приглашения в группы (ему пофиг)
 
 # ---------------------------------  Данные  ----------------------------------- #
 
@@ -104,7 +104,7 @@ def get_course(message, is_new_user):
                                               callback_data=f"course_{courses[i]}"
                                                             f"^{is_new_user}"))
 
-    bot.scheduler.send_message(message.chat.id,
+    bot.send_message(message.chat.id,
                                text_hello,
                                reply_markup=markup)
 
@@ -133,7 +133,7 @@ def get_program(message, data):
     markup.add(types.InlineKeyboardButton("⬅ Назад",
                                           callback_data=f"back_to_start{is_new_user}"))
 
-    bot.scheduler.send_message(message.chat.id,
+    bot.send_message(message.chat.id,
                                text_get_course,
                                reply_markup=markup)
 
@@ -162,7 +162,7 @@ def get_group(message, data):
                                           callback_data=f"back_to_program{number_course}"
                                                         f"^{is_new_user}"))
 
-    bot.scheduler.send_message(message.chat.id,
+    bot.send_message(message.chat.id,
                                text_get_group,
                                reply_markup=markup)
 
@@ -196,7 +196,7 @@ def get_subgroup(message, data):
                                                         f"^{number_course}"
                                                         f"^{is_new_user}"))
 
-    bot.scheduler.send_message(message.chat.id,
+    bot.send_message(message.chat.id,
                                text_get_subgroup,
                                reply_markup=markup)
 
@@ -242,7 +242,7 @@ def get_confirmation(message, data):
                                                         f"^{number_course}"
                                                         f"^{is_new_user}"))
 
-    bot.scheduler.send_message(message.chat.id,
+    bot.send_message(message.chat.id,
                                text_confirmation,
                                reply_markup=markup)
 
@@ -265,14 +265,14 @@ def get_menu(message):
     keyboard_markup_up.row(get_schedule_text_button)
     keyboard_markup_up.row_width = 4
 
-    bot.scheduler.send_message(message.chat.id,
+    bot.send_message(message.chat.id,
                                text_schedule,
                                reply_markup=keyboard_markup_up, parse_mode='HTML')
 
 
 # Получение расписания для календаря
 def get_schedule(message):
-    bot.scheduler.delete_message(message.chat.id, message.message_id)
+    bot.delete_message(message.chat.id, message.message_id)
     text_get_schedule = "🔵 Выбери способ получения расписания:"
 
     markup = types.InlineKeyboardMarkup()
@@ -285,18 +285,18 @@ def get_schedule(message):
     # markup.add(types.InlineKeyboardButton("Отправлять расписание текстом",
     #                                       callback_data="get_text_schedule"))
 
-    bot.scheduler.send_message(message.chat.id,
+    bot.send_message(message.chat.id,
                                text_get_schedule,
                                reply_markup=markup)
 
 
 # Получение текстового расписания
 def get_text_schedule(message):
-    bot.scheduler.delete_message(message.chat.id, message.message_id)
+    bot.delete_message(message.chat.id, message.message_id)
     schedule_json = api.get_schedule(message.chat.id)
 
     if schedule_json['error'] is True:
-        bot.scheduler.send_message(message.chat.id, 'Для тебя почему-то нет расписания 🤷\nНастрой группу заново '
+        bot.send_message(message.chat.id, 'Для тебя почему-то нет расписания 🤷\nНастрой группу заново '
                                                     'командой /settings!')
     else:
         schedule_dict = schedule_json['response']
@@ -321,7 +321,7 @@ def get_text_schedule(message):
                                                   f"{dates_of_session[0]} - {dates_of_session[list_length - 1]}",
                                                   callback_data=f"number_of_week_scheduleNone"))
 
-        bot.scheduler.send_message(message.chat.id,
+        bot.send_message(message.chat.id,
                                    text_message,
                                    reply_markup=markup)
 
@@ -330,11 +330,11 @@ def get_text_schedule(message):
 
 
 # Обработка команды /start и /registration
-@bot.scheduler.message_handler(commands=['start', 'старт', 'поехали', 'registration', 'регистрация'])
-@bot.scheduler.message_handler(func=lambda message: message.text == ('start' or 'старт' or 'поехали'
+@bot.message_handler(commands=['start', 'старт', 'поехали', 'registration', 'регистрация'])
+@bot.message_handler(func=lambda message: message.text == ('start' or 'старт' or 'поехали'
                                                                      or 'registration' or 'регистрация'))
 def get_registration(message):
-    bot.scheduler.delete_message(message.chat.id, message.message_id)
+    bot.delete_message(message.chat.id, message.message_id)
     if api.check_registration_user(message.chat.id):
         get_menu(message)
     else:
@@ -342,10 +342,10 @@ def get_registration(message):
 
 
 # Обработка команды /help
-@bot.scheduler.message_handler(commands=['help', 'помощь', 'помоги'])
-@bot.scheduler.message_handler(func=lambda message: message.text == ('help' or 'помощь' or 'помоги'))
+@bot.message_handler(commands=['help', 'помощь', 'помоги'])
+@bot.message_handler(func=lambda message: message.text == ('help' or 'помощь' or 'помоги'))
 def get_help(message):
-    bot.scheduler.delete_message(message.chat.id, message.message_id)
+    bot.delete_message(message.chat.id, message.message_id)
     text_help = ("<b>Вот, что я могу:</b>\n\n"
                  "🔹 /start - <i>Начало работы. Производится выбор курса, направления, группы и подгруппы</i>\n\n"
                  "🔹 /settings - <i>Изменение информации о себе</i>\n\n"
@@ -353,14 +353,14 @@ def get_help(message):
                  "Канал для обратной связи - <b>@hse_perm_helper_feedback</b>\n"
                  "Будем рады твоему отзыву или предложению!\n\n"
                  f"Версия <i>{version}</i>")
-    bot.scheduler.send_message(message.chat.id, text_help, parse_mode='HTML')
+    bot.send_message(message.chat.id, text_help, parse_mode='HTML')
 
 
 # Обработка команды /menu
-@bot.scheduler.message_handler(commands=['menu', 'меню'])
-@bot.scheduler.message_handler(func=lambda message: message.text == ('menu' or 'меню'))
+@bot.message_handler(commands=['menu', 'меню'])
+@bot.message_handler(func=lambda message: message.text == ('menu' or 'меню'))
 def start_working(message):
-    bot.scheduler.delete_message(message.chat.id, message.message_id)
+    bot.delete_message(message.chat.id, message.message_id)
     get_menu(message)
 
 
@@ -377,16 +377,16 @@ def start_working(message):
 
 
 # Обработка команды /settings
-@bot.scheduler.message_handler(commands=['settings', 'настройки'])
-@bot.scheduler.message_handler(func=lambda message: message.text == ('settings' or 'настройки'))
+@bot.message_handler(commands=['settings', 'настройки'])
+@bot.message_handler(func=lambda message: message.text == ('settings' or 'настройки'))
 def get_settings(message):
-    bot.scheduler.delete_message(message.chat.id, message.message_id)
+    bot.delete_message(message.chat.id, message.message_id)
     get_course(message, False)
 
 
 # Обработка команды /schedule
-@bot.scheduler.message_handler(commands=['schedule', 'расписание'])
-@bot.scheduler.message_handler(func=lambda message: message.text == ('schedule' or 'расписание'))
+@bot.message_handler(commands=['schedule', 'расписание'])
+@bot.message_handler(func=lambda message: message.text == ('schedule' or 'расписание'))
 def get_settings(message):
     get_text_schedule(message)
 
@@ -398,7 +398,7 @@ def get_settings(message):
 
 
 # Обработка сообщения получения текстового расписания
-@bot.scheduler.message_handler(func=lambda message: message.text == "Получить текстовое расписание")
+@bot.message_handler(func=lambda message: message.text == "Получить текстовое расписание")
 def callback_message(message):
     get_text_schedule(message)
 
@@ -417,41 +417,41 @@ def callback_message(message):
 
 
 # Обработка события нажатия на кнопку выбора курса
-@bot.scheduler.callback_query_handler(lambda c: c.data.startswith('course_'))
+@bot.callback_query_handler(lambda c: c.data.startswith('course_'))
 def course_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("course_", "")
-    bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     get_program(callback_query.message, data)
 
 
 # Обработка события нажатия на кнопку выбора программы
-@bot.scheduler.callback_query_handler(lambda c: c.data.startswith('program_'))
+@bot.callback_query_handler(lambda c: c.data.startswith('program_'))
 def program_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("program_", "")
-    bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     get_group(callback_query.message, data)
 
 
 # Обработка события нажатия на кнопку выбора группы
-@bot.scheduler.callback_query_handler(lambda c: c.data.startswith('group_'))
+@bot.callback_query_handler(lambda c: c.data.startswith('group_'))
 def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
-    bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     get_subgroup(callback_query.message, data)
 
 
 # Обработка события нажатия на кнопку выбора подгруппы
-@bot.scheduler.callback_query_handler(lambda c: c.data.startswith('subgroup_'))
+@bot.callback_query_handler(lambda c: c.data.startswith('subgroup_'))
 def subgroup_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("subgroup_", "")
-    bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     get_confirmation(callback_query.message, data)
 
 
 # Обработка события возврата на предыдущий выбор
-@bot.scheduler.callback_query_handler(lambda c: c.data.startswith('back_to_'))
+@bot.callback_query_handler(lambda c: c.data.startswith('back_to_'))
 def program_query_handler(callback_query: types.CallbackQuery):
-    bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
 
     if callback_query.data.startswith('back_to_program'):
         data = callback_query.data.replace('back_to_program', "")
@@ -468,9 +468,9 @@ def program_query_handler(callback_query: types.CallbackQuery):
 
 
 # Обработка события нажатия на кнопку подтверждения данных
-@bot.scheduler.callback_query_handler(lambda c: c.data.startswith("start_working"))
+@bot.callback_query_handler(lambda c: c.data.startswith("start_working"))
 def callback_message(callback_query: types.CallbackQuery):
-    bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('start_working', "")
     list_data = data.split("^")
     is_new_user = list_data[len(list_data) - 1]
@@ -483,29 +483,29 @@ def callback_message(callback_query: types.CallbackQuery):
         get_menu(callback_query.message)
 
     else:
-        bot.scheduler.send_message(callback_query.message.chat.id, "⚠ Произошла ошибка при внесении данных. 😔 "
+        bot.send_message(callback_query.message.chat.id, "⚠ Произошла ошибка при внесении данных. 😔 "
                                                                    "Возможно, ты уже зарегистрирован 🙃\n"
                                                                    "Для изменения данных о себе введи команду "
                                                                    "/settings !")
 
 
 # Добавить автообновляемый календарь
-@bot.scheduler.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
+@bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
 def callback_message(callback):
-    bot.scheduler.delete_message(callback.message.chat.id, callback.message.message_id)
+    bot.delete_message(callback.message.chat.id, callback.message.message_id)
     # schedule = open('calendar/schedule.ics', 'r', encoding='utf-8')
     # bot.send_message(callback.message.chat.id, "Инструкция по установке:\n\n"
     #                                            "1. Скачай файл ниже;\n"
     #                                            "2. Запусти его;\n"
     #                                            "3. Прими изменения для используемого тобой календаря.")
     # bot.send_document(callback.message.chat.id, schedule)
-    bot.scheduler.send_message(callback.message.chat.id, 'Будет позже!')
+    bot.send_message(callback.message.chat.id, 'Будет позже!')
 
 
 # Пользователем выбрано расписание для отправки
-@bot.scheduler.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
+@bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
 def callback_message(callback_query: types.CallbackQuery):
-    bot.scheduler.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('number_of_week_schedule', "")
     isSession = False
     if data != 'None':
@@ -625,14 +625,14 @@ def callback_message(callback_query: types.CallbackQuery):
                         # text_for_message += '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n'
                         # text_for_message   += '🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰🟰\n'
 
-                        bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
+                        bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
             else:
                 if data == None:
                     text_for_message = f"<b>В эту неделю у тебя нет пар! 🎉🎊</b> \n"
-                    bot.scheduler.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
+                    bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
 # Команды бота в списке
-bot.scheduler.set_my_commands([
+bot.set_my_commands([
     types.BotCommand('help', 'Помощь с работой бота'),
     types.BotCommand('settings', 'Изменить данные о себе'),
     types.BotCommand('menu', 'Вызвать меню'),
@@ -642,7 +642,9 @@ bot.scheduler.set_my_commands([
 # Модульное расписание - показывать или нет (расписание на модуль), сделать заготовку настройки
 
 # Запуск запланированных задач в отдельном потоке
-scheduler.run()
+if __name__ == "__main__":
+    scheduler.run_check_events_update()
+
 
 # Безостановочная работа бота
-bot.scheduler.infinity_polling(timeout=10, long_polling_timeout=5)
+bot.infinity_polling(timeout=10, long_polling_timeout=5)

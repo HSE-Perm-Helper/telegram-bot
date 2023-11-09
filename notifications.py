@@ -1,8 +1,8 @@
-import bot
-from api import base_url
-from api import headers
+from bot import bot
+from api import base_url, headers
 
 import requests
+
 
 def check_new_schedule():
     request = requests.get(
@@ -15,9 +15,9 @@ def check_new_schedule():
     if request.status_code == 200:
         if len(response['response']) != 0:
             for event in response['response']:
-                eventType = event['eventType']
+                event_type = event['eventType']
                 user_list = event["users"]
-                match eventType:
+                match event_type:
 
                     case "SCHEDULE_ADDED_EVENT":
                         for user in user_list:
@@ -27,20 +27,13 @@ def check_new_schedule():
                         for user in user_list:
                             schedule_changing_set.add(user)
 
-
     else:
         print("Возникли проблемы с получением ивентов")
 
     for telegram_id in schedule_changing_set:
         try:
-            # if telegram_id == 774471737 or telegram_id == 646596194:
-            #     bot.scheduler.send_message(telegram_id, f"Твое расписание было изменено 🫣\n"
-            #                                             f"Получи его командой /schedule !")
-
-            # bot.scheduler.send_message(telegram_id, f"Твое расписание было изменено 🫣\n"
-            #                                         f"Получи его командой /schedule !")
-
-            bot.scheduler.send_message(774471737, f"Расписание {telegram_id} было изменено 🫣\n")
+            bot.send_message(telegram_id, f"Твое расписание было изменено 🫣\n"
+                                          f"Получи его командой /schedule !")
 
         except Exception:
             print(f'Уведомление об изменениях не было отправлено пользователю {telegram_id}. '
@@ -48,21 +41,15 @@ def check_new_schedule():
 
     for telegram_id in new_schedule_set:
         try:
-            # if telegram_id == 774471737 or telegram_id == 646596194:
-            #     bot.scheduler.send_message(telegram_id, f"Было добавлено новое расписание 😎👍\n"
-            #                                             f"Получи его командой /schedule !")
-
-            # bot.scheduler.send_message(telegram_id, f"Было добавлено новое расписание 😎👍\n"
-            #                                         f"Получи его командой /schedule !")
-
-            bot.scheduler.send_message(774471737, f"Расписание для {telegram_id} обновилось! 🫣\n")
+            bot.send_message(telegram_id, f"Было добавлено новое расписание 😎👍\n"
+                                          f"Получи его командой /schedule !")
 
         except Exception:
             print(f'Уведомление о новом расписании не было отправлено пользователю {telegram_id}. '
                   f'Возможно, он заблокал бота. Ошибка: {Exception}')
 
-    # response_for_delete = requests.delete(
-    #     url=f"{base_url}/events?clear",
-    #     headers=headers,
-    #     json=response['response'],
-    #     verify=False)
+    response_for_delete = requests.delete(
+        url=f"{base_url}/events",
+        headers=headers,
+        json=response['response'],
+        verify=False)
