@@ -1,7 +1,6 @@
 from notifications import check_new_schedule
 from threading import Thread
 import time
-from bot import bot
 
 
 def run_check_events_update():

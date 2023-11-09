@@ -1,4 +1,4 @@
 import telebot
-import secrets
+import venv
 
-bot = telebot.TeleBot(secrets.bot_token)
+bot = telebot.TeleBot(venv.bot_token)
