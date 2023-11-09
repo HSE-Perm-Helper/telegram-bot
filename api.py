@@ -1,9 +1,9 @@
 import requests
 
-import secrets
+import venv
 
-base_url = "https://hse-schedule-bot.xenforo-studio.ru/api"
-x_secret_key = secrets.x_secret_key
+base_url = venv.base_url
+x_secret_key = venv.x_secret_key
 accept_data = "application/json"
 headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data, "Content-Type": "application/json; charset=utf-8"}
 
@@ -79,7 +79,7 @@ def registration_user(data):
     if subgroup != "None":
         subgroup = int(subgroup)
     else:
-        subgroup = None
+        subgroup = 0
     answer = requests.post(url=f"{base_url}/users",
                          json={
                              "telegramId": int(telegram_id),
@@ -91,6 +91,7 @@ def registration_user(data):
                          verify=False)
     answer = answer.json()
     return answer['error']
+
 
 def edit_user(data):
     course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
@@ -118,8 +119,14 @@ def get_schedule(telegram_id):
     answer = answer.json()
     return answer
 
-
 # -------------  Проверка обновления расписания  ------------- #
 
-def check_new_schedule():
-    print("Проверка расписания отработала")
+
+def check_registration_user(telegram_id):
+    response = requests.get(
+        url=f"{base_url}/user?telegramId={telegram_id}",
+        headers=headers,
+        verify=False)
+    return response.status_code == 200
+
+
