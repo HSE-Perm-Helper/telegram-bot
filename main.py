@@ -596,7 +596,7 @@ def callback_message(callback_query: types.CallbackQuery):
                 for day in lessons:
                     keys = day.keys()
                     for key in keys:
-                        '''Определение дня недели'''
+                        '''Определение дня недели '''
                         date_string = key
                         day_, month, year = date_string.split('.')
                         day_ = int(day_)
