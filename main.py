@@ -507,6 +507,63 @@ def callback_message(callback):
 # Пользователем выбрано расписание для отправки
 @bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
 def callback_message(callback_query: types.CallbackQuery):
+
+    def get_schedule_for_send(lesson):
+        text_for_message = ''
+        '''Если вид пары - майнор'''
+        if lesson['lessonType'] == 'COMMON_MINOR':
+            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
+            # text_for_message += f"\n{type_of_lessons_dict[lesson['lessonType']]}"
+
+            text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u> - "
+                                f"{type_of_lessons_dict[lesson['lessonType']]}\n")
+
+        else:
+            '''Вычисляем время пары'''
+            time_of_pair = f"{lesson['startTime']} - {lesson['endTime']}"
+
+            if lesson['startTime'] != None and lesson['endTime'] != None:
+                '''Добавляем в сообщение номер пары'''
+                text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> - "
+
+                '''Добавляем в сообщение название пары и ее тип'''
+                if lesson['lessonType'] in type_of_lessons_dict.keys():
+                    text_for_message += (f"{lesson['subject']} - "
+                                         f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u>\n")
+
+                '''Добавляем в сообщение время пары'''
+                text_for_message += (f"<b>{time_of_pair}</b> ")
+
+            '''Проверяем, дистант или очная'''
+            if lesson['isOnline']:
+
+                '''- Если очная, добавляем ссылки'''
+                if lesson['links'] == None:
+                    text_for_message += (f"Дистанционная пара, ссылки отсутствуют \n")
+
+                else:
+                    text_for_message += (f"Дистанционная пара, ссылки:\n")
+                    for link in lesson['links']:
+                        text_for_message += (f"{link}\n")
+
+            else:
+                if lesson['building'] != None and lesson['office'] != None:
+                    '''- Иначе добавляем номер корпуса и аудиторию'''
+                    text_for_message += (
+                        f"Корпус {lesson['building']}, аудитория {lesson['office']} \n")
+
+            if lesson['lecturer'] != None:
+                '''Добавляем преподавателя пары'''
+                text_for_message += (f"Преподаватель - <i>{lesson['lecturer']}</i> \n")
+
+            '''Проверяем наличие дополнительной информации к паре'''
+            if lesson['additionalInfo'] != None:
+                for addInfo in lesson['additionalInfo']:
+                    text_for_message += (f"\n<i>Доп.информация: - {addInfo}</i> \n")
+
+            text_for_message += "\n"
+        return text_for_message
+
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('number_of_week_schedule', "")
     is_session = False
@@ -562,68 +619,36 @@ def callback_message(callback_query: types.CallbackQuery):
                         last_pair = number_of_pair_dict[daily_schedule_list[len(daily_schedule_list) - 1]['startTime']]
                         lessons_list_count = int(last_pair.replace('-ая пара', ''))
 
-                        lesson_list = [0] * (lessons_list_count)
+                        lesson_list = [{}] * (lessons_list_count)
 
-                        '''Тут я делаю проход по парам за день, в нем расставляю в массиве пары
+                        ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
                         Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
-                        Иначе вывожу сообщение "Окно"  '''
+                        Иначе вывожу сообщение "Окно" '''
+
+                        for lesson in daily_schedule_list:
+                            pair_index_string = number_of_pair_dict[lesson["startTime"]]
+                            pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
+
+                            lesson_list[pair_index] = lesson
 
                         '''Проходим по всем парам в данный день'''
-                        for lesson in daily_schedule_list:
 
-                            '''Если вид пары - майнор'''
-                            if lesson['lessonType'] == 'COMMON_MINOR':
-                                # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
-                                # text_for_message += f"\n{type_of_lessons_dict[lesson['lessonType']]}"
-
-                                text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u> - "
-                                                    f"{type_of_lessons_dict[lesson['lessonType']]}\n")
-
+                        is_pairs_start = False
+                        number_of_pair = 0
+                        for lesson in lesson_list:
+                            if not is_pairs_start:
+                                if lesson:
+                                    is_pairs_start = True
+                                    text_for_message += get_schedule_for_send(lesson)
+                                    number_of_pair += 1
                             else:
-                                '''Вычисляем время пары'''
-                                time_of_pair = f"{lesson['startTime']} - {lesson['endTime']}"
-
-                                if lesson['startTime'] != None and lesson['endTime'] != None:
-                                    '''Добавляем в сообщение номер пары'''
-                                    text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> - "
-
-                                    '''Добавляем в сообщение название пары и ее тип'''
-                                    if lesson['lessonType'] in type_of_lessons_dict.keys():
-                                        text_for_message += (f"{lesson['subject']} - "
-                                                             f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u>\n")
-
-                                    '''Добавляем в сообщение время пары'''
-                                    text_for_message += (f"<b>{time_of_pair}</b> ")
-
-                                '''Проверяем, дистант или очная'''
-                                if lesson['isOnline']:
-
-                                    '''- Если очная, добавляем ссылки'''
-                                    if lesson['links'] == None:
-                                        text_for_message += (f"Дистанционная пара, ссылки отсутствуют \n")
-
-                                    else:
-                                        text_for_message += (f"Дистанционная пара, ссылки:\n")
-                                        for link in lesson['links']:
-                                            text_for_message += (f"{link}\n")
-
+                                if lesson:
+                                    text_for_message += get_schedule_for_send(lesson)
+                                    number_of_pair += 1
                                 else:
-                                    if lesson['building'] != None and lesson['office'] != None:
-                                        '''- Иначе добавляем номер корпуса и аудиторию'''
-                                        text_for_message += (
-                                            f"Корпус {lesson['building']}, аудитория {lesson['office']} \n")
-
-                                if lesson['lecturer'] != None:
-                                    '''Добавляем преподавателя пары'''
-                                    text_for_message += (f"Преподаватель - <i>{lesson['lecturer']}</i> \n")
-
-                                '''Проверяем наличие дополнительной информации к паре'''
-                                if lesson['additionalInfo'] != None:
-                                    for addInfo in lesson['additionalInfo']:
-                                        text_for_message += (f"\n<i>Доп.информация: - {addInfo}</i> \n")
-
-                                text_for_message += "\n"
-
+                                    text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
+                                    text_for_message += f" - ОКНО 🪟\n\n"
+                                    number_of_pair += 1
                         bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
             else:
