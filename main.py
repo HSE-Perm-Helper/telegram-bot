@@ -24,7 +24,7 @@ days_of_week_list = ['Понедельник',
 type_of_lessons_dict = {
     'LECTURE': 'лекция 😴',
     'SEMINAR': 'семинар 📗',
-    'COMMON_MINOR': 'майнор Ⓜ',
+    'COMMON_MINOR': 'Майнор Ⓜ',
     'ENGLISH': 'английский 🆎',
     'EXAM': 'экзамен ☠️',
     'INDEPENDENT_EXAM': 'независимый экзамен ☠️☠️',
@@ -515,8 +515,10 @@ def callback_message(callback_query: types.CallbackQuery):
             # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
             # text_for_message += f"\n{type_of_lessons_dict[lesson['lessonType']]}"
 
-            text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u> - "
-                                f"{type_of_lessons_dict[lesson['lessonType']]}\n")
+            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u> - "
+            #                     f"{type_of_lessons_dict[lesson['lessonType']]}\n")
+
+            text_for_message = f"{type_of_lessons_dict[lesson['lessonType']]}\n"
 
         else:
             '''Вычисляем время пары'''
