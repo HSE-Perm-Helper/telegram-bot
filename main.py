@@ -80,7 +80,7 @@ emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆', '🌇', '🌉']
 # emojies_for_number_of_pair = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 emojies_for_week_color = ['🟥', '🟧', '🟨', '🟩', '🟦', '🟪']
 
-version = "1.01.0-beta"
+version = "1.01.1-beta"
 
 
 # ---------------------------------  Функции  ----------------------------------- #
@@ -302,7 +302,7 @@ def get_text_schedule(message):
                                           'командой /settings!')
     else:
         schedule_dict = schedule_json['response']
-        text_message = "🔵 Выбери неделю, за которую хочешь видеть расписание:"
+        text_message = "🔵 Выбери неделю, за которую хочешь увидеть расписание:"
         markup = types.InlineKeyboardMarkup()
 
         dates_of_session = []
@@ -583,7 +583,7 @@ def callback_message(callback_query: types.CallbackQuery):
 
                 if data != None:
                     number_of_week = data % 6
-                    emojies_for_header = emojies_for_week_color[number_of_week - 1]
+                    emojies_for_header = emojies_for_week_color[number_of_week]
                     text_for_message = f"<b>{emojies_for_header} Расписание на {number_of_week} неделю {emojies_for_header}</b>\n\n"
                     bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
                 else:
