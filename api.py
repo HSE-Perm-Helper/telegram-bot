@@ -113,7 +113,7 @@ def edit_user(data):
 # -------------  Получение расписания  ------------- #
 
 def get_schedule(telegram_id):
-    answer = requests.get(url=f"{base_url}/schedule/{telegram_id}",
+    answer = requests.get(url=f"{base_url}/v2/schedule/{telegram_id}",
                           headers=headers,
                           verify=False)
     answer = answer.json()
