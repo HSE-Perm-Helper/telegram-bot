@@ -173,7 +173,7 @@ def get_group(message, data):
 def get_subgroup(message, data):
     number_group, number_program, number_course, is_new_user = data.split('^')
 
-    text_get_subgroup = f"{number_group} - твоя группа. Осталось определиться с подгруппой!"
+    text_get_subgroup = f"{number_group} — твоя группа. Осталось определиться с подгруппой!"
 
     subgroups = api.get_subgroups(number_course,
                                   number_program,
@@ -213,19 +213,19 @@ def get_confirmation(message, data):
     else:
         number_program_for_message = number_program
 
-    '''Два различных варианта вывода информации - с подгруппой и без нее'''
+    '''Два различных варианта вывода информации — с подгруппой и без нее'''
     if number_subgroup == "None":
         text_confirmation = ("Отлично! ✅ Теперь давай проверим, всё ли верно:\n" +
-                             f"{number_course} - курс\n"
+                             f"{number_course}-й курс,\n"
                              f"{number_program_for_message},\n"
-                             f"{number_group} - группа"
+                             f"{number_group} — группа,"
                              f"\n\nВсе верно?")
     else:
         text_confirmation = ("Отлично! ✅ Теперь давай проверим, всё ли верно:\n" +
-                             f"{number_course} - курс\n"
+                             f"{number_course}-й курс,\n"
                              f"{number_program_for_message},\n"
-                             f"{number_group} - группа\n"
-                             f"{number_subgroup} - подгруппа.\n\nВсе верно?")
+                             f"{number_group} — группа,\n"
+                             f"{number_subgroup} — подгруппа.\n\nВсе верно?")
 
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Все верно! 🎉🎊",
@@ -252,9 +252,10 @@ def get_confirmation(message, data):
 # Вывод меню для выбора способа получения расписания
 def get_menu(message):
     text_schedule = ("<b>Команды для работы:</b>\n\n"
-                     "🔹 /settings - <i>Изменение информации о себе</i>\n\n"
-                     "🔹 /menu - <i>Получить меню для работы</i>\n\n"
-                     "🔹 /help - <i>Вывод помощи</i>\n\n"
+                     "🔹 /settings — <i>Изменение информации о себе</i>\n\n"
+                     "🔹 /menu — <i>Получить меню для работы</i>\n\n"
+                     "🔹 /help — <i>Вывод помощи</i>\n\n"
+                     "🔹 /schedule — <i>Получить расписание</i>\n\n"
                      "❗ При удалении этого сообщения кнопки выбора расписания пропадут. "
                      "Чтобы их вернуть, введи /menu еще раз! 🙂")
 
@@ -311,7 +312,7 @@ def get_text_schedule(message):
         for week in schedule_dict:
             if str(week['weekNumber']) != 'None':
                 markup.add(types.InlineKeyboardButton(f"Неделя {week['weekNumber']}, "
-                                                      f"{week['weekStart']} - {week['weekEnd']}",
+                                                      f"{week['weekStart']} — {week['weekEnd']}",
                                                       callback_data=f"number_of_week_schedule{week['weekNumber']}"))
             else:
                 sessionExist = True
@@ -320,7 +321,7 @@ def get_text_schedule(message):
         if sessionExist:
             list_length = len(dates_of_session)
             markup.add(types.InlineKeyboardButton(f"Сессия, "
-                                                  f"{dates_of_session[0]} - {dates_of_session[list_length - 1]}",
+                                                  f"{dates_of_session[0]} — {dates_of_session[list_length - 1]}",
                                                   callback_data=f"number_of_week_scheduleNone"))
 
         bot.send_message(message.chat.id,
@@ -349,10 +350,11 @@ def get_registration(message):
 def get_help(message):
     bot.delete_message(message.chat.id, message.message_id)
     text_help = ("<b>Вот, что я могу:</b>\n\n"
-                 "🔹 /start - <i>Начало работы. Производится выбор курса, направления, группы и подгруппы</i>\n\n"
-                 "🔹 /settings - <i>Изменение информации о себе</i>\n\n"
-                 "🔹 /menu - <i>Получить меню для работы</i>\n\n"
-                 "Канал для обратной связи - <b>@hse_perm_helper_feedback</b>\n"
+                 "🔹 /start — <i>Начало работы. Производится выбор курса, направления, группы и подгруппы</i>\n\n"
+                 "🔹 /settings — <i>Изменение информации о себе</i>\n\n"
+                 "🔹 /menu — <i>Получить меню для работы</i>\n\n"
+                 "🔹 /schedule — <i>Получить расписание</i>\n\n"
+                 "Канал для обратной связи — <b>@hse_perm_helper_feedback</b>\n"
                  "Будем рады твоему отзыву или предложению!\n\n"
                  f"Версия <i>{version}</i>")
     bot.send_message(message.chat.id, text_help, parse_mode='HTML')
@@ -510,7 +512,7 @@ def callback_message(callback_query: types.CallbackQuery):
 
     def get_schedule_for_send(lesson):
         text_for_message = ''
-        '''Если вид пары - майнор'''
+        '''Если вид пары — майнор'''
         if lesson['lessonType'] == 'COMMON_MINOR':
             # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
             # text_for_message += f"\n{type_of_lessons_dict[lesson['lessonType']]}"
@@ -522,15 +524,15 @@ def callback_message(callback_query: types.CallbackQuery):
 
         else:
             '''Вычисляем время пары'''
-            time_of_pair = f"{lesson['startTime']} - {lesson['endTime']}"
+            time_of_pair = f"{lesson['startTime']} — {lesson['endTime']}"
 
             if lesson['startTime'] != None and lesson['endTime'] != None:
                 '''Добавляем в сообщение номер пары'''
-                text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> - "
+                text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> — "
 
                 '''Добавляем в сообщение название пары и ее тип'''
                 if lesson['lessonType'] in type_of_lessons_dict.keys():
-                    text_for_message += (f"{lesson['subject']} - "
+                    text_for_message += (f"{lesson['subject']} — "
                                          f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u>\n")
 
                 '''Добавляем в сообщение время пары'''
@@ -539,7 +541,7 @@ def callback_message(callback_query: types.CallbackQuery):
             '''Проверяем, дистант или очная'''
             if lesson['isOnline']:
 
-                '''- Если очная, добавляем ссылки'''
+                '''- Если дистант, добавляем ссылки'''
                 if lesson['links'] == None:
                     text_for_message += (f"Дистанционная пара, ссылки отсутствуют \n")
 
@@ -549,19 +551,20 @@ def callback_message(callback_query: types.CallbackQuery):
                         text_for_message += (f"{link}\n")
 
             else:
-                if lesson['building'] != None and lesson['office'] != None:
-                    '''- Иначе добавляем номер корпуса и аудиторию'''
-                    text_for_message += (
-                        f"Корпус {lesson['building']}, аудитория {lesson['office']} \n")
+                if lesson['places'] != None:
+                    for place in lesson['places']:
+                        '''- Иначе добавляем номер корпуса и аудиторию'''
+                        text_for_message += (
+                            f"Корпус {place['building']}, аудитория {place['office']} \n")
 
             if lesson['lecturer'] != None:
                 '''Добавляем преподавателя пары'''
-                text_for_message += (f"Преподаватель - <i>{lesson['lecturer']}</i> \n")
+                text_for_message += (f"Преподаватель — <i>{lesson['lecturer']}</i> \n")
 
             '''Проверяем наличие дополнительной информации к паре'''
             if lesson['additionalInfo'] != None:
                 for addInfo in lesson['additionalInfo']:
-                    text_for_message += (f"\n<i>Доп.информация: - {addInfo}</i> \n")
+                    text_for_message += (f"\n<i>Доп.информация: — {addInfo}</i> \n")
 
             text_for_message += "\n"
         return text_for_message
@@ -614,7 +617,7 @@ def callback_message(callback_query: types.CallbackQuery):
                         if is_session:
                             text_for_message += f"<u><b>{day_of_the_week}, {date_string}</b></u>\n\n"
                         else:
-                            text_for_message += (f"<u><b>{day_of_the_week}, {date_string} - "
+                            text_for_message += (f"<u><b>{day_of_the_week}, {date_string} — "
                                                  f"{count_pairs_dict[count_pairs]}</b></u>\n\n")
 
                         first_pair = number_of_pair_dict[daily_schedule_list[0]['startTime']]
