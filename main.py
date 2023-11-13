@@ -552,10 +552,16 @@ def callback_message(callback_query: types.CallbackQuery):
 
             else:
                 if lesson['places'] != None:
-                    for place in lesson['places']:
-                        '''- Иначе добавляем номер корпуса и аудиторию'''
+                    if len(lesson['places']) == 1:
+                        place = lesson['places'][0]
                         text_for_message += (
                             f"Корпус {place['building']}, аудитория {place['office']} \n")
+                    else:
+                        text_for_message += f'несколько мест:\n'
+                        for place in lesson['places']:
+                            '''- Иначе добавляем номер корпуса и аудиторию'''
+                            text_for_message += (
+                                f"Корпус {place['building']}, аудитория {place['office']} \n")
 
             if lesson['lecturer'] != None:
                 '''Добавляем преподавателя пары'''
@@ -645,15 +651,13 @@ def callback_message(callback_query: types.CallbackQuery):
                                 if lesson:
                                     is_pairs_start = True
                                     text_for_message += get_schedule_for_send(lesson)
-                                    number_of_pair += 1
                             else:
                                 if lesson:
                                     text_for_message += get_schedule_for_send(lesson)
-                                    number_of_pair += 1
                                 else:
                                     text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
                                     text_for_message += f" - ОКНО 🪟\n\n"
-                                    number_of_pair += 1
+                            number_of_pair += 1
                         bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
 
             else:
