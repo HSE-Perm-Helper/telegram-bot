@@ -303,30 +303,189 @@ def get_text_schedule(message):
                                           'командой /settings!')
     else:
         schedule_dict = schedule_json['response']
-        text_message = "🔵 Выбери неделю, за которую хочешь увидеть расписание:"
-        markup = types.InlineKeyboardMarkup()
+        if len(schedule_dict) == 1:
+            schedule_sending(message, schedule_dict[0]['weekNumber'], schedule_dict)
+        else:
+            text_message = "🔵 Выбери неделю, за которую хочешь увидеть расписание:"
+            markup = types.InlineKeyboardMarkup()
 
-        dates_of_session = []
-        sessionExist = False
+            dates_of_session = []
+            sessionExist = False
 
-        for week in schedule_dict:
-            if str(week['weekNumber']) != 'None':
-                markup.add(types.InlineKeyboardButton(f"Неделя {week['weekNumber']}, "
-                                                      f"{week['weekStart']} — {week['weekEnd']}",
-                                                      callback_data=f"number_of_week_schedule{week['weekNumber']}"))
+            for week in schedule_dict:
+                if str(week['weekNumber']) != 'None':
+                    markup.add(types.InlineKeyboardButton(f"Неделя {week['weekNumber']}, "
+                                                          f"{week['weekStart']} — {week['weekEnd']}",
+                                                          callback_data=f"number_of_week_schedule{week['weekNumber']}"))
+                else:
+                    sessionExist = True
+                    dates_of_session.append(week['weekStart'])
+                    dates_of_session.append(week['weekEnd'])
+            if sessionExist:
+                list_length = len(dates_of_session)
+                markup.add(types.InlineKeyboardButton(f"Сессия, "
+                                                      f"{dates_of_session[0]} — {dates_of_session[list_length - 1]}",
+                                                      callback_data=f"number_of_week_scheduleNone"))
+
+            bot.send_message(message.chat.id,
+                             text_message,
+                             reply_markup=markup)
+
+
+# Формирование расписания
+def schedule_sending(message, data, schedule_dict):
+    is_session = False
+    if data != 'None':
+        data = int(data)
+    else:
+        data = None
+        is_session = True
+
+    def get_schedule_for_send(lesson):
+        text_for_message = ''
+        '''Если вид пары — майнор'''
+        if lesson['lessonType'] == 'COMMON_MINOR':
+            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
+            # text_for_message += f"\n{type_of_lessons_dict[lesson['lessonType']]}"
+
+            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u> - "
+            #                     f"{type_of_lessons_dict[lesson['lessonType']]}\n")
+
+            text_for_message = f"{type_of_lessons_dict[lesson['lessonType']]}\n"
+
+        else:
+            '''Вычисляем время пары'''
+            time_of_pair = f"{lesson['startTime']} — {lesson['endTime']}"
+
+            if lesson['startTime'] != None and lesson['endTime'] != None:
+                '''Добавляем в сообщение номер пары'''
+                text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> — "
+
+                '''Добавляем в сообщение название пары и ее тип'''
+                if lesson['lessonType'] in type_of_lessons_dict.keys():
+                    text_for_message += (f"{lesson['subject']} — "
+                                         f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u>\n")
+
+                '''Добавляем в сообщение время пары'''
+                text_for_message += (f"<b>{time_of_pair}</b> ")
+
+            '''Проверяем, дистант или очная'''
+            if lesson['isOnline']:
+
+                '''- Если дистант, добавляем ссылки'''
+                if lesson['links'] == None:
+                    text_for_message += (f"Дистанционная пара, ссылки отсутствуют \n")
+
+                else:
+                    text_for_message += (f"Дистанционная пара, ссылки:\n")
+                    for link in lesson['links']:
+                        text_for_message += (f"{link}\n")
+
             else:
-                sessionExist = True
-                dates_of_session.append(week['weekStart'])
-                dates_of_session.append(week['weekEnd'])
-        if sessionExist:
-            list_length = len(dates_of_session)
-            markup.add(types.InlineKeyboardButton(f"Сессия, "
-                                                  f"{dates_of_session[0]} — {dates_of_session[list_length - 1]}",
-                                                  callback_data=f"number_of_week_scheduleNone"))
+                if lesson['places'] != None:
+                    if len(lesson['places']) == 1:
+                        place = lesson['places'][0]
+                        text_for_message += (
+                            f"Корпус {place['building']}, аудитория {place['office']} \n")
+                    else:
+                        text_for_message += f'несколько мест:\n'
+                        for place in lesson['places']:
+                            '''- Иначе добавляем номер корпуса и аудиторию'''
+                            text_for_message += (
+                                f"Корпус {place['building']}, аудитория {place['office']} \n")
 
-        bot.send_message(message.chat.id,
-                         text_message,
-                         reply_markup=markup)
+            if lesson['lecturer'] != None:
+                '''Добавляем преподавателя пары'''
+                text_for_message += (f"Преподаватель — <i>{lesson['lecturer']}</i> \n")
+
+            '''Проверяем наличие дополнительной информации к паре'''
+            if lesson['additionalInfo'] != None:
+                for addInfo in lesson['additionalInfo']:
+                    text_for_message += (f"\n<i>Доп.информация: — {addInfo}</i> \n")
+
+            text_for_message += "\n"
+        return text_for_message
+
+    for week in schedule_dict:
+        if week['weekNumber'] == data:
+
+            lessons = week['lessons']
+
+            if lessons:
+
+                if data != None:
+                    number_of_week = data % 3
+                    emojies_for_header = emojies_for_week_color[number_of_week]
+                    text_for_message = f"<b>{emojies_for_header} Расписание на {data} неделю {emojies_for_header}</b>\n\n"
+                else:
+                    emojies_for_header = '🍀'
+                    text_for_message = f"<b>{emojies_for_header} Расписание на сессию {emojies_for_header}</b>\n\n"
+
+                bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
+                for day in lessons:
+                    keys = day.keys()
+                    for key in keys:
+                        '''Определение дня недели '''
+                        date_string = key
+                        day_, month, year = date_string.split('.')
+                        day_ = int(day_)
+                        month = int(month)
+                        year = int(year)
+                        date = datetime.datetime(year, month, day_)
+                        day_of_the_week = days_of_week_list[date.isoweekday() - 1]
+                        '''Конец определения дня недели'''
+
+                        daily_schedule_list = day[key]
+                        count_pairs = str(len(daily_schedule_list))
+
+                        text_for_message = ""
+
+                        if is_session:
+                            text_for_message += f"<u><b>{day_of_the_week}, {date_string}</b></u>\n\n"
+                        else:
+                            text_for_message += (f"<u><b>{day_of_the_week}, {date_string} — "
+                                                 f"{count_pairs_dict[count_pairs]}</b></u>\n\n")
+
+                        first_pair = number_of_pair_dict[daily_schedule_list[0]['startTime']]
+                        last_pair = number_of_pair_dict[daily_schedule_list[len(daily_schedule_list) - 1]['startTime']]
+                        lessons_list_count = int(last_pair.replace('-ая пара', ''))
+
+                        lesson_list = [{}] * (lessons_list_count)
+
+                        ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
+                        Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
+                        Иначе вывожу сообщение "Окно" '''
+
+                        for lesson in daily_schedule_list:
+                            pair_index_string = number_of_pair_dict[lesson["startTime"]]
+                            pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
+
+                            lesson_list[pair_index] = lesson
+
+                        '''Проходим по всем парам в данный день'''
+
+                        is_pairs_start = False
+                        number_of_pair = 0
+                        for lesson in lesson_list:
+                            if not is_pairs_start:
+                                if lesson:
+                                    is_pairs_start = True
+                                    text_for_message += get_schedule_for_send(lesson)
+                            else:
+                                if lesson:
+                                    text_for_message += get_schedule_for_send(lesson)
+                                else:
+                                    text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
+                                    text_for_message += f" - ОКНО 🪟\n\n"
+                            number_of_pair += 1
+                        bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
+            else:
+                if data == None:
+                    text_for_message = f"<b>В эту неделю у тебя нет пар! 🎉🎊</b> \n"
+                    bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
 
 
 # ---------------------------------  Обработка команд  ----------------------------------- #
@@ -509,162 +668,11 @@ def callback_message(callback):
 # Пользователем выбрано расписание для отправки
 @bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
 def callback_message(callback_query: types.CallbackQuery):
-
-    def get_schedule_for_send(lesson):
-        text_for_message = ''
-        '''Если вид пары — майнор'''
-        if lesson['lessonType'] == 'COMMON_MINOR':
-            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
-            # text_for_message += f"\n{type_of_lessons_dict[lesson['lessonType']]}"
-
-            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u> - "
-            #                     f"{type_of_lessons_dict[lesson['lessonType']]}\n")
-
-            text_for_message = f"{type_of_lessons_dict[lesson['lessonType']]}\n"
-
-        else:
-            '''Вычисляем время пары'''
-            time_of_pair = f"{lesson['startTime']} — {lesson['endTime']}"
-
-            if lesson['startTime'] != None and lesson['endTime'] != None:
-                '''Добавляем в сообщение номер пары'''
-                text_for_message += f"<b>{number_of_pair_dict[lesson['startTime']]}</b> — "
-
-                '''Добавляем в сообщение название пары и ее тип'''
-                if lesson['lessonType'] in type_of_lessons_dict.keys():
-                    text_for_message += (f"{lesson['subject']} — "
-                                         f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u>\n")
-
-                '''Добавляем в сообщение время пары'''
-                text_for_message += (f"<b>{time_of_pair}</b> ")
-
-            '''Проверяем, дистант или очная'''
-            if lesson['isOnline']:
-
-                '''- Если дистант, добавляем ссылки'''
-                if lesson['links'] == None:
-                    text_for_message += (f"Дистанционная пара, ссылки отсутствуют \n")
-
-                else:
-                    text_for_message += (f"Дистанционная пара, ссылки:\n")
-                    for link in lesson['links']:
-                        text_for_message += (f"{link}\n")
-
-            else:
-                if lesson['places'] != None:
-                    if len(lesson['places']) == 1:
-                        place = lesson['places'][0]
-                        text_for_message += (
-                            f"Корпус {place['building']}, аудитория {place['office']} \n")
-                    else:
-                        text_for_message += f'несколько мест:\n'
-                        for place in lesson['places']:
-                            '''- Иначе добавляем номер корпуса и аудиторию'''
-                            text_for_message += (
-                                f"Корпус {place['building']}, аудитория {place['office']} \n")
-
-            if lesson['lecturer'] != None:
-                '''Добавляем преподавателя пары'''
-                text_for_message += (f"Преподаватель — <i>{lesson['lecturer']}</i> \n")
-
-            '''Проверяем наличие дополнительной информации к паре'''
-            if lesson['additionalInfo'] != None:
-                for addInfo in lesson['additionalInfo']:
-                    text_for_message += (f"\n<i>Доп.информация: — {addInfo}</i> \n")
-
-            text_for_message += "\n"
-        return text_for_message
-
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('number_of_week_schedule', "")
-    is_session = False
-    if data != 'None':
-        data = int(data)
-    else:
-        data = None
-        is_session = True
     schedule_json = api.get_schedule(callback_query.message.chat.id)
     schedule_dict = schedule_json['response']
-    for week in schedule_dict:
-        if week['weekNumber'] == data:
-
-            lessons = week['lessons']
-
-            if lessons:
-
-                if data != None:
-                    number_of_week = data % 3
-                    emojies_for_header = emojies_for_week_color[number_of_week]
-                    text_for_message = f"<b>{emojies_for_header} Расписание на {data} неделю {emojies_for_header}</b>\n\n"
-                    bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
-                else:
-                    emojies_for_header = '🍀'
-                    text_for_message = f"<b>{emojies_for_header} Расписание на сессию {emojies_for_header}</b>\n\n"
-                    bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
-
-                for day in lessons:
-                    keys = day.keys()
-                    for key in keys:
-                        '''Определение дня недели '''
-                        date_string = key
-                        day_, month, year = date_string.split('.')
-                        day_ = int(day_)
-                        month = int(month)
-                        year = int(year)
-                        date = datetime.datetime(year, month, day_)
-                        day_of_the_week = days_of_week_list[date.isoweekday() - 1]
-                        '''Конец определения дня недели'''
-
-                        daily_schedule_list = day[key]
-                        count_pairs = str(len(daily_schedule_list))
-
-                        text_for_message = ""
-
-                        if is_session:
-                            text_for_message += f"<u><b>{day_of_the_week}, {date_string}</b></u>\n\n"
-                        else:
-                            text_for_message += (f"<u><b>{day_of_the_week}, {date_string} — "
-                                                 f"{count_pairs_dict[count_pairs]}</b></u>\n\n")
-
-                        first_pair = number_of_pair_dict[daily_schedule_list[0]['startTime']]
-                        last_pair = number_of_pair_dict[daily_schedule_list[len(daily_schedule_list) - 1]['startTime']]
-                        lessons_list_count = int(last_pair.replace('-ая пара', ''))
-
-                        lesson_list = [{}] * (lessons_list_count)
-
-                        ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
-                        Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
-                        Иначе вывожу сообщение "Окно" '''
-
-                        for lesson in daily_schedule_list:
-                            pair_index_string = number_of_pair_dict[lesson["startTime"]]
-                            pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
-
-                            lesson_list[pair_index] = lesson
-
-                        '''Проходим по всем парам в данный день'''
-
-                        is_pairs_start = False
-                        number_of_pair = 0
-                        for lesson in lesson_list:
-                            if not is_pairs_start:
-                                if lesson:
-                                    is_pairs_start = True
-                                    text_for_message += get_schedule_for_send(lesson)
-                            else:
-                                if lesson:
-                                    text_for_message += get_schedule_for_send(lesson)
-                                else:
-                                    text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
-                                    text_for_message += f" - ОКНО 🪟\n\n"
-                            number_of_pair += 1
-                        bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
-
-            else:
-                if data == None:
-                    text_for_message = f"<b>В эту неделю у тебя нет пар! 🎉🎊</b> \n"
-                    bot.send_message(callback_query.message.chat.id, text_for_message, parse_mode='HTML')
-
+    schedule_sending(callback_query.message, data, schedule_dict)
 
 # Команды бота в списке
 bot.set_my_commands([
