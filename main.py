@@ -341,6 +341,16 @@ def schedule_sending(message, data, schedule_dict):
         data = None
         is_session = True
 
+    if data != None:
+        number_of_week = data % 3
+        emojies_for_header = emojies_for_week_color[number_of_week]
+        text_for_message = f"<b>{emojies_for_header} Расписание на {data} неделю {emojies_for_header}</b>\n\n"
+    else:
+        emojies_for_header = '🍀'
+        text_for_message = f"<b>{emojies_for_header} Расписание на сессию {emojies_for_header}</b>\n\n"
+
+    bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
     def get_schedule_for_send(lesson):
         text_for_message = ''
         '''Если вид пары — майнор'''
@@ -364,7 +374,7 @@ def schedule_sending(message, data, schedule_dict):
                 '''Добавляем в сообщение название пары и ее тип'''
                 if lesson['lessonType'] in type_of_lessons_dict.keys():
                     text_for_message += (f"{lesson['subject']} — "
-                                         f"<u>{type_of_lessons_dict[lesson['lessonType']]}</u>\n")
+                                         f"{type_of_lessons_dict[lesson['lessonType']]}\n")
 
                 '''Добавляем в сообщение время пары'''
                 text_for_message += (f"<b>{time_of_pair}</b> ")
@@ -413,15 +423,7 @@ def schedule_sending(message, data, schedule_dict):
 
             if lessons:
 
-                if data != None:
-                    number_of_week = data % 3
-                    emojies_for_header = emojies_for_week_color[number_of_week]
-                    text_for_message = f"<b>{emojies_for_header} Расписание на {data} неделю {emojies_for_header}</b>\n\n"
-                else:
-                    emojies_for_header = '🍀'
-                    text_for_message = f"<b>{emojies_for_header} Расписание на сессию {emojies_for_header}</b>\n\n"
 
-                bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
 
                 for day in lessons:
                     keys = day.keys()
@@ -442,10 +444,10 @@ def schedule_sending(message, data, schedule_dict):
                         text_for_message = ""
 
                         if is_session:
-                            text_for_message += f"<u><b>{day_of_the_week}, {date_string}</b></u>\n\n"
+                            text_for_message += f"<b>{day_of_the_week}, {date_string}</b>\n\n"
                         else:
-                            text_for_message += (f"<u><b>{day_of_the_week}, {date_string} — "
-                                                 f"{count_pairs_dict[count_pairs]}</b></u>\n\n")
+                            text_for_message += (f"<b>{day_of_the_week}, {date_string} — "
+                                                 f"{count_pairs_dict[count_pairs]}</b>\n\n")
 
                         first_pair = number_of_pair_dict[daily_schedule_list[0]['startTime']]
                         last_pair = number_of_pair_dict[daily_schedule_list[len(daily_schedule_list) - 1]['startTime']]
