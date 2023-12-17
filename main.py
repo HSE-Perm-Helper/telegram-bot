@@ -436,15 +436,7 @@ def schedule_sending(message, data, schedule_dict):
                         '''Конец определения дня недели'''
 
                         daily_schedule_list = day[key]
-                        count_pairs = str(len(daily_schedule_list))
-
-                        text_for_message = ""
-
-                        if is_session:
-                            text_for_message += f"<b>{day_of_the_week}, {date_string}</b>\n\n"
-                        else:
-                            text_for_message += (f"<b>{day_of_the_week}, {date_string} — "
-                                                 f"{count_pairs_dict[count_pairs]}</b>\n\n")
+                        #count_pairs = str(len(daily_schedule_list))
 
                         first_pair = number_of_pair_dict[daily_schedule_list[0]['startTime']]
                         last_pair = number_of_pair_dict[daily_schedule_list[len(daily_schedule_list) - 1]['startTime']]
@@ -461,6 +453,21 @@ def schedule_sending(message, data, schedule_dict):
                             pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
 
                             lesson_list[pair_index] = lesson
+
+                        count_pairs = 0
+                        for pair in lesson_list:
+                            if pair:
+                                count_pairs += 1
+
+                        count_pairs = str(count_pairs)
+
+                        text_for_message = ""
+
+                        if is_session:
+                            text_for_message += f"<b>{day_of_the_week}, {date_string}</b>\n\n"
+                        else:
+                            text_for_message += (f"<b>{day_of_the_week}, {date_string} — "
+                                                 f"{count_pairs_dict[count_pairs]}</b>\n\n")
 
                         '''Проходим по всем парам в данный день'''
 
