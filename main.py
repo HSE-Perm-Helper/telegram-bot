@@ -422,9 +422,6 @@ def schedule_sending(message, data, schedule_dict):
             lessons = week['lessons']
 
             if lessons:
-
-
-
                 for day in lessons:
                     keys = day.keys()
                     for key in keys:

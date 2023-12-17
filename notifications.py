@@ -6,6 +6,7 @@ import requests
 
 def check_new_schedule():
     # ID axt: 877810534
+    # My ID: 774471737
     # for i in range(1):
     #     bot.send_message(877810534, f"🔵░░░░░░░░░░█▀▀░░█░\n"
     #                                     f"░░░░░░▄▀▀▀▀░░░░░█▄▄░\n"
@@ -32,10 +33,8 @@ def check_new_schedule():
             for event in response['response']:
                 event_type = event['eventType']
                 user_list = event["users"]
-                week_number = event["weekNumber"]
-                week_start = event["27.11.2023"]
-                week_end = event["03.12.2023"]
-                event_date = f"{week_number}, {week_start} - {week_end}"
+                # week_number = event["weekNumber"]
+
                 match event_type:
 
                     case "SCHEDULE_ADDED_EVENT":
