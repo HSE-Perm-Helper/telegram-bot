@@ -335,7 +335,7 @@ def get_text_schedule(message):
 # Формирование расписания
 def schedule_sending(message, data, schedule_dict):
     is_session = False
-    if data != 'None':
+    if data != None:
         data = int(data)
     else:
         data = None
