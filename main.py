@@ -346,7 +346,7 @@ def schedule_sending(message, data, schedule_dict):
         emojies_for_header = emojies_for_week_color[number_of_week]
         text_for_message = f"<b>{emojies_for_header} Расписание на {data} неделю {emojies_for_header}</b>\n\n"
     else:
-        emojies_for_header = '🍀'
+        emojies_for_header = "🍀"
         text_for_message = f"<b>{emojies_for_header} Расписание на сессию {emojies_for_header}</b>\n\n"
 
     bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
