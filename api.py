@@ -17,7 +17,6 @@ def get_user_ids():
         headers=headers,
         verify=False
     ).json()
-    print(users_json)
     for user in users_json["response"]:
         user_ids.append(user['telegramId'])
     return user_ids
