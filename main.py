@@ -1,9 +1,13 @@
 import random
 import datetime
+import time
+
 from telebot import types
 
 import api
 from bot import bot
+
+from decorators import typing_action
 
 import scheduler
 
@@ -80,7 +84,7 @@ emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆', '🌇', '🌉']
 # emojies_for_number_of_pair = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
 
-version = "1.01.1-beta"
+version = "1.05.0-beta"
 
 
 # ---------------------------------  Функции  ----------------------------------- #
@@ -501,6 +505,7 @@ def schedule_sending(message, data, schedule_dict):
 @bot.message_handler(commands=['start', 'старт', 'поехали', 'registration', 'регистрация'])
 @bot.message_handler(func=lambda message: message.text == ('start' or 'старт' or 'поехали'
                                                            or 'registration' or 'регистрация'))
+@typing_action
 def get_registration(message):
     bot.delete_message(message.chat.id, message.message_id)
     if api.check_registration_user(message.chat.id):
@@ -512,6 +517,7 @@ def get_registration(message):
 # Обработка команды /help
 @bot.message_handler(commands=['help', 'помощь', 'помоги'])
 @bot.message_handler(func=lambda message: message.text == ('help' or 'помощь' or 'помоги'))
+@typing_action
 def get_help(message):
     bot.delete_message(message.chat.id, message.message_id)
     text_help = ("<b>Вот, что я могу:</b>\n\n"
@@ -528,6 +534,7 @@ def get_help(message):
 # Обработка команды /menu
 @bot.message_handler(commands=['menu', 'меню'])
 @bot.message_handler(func=lambda message: message.text == ('menu' or 'меню'))
+@typing_action
 def start_working(message):
     bot.delete_message(message.chat.id, message.message_id)
     get_menu(message)
@@ -548,6 +555,7 @@ def start_working(message):
 # Обработка команды /settings
 @bot.message_handler(commands=['settings', 'настройки'])
 @bot.message_handler(func=lambda message: message.text == ('settings' or 'настройки'))
+@typing_action
 def get_settings(message):
     bot.delete_message(message.chat.id, message.message_id)
     get_course(message, False)
@@ -556,6 +564,7 @@ def get_settings(message):
 # Обработка команды /schedule
 @bot.message_handler(commands=['schedule', 'расписание'])
 @bot.message_handler(func=lambda message: message.text == ('schedule' or 'расписание'))
+@typing_action
 def get_settings(message):
     get_text_schedule(message)
 
@@ -568,6 +577,7 @@ def get_settings(message):
 
 # Обработка сообщения получения текстового расписания
 @bot.message_handler(func=lambda message: message.text == "Получить текстовое расписание")
+@typing_action
 def callback_message(message):
     get_text_schedule(message)
 
@@ -586,6 +596,7 @@ def callback_message(message):
 
 
 # Обработка события нажатия на кнопку выбора курса
+@typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('course_'))
 def course_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("course_", "")
@@ -594,6 +605,7 @@ def course_query_handler(callback_query: types.CallbackQuery):
 
 
 # Обработка события нажатия на кнопку выбора программы
+@typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('program_'))
 def program_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("program_", "")
@@ -602,6 +614,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 
 
 # Обработка события нажатия на кнопку выбора группы
+@typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('group_'))
 def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
@@ -610,6 +623,7 @@ def group_query_handler(callback_query: types.CallbackQuery):
 
 
 # Обработка события нажатия на кнопку выбора подгруппы
+@typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('subgroup_'))
 def subgroup_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("subgroup_", "")
@@ -618,6 +632,7 @@ def subgroup_query_handler(callback_query: types.CallbackQuery):
 
 
 # Обработка события возврата на предыдущий выбор
+@typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('back_to_'))
 def program_query_handler(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -637,6 +652,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 
 
 # Обработка события нажатия на кнопку подтверждения данных
+@typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith("start_working"))
 def callback_message(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -659,6 +675,7 @@ def callback_message(callback_query: types.CallbackQuery):
 
 
 # Добавить автообновляемый календарь
+@typing_action
 @bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
@@ -672,6 +689,7 @@ def callback_message(callback):
 
 
 # Пользователем выбрано расписание для отправки
+@typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
 def callback_message(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
