@@ -335,13 +335,13 @@ def get_text_schedule(message):
 # Формирование расписания
 def schedule_sending(message, data, schedule_dict):
     is_session = False
-    if data != None:
+    if data is not None and data != 'None':
         data = int(data)
     else:
         data = None
         is_session = True
 
-    if data != None:
+    if data is not None:
         number_of_week = data % 3
         emojies_for_header = emojies_for_week_color[number_of_week]
         text_for_message = f"<b>{emojies_for_header} Расписание на {data} неделю {emojies_for_header}</b>\n\n"
