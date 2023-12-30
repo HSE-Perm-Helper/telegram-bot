@@ -693,6 +693,7 @@ bot.set_my_commands([
 # Запуск запланированных задач в отдельном потоке
 if __name__ == "__main__":
     scheduler.run_check_events_update()
+    scheduler.run_new_year_congratulations()
 
 # Безостановочная работа бота
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
