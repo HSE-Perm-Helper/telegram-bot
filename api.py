@@ -8,6 +8,20 @@ accept_data = "application/json"
 headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data, "Content-Type": "application/json; charset=utf-8"}
 
 
+# ------------ Пользователи --------- #
+
+def get_user_ids():
+    user_ids = []
+    users_json = requests.get(
+        url=f"{base_url}/users",
+        headers=headers,
+        verify=False
+    ).json()
+    print(users_json)
+    for user in users_json["response"]:
+        user_ids.append(user['telegramId'])
+    return user_ids
+
 # -------------  Курсы  ------------- #
 
 def get_courses():
