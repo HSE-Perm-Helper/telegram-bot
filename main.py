@@ -1,15 +1,12 @@
-import random
 import datetime
-import time
+import random
 
 from telebot import types
 
 import api
+import workers
 from bot import bot
-
 from decorators import typing_action
-
-import scheduler
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -539,18 +536,6 @@ def start_working(message):
     get_menu(message)
 
 
-# Леха, удали это потом, это наш стажёр так шутит
-# Обработка команды /gay
-# @bot.message_handler(commands=['gay', 'гей'])
-# @bot.message_handler(func=lambda message: message.text == ('gay' or 'гей'))
-# def who_is_gay(message):
-#     bot.delete_message(message.chat.id, message.message_id)
-#     if random.randint(0, 9) < 5:
-#         bot.send_message(message.chat.id, "Денис Малинин гей 👬")
-#     else:
-#         bot.send_message(message.chat.id, "Данил Кунакбаев гей 👬")
-
-
 # Обработка команды /settings
 @bot.message_handler(commands=['settings', 'настройки'])
 @bot.message_handler(func=lambda message: message.text == ('settings' or 'настройки'))
@@ -719,8 +704,7 @@ bot.set_my_commands([
 
 # Запуск запланированных задач в отдельном потоке
 if __name__ == "__main__":
-    scheduler.run_check_events_update()
-    # scheduler.run_new_year_congratulations()
+    workers.run_workers()
 
 # Безостановочная работа бота
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
