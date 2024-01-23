@@ -1,51 +1,33 @@
-import requests
-
-import venv
-
-base_url = venv.base_url
-x_secret_key = venv.x_secret_key
-accept_data = "application/json"
-headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data, "Content-Type": "application/json; charset=utf-8"}
+from utils import get_request, get_request_as_json, \
+    patch_request_as_json, post_request_as_json
 
 
 # ------------ Пользователи --------- #
 
-def get_user_ids():
-    user_ids = []
-    users_json = requests.get(
-        url=f"{base_url}/users",
-        headers=headers,
-        verify=False
-    ).json()
-    for user in users_json["response"]:
-        user_ids.append(user['telegramId'])
+def get_user_ids() -> list[int]:
+    user_ids: list[int] = []
+    users = get_request_as_json("/users")
+    for user in users["response"]:
+        user_ids.append(int(user['telegramId']))
     return user_ids
+
 
 # -------------  Курсы  ------------- #
 
-def get_courses():
-    courses = []
-    courses_json = requests.get(
-        url=f"{base_url}/schedule/available_courses",
-        headers=headers,
-        verify=False
-    )
-    courses_data = courses_json.json()
+def get_courses() -> list[int]:
+    courses: list[int] = []
+    courses_data = get_request_as_json("/schedule/available_courses")
     for i in courses_data["response"]:
-        courses.append(i)
+        courses.append(int(i))
 
     return courses
 
 
 # -------------  Программы  ------------- #
 
-def get_programs(number_course):
-    programs = []
-    programs_json = requests.get(
-        url=f"{base_url}/schedule/available_programs?course={number_course}",
-        headers=headers,
-        verify=False)
-    programs_data = programs_json.json()
+def get_programs(course: int) -> list[str]:
+    programs: list[str] = []
+    programs_data = get_request_as_json(f"/schedule/available_programs?course={course}")
     for i in programs_data["response"]:
         programs.append(i)
 
@@ -54,14 +36,10 @@ def get_programs(number_course):
 
 # -------------  Группы  ------------- #
 
-def get_groups(number_course, number_program):
-    groups = []
-    groups_json = requests.get(
-        url=f"{base_url}/schedule/available_groups?course={number_course}"
-            f"&program={number_program}",
-        headers=headers,
-        verify=False)
-    groups_data = groups_json.json()
+def get_groups(course: int, program: int) -> list[str]:
+    groups: list[str] = []
+    groups_data = get_request_as_json(path=f"/schedule/available_groups?course={course}"
+                                           f"&program={program}")
     for i in groups_data["response"]:
         groups.append(i)
 
@@ -70,16 +48,12 @@ def get_groups(number_course, number_program):
 
 # -------------  Подгруппы  ------------- #
 
-def get_subgroups(number_course, number_program, number_group):
-    subgroups = []
-    subgroups_json = requests.get(
-        url=f"{base_url}/schedule/available_subgroups?course={number_course}"
-            f"&program={number_program}&group={number_group}",
-        headers=headers,
-        verify=False)
-    subgroups_data = subgroups_json.json()
+def get_subgroups(course: int, program: str, group: str) -> list[int]:
+    subgroups: list[int] = []
+    subgroups_data = get_request_as_json(path=f"/schedule/available_subgroups?course={course}"
+                                              f"&program={program}&group={group}")
     for i in subgroups_data["response"]:
-        subgroups.append(i)
+        subgroups.append(int(i))
 
     return subgroups
 
@@ -87,59 +61,40 @@ def get_subgroups(number_course, number_program, number_group):
 # -------------  Регистрация пользователя  ------------- #
 
 
-def registration_user(data):
-    course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
-    if subgroup != "None":
-        subgroup = int(subgroup)
-    else:
-        subgroup = 0
-    answer = requests.post(url=f"{base_url}/users",
-                         json={
-                             "telegramId": int(telegram_id),
-                             "settings": {
-                                 "group": group,
-                                 "subGroup": subgroup
-                             }
-                         }, headers=headers,
-                         verify=False)
-    answer = answer.json()
-    return answer['error']
+def registration_user(telegram_id: int, group: str, subgroup: int) -> bool:
+    user_data = post_request_as_json(path=f"/users",
+                                     json={
+                                         "telegramId": int(telegram_id),
+                                         "settings": {
+                                             "group": group,
+                                             "subGroup": subgroup
+                                         }
+                                     })
+    return bool(user_data['error'])
 
 
-def edit_user(data):
-    course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
-    if subgroup != "None":
-        subgroup = int(subgroup)
-    else:
-        subgroup = None
-    answer = requests.patch(url=f"{base_url}/user?telegramId={telegram_id}",
-                          json={
-                              "group": group,
-                              "subGroup": subgroup
-                          }, headers=headers,
-                          verify=False)
-    answer = answer.json()
-    print(answer['error'])
-    return answer['error']
+def edit_user(telegram_id: int, group: str, subgroup: int) -> bool:
+    copied_subgroup = subgroup
+    if subgroup == 0:
+        copied_subgroup = None
+    user_data = patch_request_as_json(path=f"/user?telegramId={telegram_id}",
+                                      json={
+                                          "group": group,
+                                          "subGroup": copied_subgroup
+                                      })
+    return bool(user_data['error'])
 
 
 # -------------  Получение расписания  ------------- #
 
-def get_schedule(telegram_id):
-    answer = requests.get(url=f"{base_url}/v2/schedule/{telegram_id}",
-                          headers=headers,
-                          verify=False)
-    answer = answer.json()
-    return answer
+def get_schedule(telegram_id: int) -> dict[str, any]:
+    schedule_data = get_request_as_json(path=f"/v2/schedule/{telegram_id}")
+    return schedule_data
+
 
 # -------------  Проверка обновления расписания  ------------- #
 
 
-def check_registration_user(telegram_id):
-    response = requests.get(
-        url=f"{base_url}/user?telegramId={telegram_id}",
-        headers=headers,
-        verify=False)
+def check_registration_user(telegram_id: int) -> bool:
+    response = get_request(path=f"/user?telegramId={telegram_id}")
     return response.status_code == 200
-
-
