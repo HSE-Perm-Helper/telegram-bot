@@ -6,11 +6,12 @@ from telebot import types
 import api
 import workers
 from bot import bot
-from decorators import typing_action
+from decorators import typing_action, exception_handler
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
 bot.can_join_groups = False  # Запрет на приглашения в группы (ему пофиг)
+version = "1.10.0-beta"
 
 # ---------------------------------  Данные  ----------------------------------- #
 
@@ -80,9 +81,6 @@ emojies_for_groups = ['⚪', '🔴', '🟡', '🟢', '🟣', '🟤', '🔵', '�
 emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆', '🌇', '🌉']
 # emojies_for_number_of_pair = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
-
-version = "1.05.0-beta"
-
 
 # ---------------------------------  Функции  ----------------------------------- #
 
@@ -502,6 +500,7 @@ def schedule_sending(message, data, schedule_dict):
 @bot.message_handler(func=lambda message: message.text == ('start' or 'старт' or 'поехали'
                                                            or 'registration' or 'регистрация'))
 @typing_action
+@exception_handler
 def get_registration(message):
     bot.delete_message(message.chat.id, message.message_id)
     if api.check_registration_user(message.chat.id):
@@ -514,6 +513,7 @@ def get_registration(message):
 @bot.message_handler(commands=['help', 'помощь', 'помоги'])
 @bot.message_handler(func=lambda message: message.text == ('help' or 'помощь' or 'помоги'))
 @typing_action
+@exception_handler
 def get_help(message):
     bot.delete_message(message.chat.id, message.message_id)
     text_help = ("<b>Вот, что я могу:</b>\n\n"
@@ -531,6 +531,7 @@ def get_help(message):
 @bot.message_handler(commands=['menu', 'меню'])
 @bot.message_handler(func=lambda message: message.text == ('menu' or 'меню'))
 @typing_action
+@exception_handler
 def start_working(message):
     bot.delete_message(message.chat.id, message.message_id)
     get_menu(message)
@@ -540,6 +541,7 @@ def start_working(message):
 @bot.message_handler(commands=['settings', 'настройки'])
 @bot.message_handler(func=lambda message: message.text == ('settings' or 'настройки'))
 @typing_action
+@exception_handler
 def get_settings(message):
     bot.delete_message(message.chat.id, message.message_id)
     get_course(message, False)
@@ -549,6 +551,7 @@ def get_settings(message):
 @bot.message_handler(commands=['schedule', 'расписание'])
 @bot.message_handler(func=lambda message: message.text == ('schedule' or 'расписание'))
 @typing_action
+@exception_handler
 def get_settings(message):
     get_text_schedule(message)
 
@@ -562,6 +565,7 @@ def get_settings(message):
 # Обработка сообщения получения текстового расписания
 @bot.message_handler(func=lambda message: message.text == "Получить текстовое расписание")
 @typing_action
+@exception_handler
 def callback_message(message):
     get_text_schedule(message)
 
@@ -582,6 +586,7 @@ def callback_message(message):
 # Обработка события нажатия на кнопку выбора курса
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('course_'))
+@exception_handler
 def course_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("course_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -591,6 +596,7 @@ def course_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора программы
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('program_'))
+@exception_handler
 def program_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("program_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -600,6 +606,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора группы
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('group_'))
+@exception_handler
 def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -609,6 +616,7 @@ def group_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора подгруппы
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('subgroup_'))
+@exception_handler
 def subgroup_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("subgroup_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -618,6 +626,7 @@ def subgroup_query_handler(callback_query: types.CallbackQuery):
 # Обработка события возврата на предыдущий выбор
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('back_to_'))
+@exception_handler
 def program_query_handler(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
 
@@ -638,6 +647,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку подтверждения данных
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith("start_working"))
+@exception_handler
 def callback_message(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('start_working', "")
@@ -670,6 +680,7 @@ def callback_message(callback_query: types.CallbackQuery):
 # Добавить автообновляемый календарь
 @typing_action
 @bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
+@exception_handler
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
     # schedule = open('calendar/schedule.ics', 'r', encoding='utf-8')
@@ -684,6 +695,7 @@ def callback_message(callback):
 # Пользователем выбрано расписание для отправки
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
+@exception_handler
 def callback_message(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('number_of_week_schedule', "")
