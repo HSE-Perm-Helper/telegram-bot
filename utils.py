@@ -90,18 +90,18 @@ def patch_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] 
     )
 
 
-def delete_request_as_json(path: str, headers: dict[str, str] = {}) -> dict[str, any]:
+def delete_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> dict[str, any]:
     """
     Delete request as json from backend
     :param path api path for request
     :param headers for request, without required
     :return: delete response as json
     """
-    return (delete_request(path, headers)
+    return (delete_request(path, headers, json)
             .json())
 
 
-def delete_request(path: str, headers: dict[str, str] = {}) -> requests.Response:
+def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> requests.Response:
     """
     Delete request from backend
     :param path api path for request
@@ -111,5 +111,6 @@ def delete_request(path: str, headers: dict[str, str] = {}) -> requests.Response
     return requests.delete(
         url=f"{base_url}{path}",
         headers=headers | required_headers,
+        json=json,
         verify=False
     )
