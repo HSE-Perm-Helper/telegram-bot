@@ -1,4 +1,5 @@
 from functools import wraps
+from telebot import types
 
 import telebot
 
@@ -19,3 +20,20 @@ def typing_action(func):
             bot.send_chat_action(chat_id, 'typing')
         return func(*args, **kwargs)
     return decorator
+
+
+def exception_handler(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            for arg in args:
+                if isinstance(arg, telebot.types.Message):
+                    bot.send_message(arg.chat.id, "Что-то пошло не так 🤷\n"
+                                                  "Попробуй еще раз или чуть позже")
+                    break
+                elif isinstance(arg, telebot.types.CallbackQuery):
+                    bot.send_message(arg.message.chat.id, "Что-то пошло не так 🤷\n"
+                                                          "Попробуй еще раз или зайди чуть позже")
+                    break
+    return wrapper
