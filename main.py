@@ -1,19 +1,17 @@
-import random
 import datetime
-import time
+import random
 
 from telebot import types
 
 import api
+import workers
 from bot import bot
-
-from decorators import typing_action
-
-import scheduler
+from decorators import typing_action, exception_handler
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
 bot.can_join_groups = False  # Запрет на приглашения в группы (ему пофиг)
+version = "1.10.0-beta"
 
 # ---------------------------------  Данные  ----------------------------------- #
 
@@ -84,9 +82,6 @@ emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆', '🌇', '🌉']
 # emojies_for_number_of_pair = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
 
-version = "1.05.0-beta"
-
-
 # ---------------------------------  Функции  ----------------------------------- #
 
 
@@ -146,14 +141,14 @@ def get_program(message, data):
 
 # Создание кнопок выбора группы
 def get_group(message, data):
-    number_program, number_course, is_new_user = data.split('^')
-    if number_program in type_of_program_dict.keys():
-        text_get_group = f"Отлично, ты выбрал: \n{type_of_program_dict[number_program]} 😎\nТеперь давай выберем группу!"
+    program, course, is_new_user = data.split('^')
+    if program in type_of_program_dict.keys():
+        text_get_group = f"Отлично, ты выбрал: \n{type_of_program_dict[program]} 😎\nТеперь давай выберем группу!"
     else:
-        text_get_group = f"Отлично, ты выбрал {number_program} направление! 😎\nТеперь давай выберем группу!"
+        text_get_group = f"Отлично, ты выбрал {program} направление! 😎\nТеперь давай выберем группу!"
 
-    groups = api.get_groups(number_course,
-                            number_program)
+    groups = api.get_groups(course,
+                            program)
 
     markup = types.InlineKeyboardMarkup()
     random.shuffle(emojies_for_groups)
@@ -161,11 +156,11 @@ def get_group(message, data):
         emoji_for_button = f"{emojies_for_groups[i]} {groups[i]}"
         markup.add(types.InlineKeyboardButton(emoji_for_button,
                                               callback_data=f"group_{groups[i]}"
-                                                            f"^{number_program}"
-                                                            f"^{number_course}"
+                                                            f"^{program}"
+                                                            f"^{course}"
                                                             f"^{is_new_user}"))
     markup.add(types.InlineKeyboardButton("⬅ Назад",
-                                          callback_data=f"back_to_program{number_course}"
+                                          callback_data=f"back_to_program{course}"
                                                         f"^{is_new_user}"))
 
     bot.send_message(message.chat.id,
@@ -175,31 +170,31 @@ def get_group(message, data):
 
 # Создание кнопок выбора подгруппы
 def get_subgroup(message, data):
-    number_group, number_program, number_course, is_new_user = data.split('^')
+    group, program, course, is_new_user = data.split('^')
 
-    text_get_subgroup = f"{number_group} — твоя группа. Осталось определиться с подгруппой!"
+    text_get_subgroup = f"{group} — твоя группа. Осталось определиться с подгруппой!"
 
-    subgroups = api.get_subgroups(number_course,
-                                  number_program,
-                                  number_group)
+    subgroups = api.get_subgroups(course,
+                                  program,
+                                  group)
     markup = types.InlineKeyboardMarkup()
     for i in range(len(subgroups)):
         emoji_for_button = f"{emojies_for_subgroups[rand_emj(len(emojies_for_subgroups))]} {subgroups[i]}"
         markup.add(types.InlineKeyboardButton(emoji_for_button,
                                               callback_data=f"subgroup_{subgroups[i]}"
-                                                            f"^{number_group}"
-                                                            f"^{number_program}"
-                                                            f"^{number_course}"
+                                                            f"^{group}"
+                                                            f"^{program}"
+                                                            f"^{course}"
                                                             f"^{is_new_user}"))
     markup.add(types.InlineKeyboardButton("🚫 Нет подгруппы",
                                           callback_data=f"subgroup_None"
-                                                        f"^{number_group}"
-                                                        f"^{number_program}"
-                                                        f"^{number_course}"
+                                                        f"^{group}"
+                                                        f"^{program}"
+                                                        f"^{course}"
                                                         f"^{is_new_user}"))
     markup.add(types.InlineKeyboardButton("⬅ Назад",
-                                          callback_data=f"back_to_group{number_program}"
-                                                        f"^{number_course}"
+                                          callback_data=f"back_to_group{program}"
+                                                        f"^{course}"
                                                         f"^{is_new_user}"))
 
     bot.send_message(message.chat.id,
@@ -209,43 +204,43 @@ def get_subgroup(message, data):
 
 # Создание кнопок для подтверждения выбора
 def get_confirmation(message, data):
-    number_subgroup, number_group, number_program, number_course, is_new_user = data.split('^')
+    subgroup, group, program, course, is_new_user = data.split('^')
 
     '''Заводим новую переменную номера группы, чтобы в сообщение выводилось полное название направления'''
-    if number_program in type_of_program_dict.keys():
-        number_program_for_message = type_of_program_dict[number_program]
+    if program in type_of_program_dict.keys():
+        program_for_message = type_of_program_dict[program]
     else:
-        number_program_for_message = number_program
+        program_for_message = program
 
     '''Два различных варианта вывода информации — с подгруппой и без нее'''
-    if number_subgroup == "None":
+    if subgroup == "None":
         text_confirmation = ("Отлично! ✅ Теперь давай проверим, всё ли верно:\n" +
-                             f"{number_course}-й курс,\n"
-                             f"{number_program_for_message},\n"
-                             f"{number_group} — группа,"
+                             f"{course}-й курс,\n"
+                             f"{program_for_message},\n"
+                             f"{group} — группа,"
                              f"\n\nВсе верно?")
     else:
         text_confirmation = ("Отлично! ✅ Теперь давай проверим, всё ли верно:\n" +
-                             f"{number_course}-й курс,\n"
-                             f"{number_program_for_message},\n"
-                             f"{number_group} — группа,\n"
-                             f"{number_subgroup} — подгруппа.\n\nВсе верно?")
+                             f"{course}-й курс,\n"
+                             f"{program_for_message},\n"
+                             f"{group} — группа,\n"
+                             f"{subgroup} — подгруппа.\n\nВсе верно?")
 
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Все верно! 🎉🎊",
-                                          callback_data=f"start_working{number_course}"
-                                                        f"^{number_program}"
-                                                        f"^{number_group}"
-                                                        f"^{number_subgroup}"
+                                          callback_data=f"start_working{course}"
+                                                        f"^{program}"
+                                                        f"^{group}"
+                                                        f"^{subgroup}"
                                                         f"^{message.chat.id}"
                                                         f"^{is_new_user}"))
     markup.add(types.InlineKeyboardButton("Начать сначала ✏",
                                           callback_data=f"back_to_start"
                                                         f"{is_new_user}"))
     markup.add(types.InlineKeyboardButton("⬅ Назад",
-                                          callback_data=f"back_to_subgroup{number_group}"
-                                                        f"^{number_program}"
-                                                        f"^{number_course}"
+                                          callback_data=f"back_to_subgroup{group}"
+                                                        f"^{program}"
+                                                        f"^{course}"
                                                         f"^{is_new_user}"))
 
     bot.send_message(message.chat.id,
@@ -440,7 +435,7 @@ def schedule_sending(message, data, schedule_dict):
                         '''Конец определения дня недели'''
 
                         daily_schedule_list = day[key]
-                        #count_pairs = str(len(daily_schedule_list))
+                        # count_pairs = str(len(daily_schedule_list))
 
                         first_pair = number_of_pair_dict[daily_schedule_list[0]['startTime']]
                         last_pair = number_of_pair_dict[daily_schedule_list[len(daily_schedule_list) - 1]['startTime']]
@@ -497,7 +492,6 @@ def schedule_sending(message, data, schedule_dict):
                     bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
 
 
-
 # ---------------------------------  Обработка команд  ----------------------------------- #
 
 
@@ -506,6 +500,7 @@ def schedule_sending(message, data, schedule_dict):
 @bot.message_handler(func=lambda message: message.text == ('start' or 'старт' or 'поехали'
                                                            or 'registration' or 'регистрация'))
 @typing_action
+@exception_handler
 def get_registration(message):
     bot.delete_message(message.chat.id, message.message_id)
     if api.check_registration_user(message.chat.id):
@@ -518,6 +513,7 @@ def get_registration(message):
 @bot.message_handler(commands=['help', 'помощь', 'помоги'])
 @bot.message_handler(func=lambda message: message.text == ('help' or 'помощь' or 'помоги'))
 @typing_action
+@exception_handler
 def get_help(message):
     bot.delete_message(message.chat.id, message.message_id)
     text_help = ("<b>Вот, что я могу:</b>\n\n"
@@ -535,27 +531,17 @@ def get_help(message):
 @bot.message_handler(commands=['menu', 'меню'])
 @bot.message_handler(func=lambda message: message.text == ('menu' or 'меню'))
 @typing_action
+@exception_handler
 def start_working(message):
     bot.delete_message(message.chat.id, message.message_id)
     get_menu(message)
-
-
-# Леха, удали это потом, это наш стажёр так шутит
-# Обработка команды /gay
-# @bot.message_handler(commands=['gay', 'гей'])
-# @bot.message_handler(func=lambda message: message.text == ('gay' or 'гей'))
-# def who_is_gay(message):
-#     bot.delete_message(message.chat.id, message.message_id)
-#     if random.randint(0, 9) < 5:
-#         bot.send_message(message.chat.id, "Денис Малинин гей 👬")
-#     else:
-#         bot.send_message(message.chat.id, "Данил Кунакбаев гей 👬")
 
 
 # Обработка команды /settings
 @bot.message_handler(commands=['settings', 'настройки'])
 @bot.message_handler(func=lambda message: message.text == ('settings' or 'настройки'))
 @typing_action
+@exception_handler
 def get_settings(message):
     bot.delete_message(message.chat.id, message.message_id)
     get_course(message, False)
@@ -565,6 +551,7 @@ def get_settings(message):
 @bot.message_handler(commands=['schedule', 'расписание'])
 @bot.message_handler(func=lambda message: message.text == ('schedule' or 'расписание'))
 @typing_action
+@exception_handler
 def get_settings(message):
     get_text_schedule(message)
 
@@ -578,6 +565,7 @@ def get_settings(message):
 # Обработка сообщения получения текстового расписания
 @bot.message_handler(func=lambda message: message.text == "Получить текстовое расписание")
 @typing_action
+@exception_handler
 def callback_message(message):
     get_text_schedule(message)
 
@@ -598,6 +586,7 @@ def callback_message(message):
 # Обработка события нажатия на кнопку выбора курса
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('course_'))
+@exception_handler
 def course_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("course_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -607,6 +596,7 @@ def course_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора программы
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('program_'))
+@exception_handler
 def program_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("program_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -616,6 +606,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора группы
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('group_'))
+@exception_handler
 def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -625,6 +616,7 @@ def group_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора подгруппы
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('subgroup_'))
+@exception_handler
 def subgroup_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("subgroup_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -634,6 +626,7 @@ def subgroup_query_handler(callback_query: types.CallbackQuery):
 # Обработка события возврата на предыдущий выбор
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith('back_to_'))
+@exception_handler
 def program_query_handler(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
 
@@ -654,17 +647,27 @@ def program_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку подтверждения данных
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith("start_working"))
+@exception_handler
 def callback_message(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('start_working', "")
-    list_data = data.split("^")
-    is_new_user = list_data[len(list_data) - 1]
-    if is_new_user == "True":
-        is_error = api.registration_user(data)
-    else:
-        is_error = api.edit_user(data)
+    course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
 
-    if not is_error:
+    if subgroup != "None":
+        subgroup = int(subgroup)
+    else:
+        subgroup = 0
+
+    if is_new_user == "True":
+        is_success = api.registration_user(telegram_id=telegram_id,
+                                           group=group,
+                                           subgroup=subgroup)
+    else:
+        is_success = api.edit_user(telegram_id=telegram_id,
+                                   group=group,
+                                   subgroup=subgroup)
+
+    if is_success:
         get_menu(callback_query.message)
 
     else:
@@ -677,6 +680,7 @@ def callback_message(callback_query: types.CallbackQuery):
 # Добавить автообновляемый календарь
 @typing_action
 @bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
+@exception_handler
 def callback_message(callback):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
     # schedule = open('calendar/schedule.ics', 'r', encoding='utf-8')
@@ -691,12 +695,14 @@ def callback_message(callback):
 # Пользователем выбрано расписание для отправки
 @typing_action
 @bot.callback_query_handler(lambda c: c.data.startswith("number_of_week_schedule"))
+@exception_handler
 def callback_message(callback_query: types.CallbackQuery):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = callback_query.data.replace('number_of_week_schedule', "")
     schedule_json = api.get_schedule(callback_query.message.chat.id)
     schedule_dict = schedule_json['response']
     schedule_sending(callback_query.message, data, schedule_dict)
+
 
 # Команды бота в списке
 bot.set_my_commands([
@@ -710,8 +716,7 @@ bot.set_my_commands([
 
 # Запуск запланированных задач в отдельном потоке
 if __name__ == "__main__":
-    scheduler.run_check_events_update()
-    # scheduler.run_new_year_congratulations()
+    workers.run_workers()
 
 # Безостановочная работа бота
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
