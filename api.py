@@ -70,19 +70,16 @@ def registration_user(telegram_id: int, group: str, subgroup: int) -> bool:
                                              "subGroup": subgroup
                                          }
                                      })
-    return bool(user_data['error'])
+    return not bool(user_data['error'])
 
 
 def edit_user(telegram_id: int, group: str, subgroup: int) -> bool:
-    copied_subgroup = subgroup
-    if subgroup == 0:
-        copied_subgroup = None
     user_data = patch_request_as_json(path=f"/user?telegramId={telegram_id}",
                                       json={
                                           "group": group,
-                                          "subGroup": copied_subgroup
+                                          "subGroup": subgroup
                                       })
-    return bool(user_data['error'])
+    return not bool(user_data['error'])
 
 
 # -------------  Получение расписания  ------------- #
