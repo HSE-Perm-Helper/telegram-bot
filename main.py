@@ -34,10 +34,11 @@ type_of_lessons_dict = {
     'PRACTICE': 'практика 💼',
     'MINOR': 'Майнор Ⓜ',
     'COMMON_ENGLISH': 'английский 🆎',
-    'STATEMENT': 'Ведомость 📜',
+    'STATEMENT': 'ведомость 📜',
     'ICC': 'МКД 📙',
     'UNDEFINED_AED': 'ДОЦ по выбору 📕',
     'AED': 'ДОЦ 📕',
+    'CONSULT': 'консультация 🗿',
     'EVENT': 'мероприятие'
 }
 
