@@ -575,6 +575,31 @@ def callback_message(message):
 # def callback_message(message):
 #     bot.send_message(message.chat.id, "Скоро будет!")
 
+# Обработка команды /mailing
+@bot.message_handler(commands=["mailing"])
+@exception_handler
+def mailing_to_all(message: types.Message):
+    if message.chat.id not in api.get_admin_ids():
+        return
+    else:
+        courses = api.get_courses()
+        markup = types.InlineKeyboardMarkup()
+        text = "Выберите группы, в которые необходимо сделать рассылку:"
+        for i in range(len(courses)):
+            emoji_for_button = f"{emojies_for_course[i]} {courses[i]} курс"
+            markup.add(types.InlineKeyboardButton(emoji_for_button,
+                                                  callback_data=f"mailing_course_{courses[i]}"))
+        markup.add(types.InlineKeyboardButton("Ебануть на все курсы",
+                                              callback_data=f"mailing_course_all"))
+
+        bot.send_message(message.chat.id,
+                         text,
+                         reply_markup=markup)
+
+
+def send_mail(message: types.Message):
+    send_message_to_all_users(message.html_text)
+
 
 # ---------------------------------  Обработка событий  ----------------------------------- #
 
@@ -700,18 +725,29 @@ def callback_message(callback_query: types.CallbackQuery):
     schedule_sending(callback_query.message, data, schedule_dict)
 
 
-@bot.message_handler(commands=["mailing"])
+@typing_action
+@bot.callback_query_handler(lambda c: c.data.startswith("mailing_courses_"))
 @exception_handler
-def mailing_to_all(message: types.Message):
-    if message.chat.id not in api.get_admin_ids():
-        return
-    text = "Введите сообщение для рассылки:"
-    bot.send_message(message.chat.id, text)
-    bot.register_next_step_handler(message, send_mail)
+def callback_message(callback_query: types.CallbackQuery):
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    data = callback_query.data.replace('mailing_courses_', "")
+    # Получить список пользователей, чья группа == data
+    # Получить сообщение для отправки
+    # Отправить сообщение пользователям
+    courses = api.get_courses()
+    if data != "all":
+        data = int(data)
+        for course in courses:
+            if course != data:
+                courses.remove(course)
+    for course in courses:
+        pass
+
+    schedule_json = api.get_schedule(callback_query.message.chat.id)
+    schedule_dict = schedule_json['response']
+    schedule_sending(callback_query.message, data, schedule_dict)
 
 
-def send_mail(message: types.Message):
-    send_message_to_all_users(message.html_text)
 
 
 
