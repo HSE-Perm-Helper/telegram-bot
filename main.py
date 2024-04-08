@@ -355,12 +355,6 @@ def schedule_sending(message, data, schedule_dict):
         text_for_message = ''
         '''Если вид пары — майнор'''
         if lesson['lessonType'] == 'COMMON_MINOR':
-            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u>\n")
-            # text_for_message += f"\n{type_of_lessons_dict[lesson['lessonType']]}"
-
-            # text_for_message = (f"<u><b>{day_of_the_week}, {date_string}</b></u> - "
-            #                     f"{type_of_lessons_dict[lesson['lessonType']]}\n")
-
             text_for_message = f"{type_of_lessons_dict[lesson['lessonType']]}\n"
 
         else:
