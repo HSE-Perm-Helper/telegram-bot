@@ -12,6 +12,12 @@ def get_user_ids() -> list[int]:
     return user_ids
 
 
+# ---------- Администраторы -----------#
+
+def get_admin_ids() -> list[int]:
+    return [646596194, 774471737]
+
+
 # -------------  Курсы  ------------- #
 
 def get_courses() -> list[int]:
