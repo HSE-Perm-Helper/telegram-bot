@@ -12,6 +12,18 @@ def get_user_ids() -> list[int]:
     return user_ids
 
 
+def get_user_ids_by_course(course: int) -> list[int]:
+    user_ids: list[int] = []
+    users = get_request_as_json("/users")
+    for user in users["response"]:
+        group = user["settings"]["group"]
+        num = int(group.split("-")[1])
+        user_course = 23 - num + 1
+        if user_course == course:
+            user_ids.append(int(user['telegramId']))
+    return user_ids
+
+
 # ---------- Администраторы -----------#
 
 def get_admin_ids() -> list[int]:

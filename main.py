@@ -7,7 +7,7 @@ import api
 import workers
 from bot import bot
 from decorators import typing_action, exception_handler
-from users_utils import send_message_to_all_users
+from users_utils import send_message_to_users
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -83,6 +83,7 @@ emojies_for_groups = ['⚪', '🔴', '🟡', '🟢', '🟣', '🟤', '🔵', '�
 emojies_for_subgroups = ['🌁', '🌃', '🌄', '🌅', '🌆', '🌇', '🌉']
 # emojies_for_number_of_pair = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
+
 
 # ---------------------------------  Функции  ----------------------------------- #
 
@@ -575,6 +576,35 @@ def callback_message(message):
 # def callback_message(message):
 #     bot.send_message(message.chat.id, "Скоро будет!")
 
+# Обработка команды /mailing
+@bot.message_handler(commands=["mailing"])
+@exception_handler
+def mailing_to_all(message: types.Message):
+    if message.chat.id not in api.get_admin_ids():
+        return
+    courses = api.get_courses()
+    markup = types.InlineKeyboardMarkup()
+    text = "Выберите курсы, в которые необходимо сделать рассылку:"
+    for i in range(len(courses)):
+        emoji_for_button = f"{emojies_for_course[i]} {courses[i]} курс"
+        markup.add(types.InlineKeyboardButton(emoji_for_button,
+                                              callback_data=f"mailing_course_{courses[i]}"))
+    markup.add(types.InlineKeyboardButton("Всем",
+                                          callback_data=f"mailing_course_all"))
+
+    bot.send_message(message.chat.id,
+                     text,
+                     reply_markup=markup)
+
+
+def send_mail(message: types.Message, course: int = None):
+    bot.send_message(message.chat.id, "Рассылка успешно отправлена!")
+    if not course:
+        users = api.get_user_ids()
+    else:
+        users = api.get_user_ids_by_course(course)
+    send_message_to_users(message.html_text, users)
+
 
 # ---------------------------------  Обработка событий  ----------------------------------- #
 
@@ -700,19 +730,18 @@ def callback_message(callback_query: types.CallbackQuery):
     schedule_sending(callback_query.message, data, schedule_dict)
 
 
-@bot.message_handler(commands=["mailing"])
+@typing_action
+@bot.callback_query_handler(lambda c: c.data.startswith("mailing_course"))
 @exception_handler
-def mailing_to_all(message: types.Message):
-    if message.chat.id not in api.get_admin_ids():
-        return
-    text = "Введите сообщение для рассылки:"
-    bot.send_message(message.chat.id, text)
-    bot.register_next_step_handler(message, send_mail)
-
-
-def send_mail(message: types.Message):
-    send_message_to_all_users(message.html_text)
-
+def callback_message(callback_query: types.CallbackQuery):
+    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    data = callback_query.data.replace('mailing_course_', "")
+    course = None
+    if data != "all":
+        course = int(data)
+    bot.send_message(callback_query.message.chat.id,
+                     "Введите сообщение для рассылки: ")
+    bot.register_next_step_handler(callback_query.message, send_mail, course=course)
 
 
 # Команды бота в списке
