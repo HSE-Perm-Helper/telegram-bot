@@ -7,6 +7,7 @@ import api
 import workers
 from bot import bot
 from decorators import typing_action, exception_handler
+from users_utils import send_message_to_all_users
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -697,6 +698,21 @@ def callback_message(callback_query: types.CallbackQuery):
     schedule_json = api.get_schedule(callback_query.message.chat.id)
     schedule_dict = schedule_json['response']
     schedule_sending(callback_query.message, data, schedule_dict)
+
+
+@bot.message_handler(commands=["mailing"])
+@exception_handler
+def mailing_to_all(message: types.Message):
+    if message.chat.id not in api.get_admin_ids():
+        return
+    text = "Введите сообщение для рассылки:"
+    bot.send_message(message.chat.id, text)
+    bot.register_next_step_handler(message, send_mail)
+
+
+def send_mail(message: types.Message):
+    send_message_to_all_users(message.html_text)
+
 
 
 # Команды бота в списке
