@@ -11,26 +11,25 @@ class NotificationsSendWorker(threading.Thread):
     def __init__(self):
         super().__init__()
 
-    def check_new_events(self):
+    def check_new_notifications(self):
         try:
-            events_response = get_request(path="/events")
+            notifications_response = get_request(path="/notifications")
             new_schedule_set = set()
             schedule_changing_set = set()
-            events_data = events_response.json()
-            if events_response.status_code == 200:
-                if len(events_data['response']) != 0:
-                    # event_date = ""
-                    for event in events_data['response']:
-                        event_type = event['eventType']
-                        user_list = event["users"]
+            notifications_data = notifications_response.json()
+            if notifications_response.status_code == 200:
+                if len(notifications_data['response']) != 0:
+                    for notification in notifications_data['response']:
+                        event_type = notification['notificationType']
+                        user_list = notification["users"]
                         # week_number = event["weekNumber"]
 
                         match event_type:
-                            case "SCHEDULE_ADDED_EVENT":
+                            case "SCHEDULE_ADDED":
                                 for user in user_list:
                                     new_schedule_set.add(user)
 
-                            case "SCHEDULE_CHANGED_FOR_USER_EVENT":
+                            case "SCHEDULE_CHANGED_FOR_USER":
                                 for user in user_list:
                                     schedule_changing_set.add(user)
 
@@ -47,10 +46,10 @@ class NotificationsSendWorker(threading.Thread):
                             pass
 
 
-                delete_events = delete_request(path="/events", json=events_data['response'])
+                delete_events = delete_request(path="/events", json=notifications_data['response'])
 
             else:
-                send_logs_to_admins(f"Проверка уведомлений вернула код ${events_response.status_code}, вместо OK")
+                send_logs_to_admins(f"Проверка уведомлений вернула код ${notifications_response.status_code}, вместо OK")
         except Exception as e:
             send_logs_to_admins(f"Произошла ошибка при попытке отправить запрос новых уведомлений на сервер!\n"
                                 f"Стэктрейс: \n"
@@ -58,5 +57,5 @@ class NotificationsSendWorker(threading.Thread):
 
     def run(self):
         while True:
-            self.check_new_events()
+            self.check_new_notifications()
             time.sleep(300)

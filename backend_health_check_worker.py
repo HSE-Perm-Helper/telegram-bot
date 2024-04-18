@@ -11,7 +11,7 @@ class BackendCheckHealthWorker(threading.Thread):
 
     def check_health(self):
         try:
-            events_response = get_request(path="/events")
+            events_response = get_request(path="/notifications")
             if events_response.status_code != 200:
                 send_logs_to_admins("Проблема с бэкэндом, требуется срочно проверить его работу!")
         except Exception as e:
