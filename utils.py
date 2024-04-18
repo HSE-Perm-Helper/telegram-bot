@@ -2,6 +2,8 @@ import requests
 
 import venv
 
+import api
+
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key
 accept_data = "application/json"
@@ -114,3 +116,8 @@ def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any]
         json=json,
         verify=False
     )
+
+
+def is_admin(telegram_id: int) -> bool:
+    admins = api.get_admin_ids()
+    return telegram_id in admins

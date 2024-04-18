@@ -4,10 +4,12 @@ import random
 from telebot import types
 
 import api
+import utils
 import workers
 from bot import bot
 from decorators import typing_action, exception_handler
 from users_utils import send_message_to_users
+from utils import is_admin
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -567,14 +569,20 @@ def callback_message(message):
     get_text_schedule(message)
 
 
-# @bot.message_handler(func= lambda message: message.text == "Получить расписание")
-# def callback_message(message):
-#     get_schedule(message)
+@bot.message_handler(commands=['remote_schedule'])
+@typing_action
+@exception_handler
+def get_remote_schedule(message):
+    if not is_admin(message.chat.id):
+        return
+    bot.delete_message(message.chat.id, message.message_id)
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    link = api.get_remote_schedule_link(message.chat.id)
+    markup.add(types.InlineKeyboardButton(text="Добавить расписание в календарь", url=link))
+    bot.send_message(message.chat.id,
+                     text="Чтобы добавить расписание в свой календарь тебе всего-лишь нужно нажать на кнопку и выбрать календарь, который ты используешь."
+                          "И всё. Твое расписание у тебя на устройстве!", reply_markup=markup)
 
-
-# @bot.message_handler(func= lambda message: message.text == "Проверить дедлайны")
-# def callback_message(message):
-#     bot.send_message(message.chat.id, "Скоро будет!")
 
 # Обработка команды /mailing
 @bot.message_handler(commands=["mailing"])
@@ -701,21 +709,6 @@ def callback_message(callback_query: types.CallbackQuery):
                                                          "Возможно, ты уже зарегистрирован 🙃\n"
                                                          "Для изменения данных о себе введи команду "
                                                          "/settings !")
-
-
-# Добавить автообновляемый календарь
-@typing_action
-@bot.callback_query_handler(func=lambda callback: callback.data == "add_calendar")
-@exception_handler
-def callback_message(callback):
-    bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    # schedule = open('calendar/schedule.ics', 'r', encoding='utf-8')
-    # bot.send_message(callback.message.chat.id, "Инструкция по установке:\n\n"
-    #                                            "1. Скачай файл ниже;\n"
-    #                                            "2. Запусти его;\n"
-    #                                            "3. Прими изменения для используемого тобой календаря.")
-    # bot.send_document(callback.message.chat.id, schedule)
-    bot.send_message(callback.message.chat.id, 'Будет позже!')
 
 
 # Пользователем выбрано расписание для отправки
