@@ -113,3 +113,11 @@ def get_schedule(telegram_id: int) -> dict[str, any]:
 def check_registration_user(telegram_id: int) -> bool:
     response = get_request(path=f"/user?telegramId={telegram_id}")
     return response.status_code == 200
+
+
+# ----------- Автообновляемое расписание -------------- #
+
+def get_remote_schedule_link(telegram_id: int) -> str:
+    response = get_request_as_json(path=f"/schedule/{telegram_id}/download")
+    print(response)
+    return f'{response["response"]["linkForRemoteCalendar"]}'

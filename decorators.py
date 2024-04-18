@@ -1,5 +1,5 @@
+import traceback
 from functools import wraps
-from telebot import types
 
 import telebot
 
@@ -27,6 +27,7 @@ def exception_handler(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
+            traceback.print_exc()
             for arg in args:
                 if isinstance(arg, telebot.types.Message):
                     bot.send_message(arg.chat.id, "Что-то пошло не так 🤷\n"
