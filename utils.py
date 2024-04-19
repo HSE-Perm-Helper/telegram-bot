@@ -119,5 +119,21 @@ def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any]
 
 
 def is_admin(telegram_id: int) -> bool:
+    """
+    Check user is admin
+    :param telegram_id user telegram id
+    :return True if user is admin
+    """
     admins = api.get_admin_ids()
     return telegram_id in admins
+
+
+def format_output_array(array: list[str]):
+    if len(array) == 0:
+        return ""
+    if array[0] is not str:
+        array = list(map(str, array))
+    if len(array) == 1:
+        return array[0]
+    output = ", ".join(array[0: len(array) - 1])
+    return f"{output} и {array[-1]}"
