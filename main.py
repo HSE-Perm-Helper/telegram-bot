@@ -588,7 +588,7 @@ def get_remote_schedule(message):
 @bot.message_handler(commands=["mailing"])
 @exception_handler
 def mailing_to_all(message: types.Message):
-    if message.chat.id not in api.get_admin_ids():
+    if not is_admin(message.chat.id):
         return
     courses = api.get_courses()
     markup = types.InlineKeyboardMarkup()

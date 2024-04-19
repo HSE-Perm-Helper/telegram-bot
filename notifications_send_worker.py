@@ -20,11 +20,11 @@ class NotificationsSendWorker(threading.Thread):
             if notifications_response.status_code == 200:
                 if len(notifications_data['response']) != 0:
                     for notification in notifications_data['response']:
-                        event_type = notification['notificationType']
+                        notification_type = notification['notificationType']
                         user_list = notification["users"]
                         # week_number = event["weekNumber"]
 
-                        match event_type:
+                        match notification_type:
                             case "SCHEDULE_ADDED":
                                 for user in user_list:
                                     new_schedule_set.add(user)
