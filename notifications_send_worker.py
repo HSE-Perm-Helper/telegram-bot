@@ -46,7 +46,7 @@ class NotificationsSendWorker(threading.Thread):
                             pass
 
 
-                delete_events = delete_request(path="/events", json=notifications_data['response'])
+                delete_events = delete_request(path="/notifications", json=notifications_data['response'])
 
             else:
                 send_logs_to_admins(f"Проверка уведомлений вернула код ${notifications_response.status_code}, вместо OK")
