@@ -1,3 +1,5 @@
+import datetime
+
 import requests
 
 import venv
@@ -9,6 +11,24 @@ x_secret_key = venv.x_secret_key
 accept_data = "application/json"
 required_headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data,
                     "Content-Type": "application/json; charset=utf-8"}
+
+days_of_week_list = ['Понедельник',
+                     'Вторник',
+                     'Среда',
+                     'Четверг',
+                     'Пятница',
+                     'Суббота',
+                     'Воскресенье']
+
+days_of_week_slug = {
+    "MONDAY": days_of_week_list[0],
+    "TUESDAY": days_of_week_list[1],
+    "WEDNESDAY": days_of_week_list[2],
+    "THURSDAY": days_of_week_list[3],
+    "FRIDAY": days_of_week_list[4],
+    "SATURDAY": days_of_week_list[5],
+    "SUNDAY": days_of_week_list[6]
+}
 
 
 def get_request_as_json(path: str, headers: dict[str, str] = {}) -> dict[str, any]:
@@ -137,3 +157,18 @@ def format_output_array(array: list[str]):
         return array[0]
     output = ", ".join(array[0: len(array) - 1])
     return f"{output} и {array[-1]}"
+
+
+def get_day_of_week_from_date(date_string: str) -> str:
+    day_, month, year = date_string.split('.')
+    day_ = int(day_)
+    month = int(month)
+    year = int(year)
+    date = datetime.datetime(year, month, day_)
+    day_of_the_week = days_of_week_list[date.isoweekday() - 1]
+    return day_of_the_week
+
+
+def get_day_of_week_from_slug(slug: str) -> str:
+    return days_of_week_slug.get(slug.upper(), "N/a")
+
