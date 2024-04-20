@@ -102,8 +102,13 @@ def edit_user(telegram_id: int, group: str, subgroup: int) -> bool:
 
 # -------------  Получение расписания  ------------- #
 
-def get_schedule(telegram_id: int) -> dict[str, any]:
-    schedule_data = get_request_as_json(path=f"/v2/schedule/{telegram_id}")
+def get_schedule(telegram_id: int, start: str, end: str) -> dict[str, any]:
+    schedule_data = get_request_as_json(path=f"/v3/schedule/{telegram_id}?start={start}&end={end}")
+    return schedule_data
+
+
+def get_schedules() -> dict[str, any]:
+    schedule_data = get_request_as_json(path=f"/v3/schedules")
     return schedule_data
 
 
