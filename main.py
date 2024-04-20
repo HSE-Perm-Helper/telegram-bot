@@ -529,7 +529,7 @@ def get_settings(message):
 
 
 # Обработка сообщения получения текстового расписания
-@bot.message_handler(func=lambda message: message.text == "Получить текстовое расписание 💼")
+@bot.message_handler(func=lambda message: message.text == "Получить текстовое расписание 💼" or message.text == "Получить текстовое расписание")
 @typing_action
 @exception_handler
 def callback_message(message):
@@ -576,6 +576,7 @@ def mailing_to_all(message: types.Message):
 @typing_action
 @exception_handler
 def get_base_schedule(message: types.Message):
+    bot.delete_message(message.chat.id, message.message_id)
     schedules_json = api.get_schedules()
     schedules = list(filter(lambda schedule: schedule["scheduleType"] == ScheduleType.QUARTER_SCHEDULE.value,
                                  schedules_json['response']))
