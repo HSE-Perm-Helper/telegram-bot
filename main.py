@@ -306,7 +306,10 @@ def get_text_schedule(message):
                                 schedule_json['response']))
 
         if len(schedules_dict) == 1:
-            schedule_sending(message, schedules_dict)
+            schedule = schedules_dict[0]
+            start = schedule["start"]
+            end = schedule["end"]
+            schedule_sending(message, api.get_schedule(message.chat.id, start, end)["response"])
         elif len(schedules_dict) == 0:
             bot.send_message(message.chat.id,
                              "Расписания пока нет, отдыхай! 😎")
@@ -582,7 +585,7 @@ def get_base_schedule(message: types.Message):
                                  schedules_json['response']))
     if len(schedules) == 0:
         bot.send_message(message.chat.id,
-                         "<b>Пока расписания на модуль нет! 🎉🎊</b> \n")
+                         "Пока расписания на модуль нет! 🎉🎊")
     else:
         schedule = schedules[0]
         response_schedule = api.get_schedule(message.chat.id, schedule["start"], schedule["end"])
