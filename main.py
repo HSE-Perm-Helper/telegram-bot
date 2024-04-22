@@ -89,8 +89,8 @@ def rand_emj(count):
 
 
 # Создание кнопок выбора курса
-def get_course(message, is_new_user):
-    if is_new_user == "True":
+def get_course(message, is_new_user: bool):
+    if is_new_user:
         text_hello = "Давай познакомися! 👋 На каком курсе ты учишься?"
     else:
         text_hello = "Немного изменим данные. ✏ На каком курсе ты учишься?"
@@ -471,7 +471,6 @@ def schedule_sending(message, schedule_dict):
 @typing_action
 @exception_handler
 def get_registration(message):
-    bot.delete_message(message.chat.id, message.message_id)
     if api.check_registration_user(message.chat.id):
         get_menu(message)
     else:
