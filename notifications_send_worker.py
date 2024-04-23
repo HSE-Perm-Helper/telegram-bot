@@ -3,6 +3,9 @@ import threading
 import time
 import traceback
 
+from telebot import types
+
+import schedule_utils
 from utils import get_request, delete_request, format_output_array
 from bot import bot
 from logs_utils import send_logs_to_admins
@@ -44,6 +47,12 @@ class NotificationsSendWorker(threading.Thread):
             difference.append("расписание на сессию")
         return format_output_array(difference)
 
+    def get_markup(self, schedules) -> types.InlineKeyboardMarkup:
+        markup = types.InlineKeyboardMarkup()
+        for schedule in schedules:
+            markup.add(schedule_utils.get_button_by_schedule_info(schedule, False))
+        return markup
+
     def check_new_notifications(self):
         try:
             notifications_response = get_request(path="/notifications")
@@ -71,28 +80,31 @@ class NotificationsSendWorker(threading.Thread):
 
                     for telegram_id, schedules in schedule_changing.items():
                         difference = self.get_difference(schedules)
+                        markup = self.get_markup(schedules)
                         try:
-                            bot.send_message(telegram_id, f"🟣Твоё {difference} было изменено!🟣\n")
+                            bot.send_message(telegram_id, f"🟣Твоё {difference} было изменено!🟣\n", reply_markup=markup)
                         except Exception as e:
+                            print(e)
                             pass
 
                     for telegram_id, schedules in new_schedule.items():
                         difference = self.get_difference(schedules)
+                        markup = self.get_markup(schedules)
                         try:
-                            bot.send_message(telegram_id, f"🟣Было добавлено {difference}!🟣\n")
+                            bot.send_message(telegram_id, f"🟣Было добавлено {difference}!🟣\n", reply_markup=markup)
                         except Exception as e:
+                            print(e)
                             pass
-
 
                 delete_events = delete_request(path="/notifications", json=notifications_data['response'])
 
             else:
-                send_logs_to_admins(f"Проверка уведомлений вернула код ${notifications_response.status_code}, вместо OK")
+                send_logs_to_admins(
+                    f"Проверка уведомлений вернула код ${notifications_response.status_code}, вместо OK")
         except Exception as e:
             send_logs_to_admins(f"Произошла ошибка при попытке отправить запрос новых уведомлений на сервер!\n"
                                 f"Стэктрейс: \n"
                                 f"{traceback.format_exc()}")
-
 
     def run(self):
         while True:

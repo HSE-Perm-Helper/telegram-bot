@@ -318,7 +318,7 @@ def get_text_schedule(message):
             markup = types.InlineKeyboardMarkup()
 
             for schedule in schedules_dict:
-                markup.add(get_button_by_schedule_info(schedule)),
+                markup.add(get_button_by_schedule_info(schedule, True)),
 
             bot.send_message(message.chat.id,
                              text_message,
@@ -702,11 +702,28 @@ def callback_message(callback_query: types.CallbackQuery):
 @bot.callback_query_handler(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
 @exception_handler
 def callback_message(callback_query: types.CallbackQuery):
-    bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
     start = data[0]
     end = data[1]
+    need_delete_message = data[2]
+    if need_delete_message == "True":
+        bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     schedule_json = api.get_schedule(callback_query.message.chat.id, start, end)
+
+    if need_delete_message == "False" and schedule_json["error"]:
+        bot.send_message(callback_query.message.chat.id, "Такого расписания уже нет 😔")
+
+        keyboard = callback_query.message.reply_markup.keyboard
+        new_keyboard = []
+        for row in keyboard:
+            filtered_row = list(filter(lambda button: button.callback_data != callback_query.data, row))
+            if len(filtered_row) > 0:
+                new_keyboard.append(filtered_row)
+
+        bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
+                                      message_id=callback_query.message.message_id,
+                                      reply_markup=types.InlineKeyboardMarkup(keyboard=new_keyboard))
+        return
     schedule_dict = schedule_json['response']
     schedule_sending(callback_query.message, schedule_dict)
 
