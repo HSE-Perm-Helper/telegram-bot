@@ -37,10 +37,10 @@ def get_schedule_header_by_schedule_info(schedule_info: dict) -> str:
     return "N/a"
 
 
-def get_button_by_schedule_info(schedule_info: dict) -> types.InlineKeyboardButton:
+def get_button_by_schedule_info(schedule_info: dict, need_delete_message: bool) -> types.InlineKeyboardButton:
     start = schedule_info["start"]
     end = schedule_info["end"]
-    data = insert_data_to_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, [start, end])
+    data = insert_data_to_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, [start, end, need_delete_message])
     return types.InlineKeyboardButton(get_button_text_by_schedule_info(schedule_info, start, end),
                                       callback_data=data)
 
