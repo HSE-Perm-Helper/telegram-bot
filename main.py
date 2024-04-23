@@ -5,15 +5,15 @@ from telebot import types
 import api
 import workers
 from bot import bot
+from callback.callback import check_callback, extract_data_from_callback
+from callback.schedule_callback import ScheduleCallback
 from decorators import typing_action, exception_handler, required_admin
-from schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
+from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE
+from message.common_messages import SUCCESS_REGISTER
 from schedule import ScheduleType
+from schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
 from users_utils import send_message_to_users
 from utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
-from callback.schedule_callback import ScheduleCallback
-from callback.callback import check_callback, insert_data_to_callback, extract_data_from_callback
-
-from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, GETTING_SCHEDULE
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -611,6 +611,7 @@ def send_mail(message: types.Message, course: int = None):
 def course_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("course_", "")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+
     get_program(callback_query.message, data)
 
 
@@ -689,6 +690,7 @@ def callback_message(callback_query: types.CallbackQuery):
                                    subgroup=subgroup)
 
     if is_success:
+        answer_callback(bot, callback_query, text=SUCCESS_REGISTER)
         get_menu(callback_query.message)
 
     else:
