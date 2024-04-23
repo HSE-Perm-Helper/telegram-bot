@@ -9,11 +9,11 @@ from decorators import typing_action, exception_handler, required_admin
 from schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
 from schedule import ScheduleType
 from users_utils import send_message_to_users
-from utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug
+from utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
 from callback.schedule_callback import ScheduleCallback
 from callback.callback import check_callback, insert_data_to_callback, extract_data_from_callback
 
-from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE
+from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, GETTING_SCHEDULE
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -711,7 +711,7 @@ def callback_message(callback_query: types.CallbackQuery):
         bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     schedule_json = api.get_schedule(callback_query.message.chat.id, start, end)
     if need_delete_message == "False" and schedule_json["error"]:
-        bot.answer_callback_query(callback_query_id=callback_query.id, text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
+        answer_callback(bot, callback_query, text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
 
         keyboard = callback_query.message.reply_markup.keyboard
         new_keyboard = []

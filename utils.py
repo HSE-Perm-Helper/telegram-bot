@@ -1,8 +1,10 @@
 import datetime
 
 import requests
+import telebot
 
 import venv
+from telebot.types import CallbackQuery
 
 import api
 
@@ -171,4 +173,8 @@ def get_day_of_week_from_date(date_string: str) -> str:
 
 def get_day_of_week_from_slug(slug: str) -> str:
     return days_of_week_slug.get(slug.upper(), "N/a")
+
+
+def answer_callback(bot: telebot.TeleBot, callback_query: CallbackQuery, text, show_alert=False):
+    bot.answer_callback_query(callback_query_id=callback_query.id, text=text, show_alert=show_alert)
 
