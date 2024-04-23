@@ -8,6 +8,7 @@ from utils import is_admin
 
 from message.common_messages import EXCEPTION_MESSAGE
 
+
 def typing_action(func):
     @wraps(func)
     def decorator(*args, **kwargs):
@@ -21,6 +22,7 @@ def typing_action(func):
         if chat_id:
             bot.send_chat_action(chat_id, 'typing')
         return func(*args, **kwargs)
+
     return decorator
 
 
@@ -37,6 +39,7 @@ def exception_handler(func):
                 elif isinstance(arg, telebot.types.CallbackQuery):
                     bot.send_message(arg.message.chat.id, EXCEPTION_MESSAGE)
                     break
+
     return wrapper
 
 
@@ -55,4 +58,5 @@ def required_admin(func):
                 else:
                     func(*args, **kwargs)
                 return
+
     return wrapper
