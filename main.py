@@ -5,13 +5,15 @@ from telebot import types
 import api
 import workers
 from bot import bot
-from decorators import typing_action, exception_handler
+from decorators import typing_action, exception_handler, required_admin
 from schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
 from schedule import ScheduleType
 from users_utils import send_message_to_users
 from utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug
 from callback.schedule_callback import ScheduleCallback
 from callback.callback import check_callback, insert_data_to_callback, extract_data_from_callback
+
+from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -556,9 +558,8 @@ def get_remote_schedule(message):
 # Обработка команды /mailing
 @bot.message_handler(commands=["mailing"])
 @exception_handler
+@required_admin
 def mailing_to_all(message: types.Message):
-    if not is_admin(message.chat.id):
-        return
     courses = api.get_courses()
     markup = types.InlineKeyboardMarkup()
     text = "Выберите курсы, в которые необходимо сделать рассылку:"
@@ -661,7 +662,7 @@ def program_query_handler(callback_query: types.CallbackQuery):
         get_subgroup(callback_query.message, data)
     elif callback_query.data.startswith('back_to_start'):
         data = callback_query.data.replace('back_to_start', "")
-        get_course(callback_query.message, data)
+        get_course(callback_query.message, data == "True")
 
 
 # Обработка события нажатия на кнопку подтверждения данных
@@ -709,9 +710,8 @@ def callback_message(callback_query: types.CallbackQuery):
     if need_delete_message == "True":
         bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     schedule_json = api.get_schedule(callback_query.message.chat.id, start, end)
-
     if need_delete_message == "False" and schedule_json["error"]:
-        bot.send_message(callback_query.message.chat.id, "Такого расписания уже нет 😔")
+        bot.answer_callback_query(callback_query_id=callback_query.id, text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
 
         keyboard = callback_query.message.reply_markup.keyboard
         new_keyboard = []
