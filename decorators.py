@@ -4,7 +4,10 @@ from functools import wraps
 import telebot
 
 from bot import bot
+from utils import is_admin
 
+EXCEPTION_MESSSAGE = "Что-то пошло не так 🤷\n"\
+                     "Попробуй еще раз или чуть позже"
 
 def typing_action(func):
     @wraps(func)
@@ -30,11 +33,27 @@ def exception_handler(func):
             traceback.print_exc()
             for arg in args:
                 if isinstance(arg, telebot.types.Message):
-                    bot.send_message(arg.chat.id, "Что-то пошло не так 🤷\n"
-                                                  "Попробуй еще раз или чуть позже")
+                    bot.send_message(arg.chat.id, EXCEPTION_MESSSAGE)
                     break
                 elif isinstance(arg, telebot.types.CallbackQuery):
-                    bot.send_message(arg.message.chat.id, "Что-то пошло не так 🤷\n"
-                                                          "Попробуй еще раз или зайди чуть позже")
+                    bot.send_message(arg.message.chat.id, EXCEPTION_MESSSAGE)
                     break
+    return wrapper
+
+
+def required_admin(func):
+    def wrapper(*args, **kwargs):
+        for arg in args:
+            if isinstance(arg, telebot.types.Message):
+                if not is_admin(arg.chat.id):
+                    return
+                else:
+                    func(*args, **kwargs)
+                return
+            elif isinstance(arg, telebot.types.CallbackQuery):
+                if not is_admin(arg.message.chat.id):
+                    return
+                else:
+                    func(*args, **kwargs)
+                return
     return wrapper
