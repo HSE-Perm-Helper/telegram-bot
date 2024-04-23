@@ -6,8 +6,7 @@ import telebot
 from bot import bot
 from utils import is_admin
 
-EXCEPTION_MESSSAGE = "Что-то пошло не так 🤷\n"\
-                     "Попробуй еще раз или чуть позже"
+from message.common_messages import EXCEPTION_MESSAGE
 
 def typing_action(func):
     @wraps(func)
@@ -33,10 +32,10 @@ def exception_handler(func):
             traceback.print_exc()
             for arg in args:
                 if isinstance(arg, telebot.types.Message):
-                    bot.send_message(arg.chat.id, EXCEPTION_MESSSAGE)
+                    bot.send_message(arg.chat.id, EXCEPTION_MESSAGE)
                     break
                 elif isinstance(arg, telebot.types.CallbackQuery):
-                    bot.send_message(arg.message.chat.id, EXCEPTION_MESSSAGE)
+                    bot.send_message(arg.message.chat.id, EXCEPTION_MESSAGE)
                     break
     return wrapper
 

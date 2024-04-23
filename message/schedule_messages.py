@@ -1,0 +1,1 @@
+SCHEDULE_NOT_FOUND_ANYMORE = "Такого расписания уже нет 😔"

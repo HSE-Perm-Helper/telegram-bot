@@ -13,6 +13,8 @@ from utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug
 from callback.schedule_callback import ScheduleCallback
 from callback.callback import check_callback, insert_data_to_callback, extract_data_from_callback
 
+from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE
+
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
 bot.can_join_groups = False  # Запрет на приглашения в группы (ему пофиг)
@@ -708,9 +710,8 @@ def callback_message(callback_query: types.CallbackQuery):
     if need_delete_message == "True":
         bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     schedule_json = api.get_schedule(callback_query.message.chat.id, start, end)
-
     if need_delete_message == "False" and schedule_json["error"]:
-        bot.send_message(callback_query.message.chat.id, "Такого расписания уже нет 😔")
+        bot.answer_callback_query(callback_query_id=callback_query.id, text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
 
         keyboard = callback_query.message.reply_markup.keyboard
         new_keyboard = []
