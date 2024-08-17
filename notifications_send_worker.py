@@ -100,7 +100,7 @@ class NotificationsSendWorker(threading.Thread):
 
             else:
                 send_logs_to_admins(
-                    f"Проверка уведомлений вернула код ${notifications_response.status_code}, вместо OK")
+                    f"Проверка уведомлений вернула код {notifications_response.status_code}, вместо OK")
         except Exception as e:
             send_logs_to_admins(f"Произошла ошибка при попытке отправить запрос новых уведомлений на сервер!\n"
                                 f"Стэктрейс: \n"
