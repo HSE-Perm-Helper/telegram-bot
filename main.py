@@ -414,11 +414,10 @@ def schedule_sending(message, schedule_dict):
                                                 lambda l: f'{get_day_of_week_from_date(l["time"]["date"])}'
                                                           f', {l["time"]["date"]}')
         for day, lessons in temp_lessons.items():
-            first_pair = number_of_pair_dict[lessons[0]["time"]['startTime']]
             last_pair = number_of_pair_dict[lessons[- 1]["time"]['startTime']]
             lessons_list_count = int(last_pair.replace('-ая пара', ''))
 
-            lesson_list = [{}] * lessons_list_count
+            lesson_list = [None] * lessons_list_count
 
             ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
                 Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
@@ -428,7 +427,10 @@ def schedule_sending(message, schedule_dict):
                 pair_index_string = number_of_pair_dict[lesson["time"]["startTime"]]
                 pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
 
-                lesson_list[pair_index] = lesson
+                if lesson_list[pair_index] is None:
+                    lesson_list[pair_index] = []
+
+                lesson_list[pair_index].append(lesson)
 
             count_pairs = 0
             for pair in lesson_list:
@@ -449,17 +451,18 @@ def schedule_sending(message, schedule_dict):
 
             is_pairs_start = False
             number_of_pair = 0
-            for lesson in lesson_list:
+            for lessons_inner in lesson_list:
                 if not is_pairs_start:
-                    if lesson:
+                    if lessons_inner:
                         is_pairs_start = True
-                        text_for_message += get_lesson_as_string(lesson)
-                else:
-                    if lesson:
-                        text_for_message += get_lesson_as_string(lesson)
-                    else:
+                if not lessons_inner:
+                    if is_pairs_start:
                         text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
                         text_for_message += f" - ОКНО 🪟\n\n"
+
+                else:
+                    for lesson in lessons_inner:
+                        text_for_message += get_lesson_as_string(lesson)
                 number_of_pair += 1
             bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
 
