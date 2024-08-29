@@ -1,4 +1,4 @@
-from utils import get_request, get_request_as_json, \
+from util.utils import get_request, get_request_as_json, \
     patch_request_as_json, post_request_as_json
 
 

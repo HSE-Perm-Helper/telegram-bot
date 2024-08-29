@@ -1,8 +1,8 @@
 import threading
 import time
 
-from logs_utils import send_logs_to_admins
-from utils import get_request
+from util.logs_utils import send_logs_to_admins
+from util.utils import get_request
 
 
 class BackendCheckHealthWorker(threading.Thread):

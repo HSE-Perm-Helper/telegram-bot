@@ -3,17 +3,17 @@ import random
 from telebot import types
 
 import api
-import workers
+from worker import workers
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
 from callback.schedule_callback import ScheduleCallback
-from decorators import typing_action, exception_handler, required_admin
-from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE
+from decorator.decorators import typing_action, exception_handler, required_admin
+from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from message.common_messages import SUCCESS_REGISTER
-from schedule import ScheduleType
-from schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
-from users_utils import send_message_to_users
-from utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
+from schedule.schedule import ScheduleType
+from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
+from util.users_utils import send_message_to_users
+from util.utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -399,7 +399,7 @@ def schedule_sending(message, schedule_dict):
     temp_lessons = schedule_dict['lessons']
 
     if len(temp_lessons) == 0:
-        bot.send_message(message.chat.id, "<b>В эту неделю у тебя нет пар! 🎉🎊</b>", parse_mode='HTML')
+        bot.send_message(message.chat.id, NO_LESSONS_IN_SCHEDULE, parse_mode='HTML')
         return
 
     else:
@@ -417,7 +417,7 @@ def schedule_sending(message, schedule_dict):
             last_pair = number_of_pair_dict[lessons[- 1]["time"]['startTime']]
             lessons_list_count = int(last_pair.replace('-ая пара', ''))
 
-            lesson_list = [None] * lessons_list_count
+            lesson_list: list[None | list[dict]] = [None] * lessons_list_count
 
             ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
                 Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его

@@ -6,7 +6,7 @@ import telebot
 import venv
 from telebot.types import CallbackQuery
 
-import api
+from api import api
 
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key

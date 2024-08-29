@@ -1,5 +1,5 @@
 from bot import bot
-from api import get_admin_ids
+from api.api import get_admin_ids
 
 
 def send_logs_to_admins(data: str):
