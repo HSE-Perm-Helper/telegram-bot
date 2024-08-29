@@ -8,7 +8,8 @@ from telebot import types
 from util.utils import get_request, delete_request, format_output_array
 from bot import bot
 from util.logs_utils import send_logs_to_admins
-from schedule.schedule import ScheduleType, schedule_utils
+from schedule.schedule_type import ScheduleType
+from schedule import schedule_utils
 
 
 class NotificationType(enum.Enum):

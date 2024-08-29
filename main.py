@@ -2,7 +2,7 @@ import random
 
 from telebot import types
 
-import api
+from api import api
 from worker import workers
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
@@ -10,10 +10,10 @@ from callback.schedule_callback import ScheduleCallback
 from decorator.decorators import typing_action, exception_handler, required_admin
 from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from message.common_messages import SUCCESS_REGISTER
-from schedule.schedule import ScheduleType
+from schedule.schedule_type import ScheduleType
 from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
 from util.users_utils import send_message_to_users
-from util.utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
+from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -548,9 +548,8 @@ def callback_message(message):
 @bot.message_handler(commands=['remote_schedule'])
 @typing_action
 @exception_handler
+@required_admin
 def get_remote_schedule(message):
-    if not is_admin(message.chat.id):
-        return
     bot.delete_message(message.chat.id, message.message_id)
     markup = types.InlineKeyboardMarkup(row_width=1)
     link = api.get_remote_schedule_link(message.chat.id)

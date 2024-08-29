@@ -6,8 +6,6 @@ import telebot
 import venv
 from telebot.types import CallbackQuery
 
-from api import api
-
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key
 accept_data = "application/json"
@@ -138,16 +136,6 @@ def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any]
         json=json,
         verify=False
     )
-
-
-def is_admin(telegram_id: int) -> bool:
-    """
-    Check user is admin
-    :param telegram_id user telegram id
-    :return True if user is admin
-    """
-    admins = api.get_admin_ids()
-    return telegram_id in admins
 
 
 def format_output_array(array: list[str]):
