@@ -5,11 +5,11 @@ import traceback
 
 from telebot import types
 
-import schedule_utils
-from utils import get_request, delete_request, format_output_array
+from util.utils import get_request, delete_request, format_output_array
 from bot import bot
-from logs_utils import send_logs_to_admins
-from schedule import ScheduleType
+from util.logs_utils import send_logs_to_admins
+from schedule.schedule_type import ScheduleType
+from schedule import schedule_utils
 
 
 class NotificationType(enum.Enum):

@@ -4,7 +4,7 @@ from functools import wraps
 import telebot
 
 from bot import bot
-from utils import is_admin
+from util.users_utils import is_admin
 
 from message.common_messages import EXCEPTION_MESSAGE
 

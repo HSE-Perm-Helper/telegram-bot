@@ -1,7 +1,6 @@
-import time
 from threading import Thread
-from notifications_send_worker import NotificationsSendWorker
-from backend_health_check_worker import BackendCheckHealthWorker
+from worker.notifications_send_worker import NotificationsSendWorker
+from worker.backend_health_check_worker import BackendCheckHealthWorker
 
 workers: list[Thread] = [
     NotificationsSendWorker(),

@@ -1,6 +1,6 @@
 from telebot import types
 
-from schedule import ScheduleType
+from schedule.schedule_type import ScheduleType
 from callback.schedule_callback import ScheduleCallback
 from callback.callback import insert_data_to_callback
 

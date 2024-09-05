@@ -6,8 +6,6 @@ import telebot
 import venv
 from telebot.types import CallbackQuery
 
-import api
-
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key
 accept_data = "application/json"
@@ -53,8 +51,7 @@ def get_request(path: str, headers: dict[str, str] = {}) -> requests.Response:
     """
     return requests.get(
         url=f"{base_url}{path}",
-        headers=headers | required_headers,
-        verify=False
+        headers=headers | required_headers
     )
 
 
@@ -81,8 +78,7 @@ def post_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] =
     return requests.post(
         url=f"{base_url}{path}",
         json=json,
-        headers=headers | required_headers,
-        verify=False
+        headers=headers | required_headers
     )
 
 
@@ -109,8 +105,7 @@ def patch_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] 
     return requests.patch(
         url=f"{base_url}{path}",
         json=json,
-        headers=headers | required_headers,
-        verify=False
+        headers=headers | required_headers
     )
 
 
@@ -135,19 +130,8 @@ def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any]
     return requests.delete(
         url=f"{base_url}{path}",
         headers=headers | required_headers,
-        json=json,
-        verify=False
+        json=json
     )
-
-
-def is_admin(telegram_id: int) -> bool:
-    """
-    Check user is admin
-    :param telegram_id user telegram id
-    :return True if user is admin
-    """
-    admins = api.get_admin_ids()
-    return telegram_id in admins
 
 
 def format_output_array(array: list[str]):

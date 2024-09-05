@@ -2,18 +2,19 @@ import random
 
 from telebot import types
 
-import api
-import workers
+from api import api
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
 from callback.schedule_callback import ScheduleCallback
-from decorators import typing_action, exception_handler, required_admin
-from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE
+from decorator.decorators import typing_action, exception_handler, required_admin
 from message.common_messages import SUCCESS_REGISTER
-from schedule import ScheduleType
-from schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
-from users_utils import send_message_to_users
-from utils import is_admin, get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
+from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
+from schedule.schedule_type import ScheduleType
+from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, \
+    get_schedule_header_by_schedule_info
+from util.users_utils import send_message_to_users
+from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
+from worker import workers
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -390,7 +391,7 @@ def get_lesson_as_string(lesson):
 
 
 # Формирование расписания
-def schedule_sending(message, schedule_dict):
+def schedule_sending(message: types.Message, schedule_dict):
     schedule_type = schedule_dict["scheduleType"]
     is_session = False
     if schedule_type == ScheduleType.SESSION_SCHEDULE.value:
@@ -399,13 +400,14 @@ def schedule_sending(message, schedule_dict):
     temp_lessons = schedule_dict['lessons']
 
     if len(temp_lessons) == 0:
-        bot.send_message(message.chat.id, "<b>В эту неделю у тебя нет пар! 🎉🎊</b>", parse_mode='HTML')
+        bot.send_message(message.chat.id, NO_LESSONS_IN_SCHEDULE, parse_mode='HTML')
         return
 
     else:
         text_for_message = f"<b>{get_schedule_header_by_schedule_info(schedule_dict)}</b>\n\n"
 
-        bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+        header_message = bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
         if schedule_type == ScheduleType.QUARTER_SCHEDULE.value:
             temp_lessons = group_lessons_by_key(temp_lessons,
                                                 lambda l: get_day_of_week_from_slug(l["time"]["dayOfWeek"]))
@@ -417,7 +419,7 @@ def schedule_sending(message, schedule_dict):
             last_pair = number_of_pair_dict[lessons[- 1]["time"]['startTime']]
             lessons_list_count = int(last_pair.replace('-ая пара', ''))
 
-            lesson_list = [None] * lessons_list_count
+            lesson_list: list[None | list[dict]] = [None] * lessons_list_count
 
             ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
                 Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
@@ -465,6 +467,9 @@ def schedule_sending(message, schedule_dict):
                         text_for_message += get_lesson_as_string(lesson)
                 number_of_pair += 1
             bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
+        bot.unpin_all_chat_messages(message.chat.id)
+        bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
 
 
 # ---------------------------------  Обработка команд  ----------------------------------- #
@@ -548,9 +553,8 @@ def callback_message(message):
 @bot.message_handler(commands=['remote_schedule'])
 @typing_action
 @exception_handler
+@required_admin
 def get_remote_schedule(message):
-    if not is_admin(message.chat.id):
-        return
     bot.delete_message(message.chat.id, message.message_id)
     markup = types.InlineKeyboardMarkup(row_width=1)
     link = api.get_remote_schedule_link(message.chat.id)
@@ -711,6 +715,9 @@ def callback_message(callback_query: types.CallbackQuery):
 @bot.callback_query_handler(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
 @exception_handler
 def callback_message(callback_query: types.CallbackQuery):
+
+    bot.answer_callback_query(callback_query.id)
+
     data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
     start = data[0]
     end = data[1]
