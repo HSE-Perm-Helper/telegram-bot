@@ -3,17 +3,18 @@ import random
 from telebot import types
 
 from api import api
-from worker import workers
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
 from callback.schedule_callback import ScheduleCallback
 from decorator.decorators import typing_action, exception_handler, required_admin
-from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from message.common_messages import SUCCESS_REGISTER
+from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from schedule.schedule_type import ScheduleType
-from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, get_schedule_header_by_schedule_info
+from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, \
+    get_schedule_header_by_schedule_info
 from util.users_utils import send_message_to_users
 from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
+from worker import workers
 
 # ---------------------------------  Настройка бота  ----------------------------------- #
 
@@ -390,7 +391,7 @@ def get_lesson_as_string(lesson):
 
 
 # Формирование расписания
-def schedule_sending(message, schedule_dict):
+def schedule_sending(message: types.Message, schedule_dict):
     schedule_type = schedule_dict["scheduleType"]
     is_session = False
     if schedule_type == ScheduleType.SESSION_SCHEDULE.value:
@@ -405,7 +406,8 @@ def schedule_sending(message, schedule_dict):
     else:
         text_for_message = f"<b>{get_schedule_header_by_schedule_info(schedule_dict)}</b>\n\n"
 
-        bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+        header_message = bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
         if schedule_type == ScheduleType.QUARTER_SCHEDULE.value:
             temp_lessons = group_lessons_by_key(temp_lessons,
                                                 lambda l: get_day_of_week_from_slug(l["time"]["dayOfWeek"]))
@@ -465,6 +467,9 @@ def schedule_sending(message, schedule_dict):
                         text_for_message += get_lesson_as_string(lesson)
                 number_of_pair += 1
             bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+
+        bot.unpin_all_chat_messages(message.chat.id)
+        bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
 
 
 # ---------------------------------  Обработка команд  ----------------------------------- #
@@ -710,6 +715,9 @@ def callback_message(callback_query: types.CallbackQuery):
 @bot.callback_query_handler(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
 @exception_handler
 def callback_message(callback_query: types.CallbackQuery):
+
+    bot.answer_callback_query(callback_query.id)
+
     data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
     start = data[0]
     end = data[1]

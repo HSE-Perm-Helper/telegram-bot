@@ -51,8 +51,7 @@ def get_request(path: str, headers: dict[str, str] = {}) -> requests.Response:
     """
     return requests.get(
         url=f"{base_url}{path}",
-        headers=headers | required_headers,
-        verify=False
+        headers=headers | required_headers
     )
 
 
@@ -79,8 +78,7 @@ def post_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] =
     return requests.post(
         url=f"{base_url}{path}",
         json=json,
-        headers=headers | required_headers,
-        verify=False
+        headers=headers | required_headers
     )
 
 
@@ -107,8 +105,7 @@ def patch_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] 
     return requests.patch(
         url=f"{base_url}{path}",
         json=json,
-        headers=headers | required_headers,
-        verify=False
+        headers=headers | required_headers
     )
 
 
@@ -133,8 +130,7 @@ def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any]
     return requests.delete(
         url=f"{base_url}{path}",
         headers=headers | required_headers,
-        json=json,
-        verify=False
+        json=json
     )
 
 
