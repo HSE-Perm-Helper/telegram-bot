@@ -34,7 +34,7 @@ def get_admin_ids() -> list[int]:
 
 def get_courses() -> list[int]:
     courses: list[int] = []
-    courses_data = get_request_as_json("/schedule/available_courses")
+    courses_data = get_request_as_json("/schedule_handle/available_courses")
     for i in courses_data["response"]:
         courses.append(int(i))
 
@@ -45,7 +45,7 @@ def get_courses() -> list[int]:
 
 def get_programs(course: int) -> list[str]:
     programs: list[str] = []
-    programs_data = get_request_as_json(f"/schedule/available_programs?course={course}")
+    programs_data = get_request_as_json(f"/schedule_handle/available_programs?course={course}")
     for i in programs_data["response"]:
         programs.append(i)
 
@@ -56,7 +56,7 @@ def get_programs(course: int) -> list[str]:
 
 def get_groups(course: int, program: int) -> list[str]:
     groups: list[str] = []
-    groups_data = get_request_as_json(path=f"/schedule/available_groups?course={course}"
+    groups_data = get_request_as_json(path=f"/schedule_handle/available_groups?course={course}"
                                            f"&program={program}")
     for i in groups_data["response"]:
         groups.append(i)
@@ -68,7 +68,7 @@ def get_groups(course: int, program: int) -> list[str]:
 
 def get_subgroups(course: int, program: str, group: str) -> list[int]:
     subgroups: list[int] = []
-    subgroups_data = get_request_as_json(path=f"/schedule/available_subgroups?course={course}"
+    subgroups_data = get_request_as_json(path=f"/schedule_handle/available_subgroups?course={course}"
                                               f"&program={program}&group={group}")
     for i in subgroups_data["response"]:
         subgroups.append(int(i))
@@ -103,7 +103,7 @@ def edit_user(telegram_id: int, group: str, subgroup: int) -> bool:
 # -------------  Получение расписания  ------------- #
 
 def get_schedule(telegram_id: int, start: str, end: str) -> dict[str, any]:
-    schedule_data = get_request_as_json(path=f"/v3/schedule/{telegram_id}?start={start}&end={end}")
+    schedule_data = get_request_as_json(path=f"/v3/schedule_handle/{telegram_id}?start={start}&end={end}")
     return schedule_data
 
 
@@ -123,6 +123,6 @@ def check_registration_user(telegram_id: int) -> bool:
 # ----------- Автообновляемое расписание -------------- #
 
 def get_remote_schedule_link(telegram_id: int) -> str:
-    response = get_request_as_json(path=f"/schedule/{telegram_id}/download")
+    response = get_request_as_json(path=f"/schedule_handle/{telegram_id}/download")
     print(response)
     return f'{response["response"]["linkForRemoteCalendar"]}'

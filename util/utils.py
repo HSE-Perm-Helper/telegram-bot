@@ -1,10 +1,10 @@
 import datetime
 
 import requests
-import telebot
+import aiogram
 
 import venv
-from telebot.types import CallbackQuery
+from aiogram.types import CallbackQuery
 
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key
@@ -159,6 +159,6 @@ def get_day_of_week_from_slug(slug: str) -> str:
     return days_of_week_slug.get(slug.upper(), "N/a")
 
 
-def answer_callback(bot: telebot.TeleBot, callback_query: CallbackQuery, text, show_alert=False):
+def answer_callback(bot: aiogram.Bot, callback_query: CallbackQuery, text, show_alert=False):
     bot.answer_callback_query(callback_query_id=callback_query.id, text=text, show_alert=show_alert)
 

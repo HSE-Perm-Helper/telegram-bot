@@ -1,4 +1,4 @@
-from telebot import types
+from aiogram import types
 
 from schedule.schedule_type import ScheduleType
 from callback.schedule_callback import ScheduleCallback

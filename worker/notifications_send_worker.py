@@ -3,7 +3,8 @@ import threading
 import time
 import traceback
 
-from telebot import types
+from aiogram import Router, types
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from util.utils import get_request, delete_request, format_output_array
 from bot import bot
@@ -11,6 +12,7 @@ from util.logs_utils import send_logs_to_admins
 from schedule.schedule_type import ScheduleType
 from schedule import schedule_utils
 
+router = Router()
 
 class NotificationType(enum.Enum):
     SCHEDULE_ADDED = "SCHEDULE_ADDED"
@@ -47,11 +49,11 @@ class NotificationsSendWorker(threading.Thread):
             difference.append("расписание на сессию")
         return format_output_array(difference)
 
-    def get_markup(self, schedules) -> types.InlineKeyboardMarkup:
-        markup = types.InlineKeyboardMarkup()
+    def get_markup(self, schedules) -> InlineKeyboardBuilder:
+        keyword = InlineKeyboardBuilder()
         for schedule in schedules:
-            markup.add(schedule_utils.get_button_by_schedule_info(schedule, False))
-        return markup
+            keyword.add(schedule_utils.get_button_by_schedule_info(schedule, False))
+        return keyword
 
     def check_new_notifications(self):
         try:
