@@ -1,10 +1,9 @@
 import datetime
 
 import requests
-import aiogram
+from aiogram.types import CallbackQuery
 
 import venv
-from aiogram.types import CallbackQuery
 
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key
@@ -31,18 +30,18 @@ days_of_week_slug = {
 }
 
 
-def get_request_as_json(path: str, headers: dict[str, str] = {}) -> dict[str, any]:
+async def get_request_as_json(path: str, headers: dict[str, str] = {}) -> dict[str, any]:
     """
     Get request as json from backend
     :param path api path for request
     :param headers for request, without required
     :return: get response as json
     """
-    return (get_request(path, headers)
-            .json())
+    response = await get_request(path, headers)
+    return response.json()
 
 
-def get_request(path: str, headers: dict[str, str] = {}) -> requests.Response:
+async def get_request(path: str, headers: dict[str, str] = {}) -> requests.Response:
     """
     Get request from backend
     :param path api path for request
@@ -55,7 +54,7 @@ def get_request(path: str, headers: dict[str, str] = {}) -> requests.Response:
     )
 
 
-def post_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> dict[str, any]:
+async def post_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> dict[str, any]:
     """
     Post request as json from backend
     :param path api path for request
@@ -63,11 +62,11 @@ def post_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str
     :param json payload for request
     :return: get response as json
     """
-    return (post_request(path, headers, json)
-            .json())
+    response = await post_request(path, headers, json)
+    return response.json()
 
 
-def post_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> requests.Response:
+async def post_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> requests.Response:
     """
     Post request from backend
     :param path api path for request
@@ -82,7 +81,7 @@ def post_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] =
     )
 
 
-def patch_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> dict[str, any]:
+async def patch_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> dict[str, any]:
     """
     Patch request as json from backend
     :param path api path for request
@@ -90,11 +89,11 @@ def patch_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[st
     :param json payload for request
     :return: get response as json
     """
-    return (patch_request(path, headers, json)
-            .json())
+    response = await patch_request(path, headers, json)
+    return response.json()
 
 
-def patch_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> requests.Response:
+async def patch_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> requests.Response:
     """
     Patch request from backend
     :param path api path for request
@@ -109,18 +108,19 @@ def patch_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] 
     )
 
 
-def delete_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> dict[str, any]:
+async def delete_request_as_json(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> dict[
+    str, any]:
     """
     Delete request as json from backend
     :param path api path for request
     :param headers for request, without required
     :return: delete response as json
     """
-    return (delete_request(path, headers, json)
-            .json())
+    response = await delete_request(path, headers, json)
+    return response.json()
 
 
-def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> requests.Response:
+async def delete_request(path: str, headers: dict[str, str] = {}, json: dict[str, any] = None) -> requests.Response:
     """
     Delete request from backend
     :param path api path for request
@@ -159,6 +159,5 @@ def get_day_of_week_from_slug(slug: str) -> str:
     return days_of_week_slug.get(slug.upper(), "N/a")
 
 
-def answer_callback(bot: aiogram.Bot, callback_query: CallbackQuery, text, show_alert=False):
-    bot.answer_callback_query(callback_query_id=callback_query.id, text=text, show_alert=show_alert)
-
+async def answer_callback(callback_query: CallbackQuery, text, show_alert=False):
+    await callback_query.answer(text=text, show_alert=show_alert)

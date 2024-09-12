@@ -4,9 +4,8 @@ from functools import wraps
 import aiogram
 
 from bot import bot
-from util.users_utils import is_admin
-
 from message.common_messages import EXCEPTION_MESSAGE
+from util.users_utils import is_admin
 
 
 def typing_action(func):
@@ -49,12 +48,12 @@ def required_admin(func):
     async def wrapper(*args, **kwargs):
         for arg in args:
             if isinstance(arg, aiogram.types.Message):
-                if not is_admin(arg.chat.id):
+                if not await is_admin(arg.chat.id):
                     return
                 else:
                     return await func(*args, **kwargs)
             elif isinstance(arg, aiogram.types.CallbackQuery):
-                if not is_admin(arg.message.chat.id):
+                if not await is_admin(arg.message.chat.id):
                     return
                 else:
                     return await func(*args, **kwargs)

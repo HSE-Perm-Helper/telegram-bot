@@ -1,25 +1,25 @@
+import asyncio
 import enum
-import threading
-import time
 import traceback
 
-from aiogram import Router, types
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+from aiogram import Router
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from util.utils import get_request, delete_request, format_output_array
 from bot import bot
-from util.logs_utils import send_logs_to_admins
-from schedule.schedule_type import ScheduleType
 from schedule import schedule_utils
+from schedule.schedule_type import ScheduleType
+from util.logs_utils import send_logs_to_admins
+from util.utils import get_request, delete_request, format_output_array
 
 router = Router()
+
 
 class NotificationType(enum.Enum):
     SCHEDULE_ADDED = "SCHEDULE_ADDED"
     SCHEDULE_CHANGED = "SCHEDULE_CHANGED_FOR_USER"
 
 
-class NotificationsSendWorker(threading.Thread):
+class NotificationsSendWorker:
     def __init__(self):
         super().__init__()
 
@@ -52,12 +52,12 @@ class NotificationsSendWorker(threading.Thread):
     def get_markup(self, schedules) -> InlineKeyboardBuilder:
         keyword = InlineKeyboardBuilder()
         for schedule in schedules:
-            keyword.add(schedule_utils.get_button_by_schedule_info(schedule, False))
+            keyword.row(schedule_utils.get_button_by_schedule_info(schedule, False))
         return keyword
 
-    def check_new_notifications(self):
+    async def check_new_notifications(self):
         try:
-            notifications_response = get_request(path="/notifications")
+            notifications_response = await get_request(path="/notifications")
             new_schedule: dict[int, list] = {}
             schedule_changing: dict[int, list] = {}
             notifications_data = notifications_response.json()
@@ -84,7 +84,8 @@ class NotificationsSendWorker(threading.Thread):
                         difference = self.get_difference(schedules)
                         markup = self.get_markup(schedules)
                         try:
-                            bot.send_message(telegram_id, f"🟣Твоё {difference} было изменено!🟣\n", reply_markup=markup)
+                            await bot.send_message(telegram_id, f"🟣Твоё {difference} было изменено!🟣\n",
+                                                   reply_markup=markup.as_markup())
                         except Exception as e:
                             print(e)
                             pass
@@ -93,22 +94,23 @@ class NotificationsSendWorker(threading.Thread):
                         difference = self.get_difference(schedules)
                         markup = self.get_markup(schedules)
                         try:
-                            bot.send_message(telegram_id, f"🟣Было добавлено {difference}!🟣\n", reply_markup=markup)
+                            await bot.send_message(telegram_id, f"🟣Было добавлено {difference}!🟣\n",
+                                                   reply_markup=markup.as_markup())
                         except Exception as e:
                             print(e)
                             pass
 
-                delete_events = delete_request(path="/notifications", json=notifications_data['response'])
+                delete_events = await delete_request(path="/notifications", json=notifications_data['response'])
 
             else:
-                send_logs_to_admins(
+                await send_logs_to_admins(
                     f"Проверка уведомлений вернула код {notifications_response.status_code}, вместо OK")
         except Exception as e:
-            send_logs_to_admins(f"Произошла ошибка при попытке отправить запрос новых уведомлений на сервер!\n"
-                                f"Стэктрейс: \n"
-                                f"{traceback.format_exc()}")
+            await send_logs_to_admins(f"Произошла ошибка при попытке отправить запрос новых уведомлений на сервер!\n"
+                                      f"Стэктрейс: \n"
+                                      f"{traceback.format_exc()}")
 
-    def run(self):
+    async def run(self):
         while True:
-            self.check_new_notifications()
-            time.sleep(300)
+            await self.check_new_notifications()
+            await asyncio.sleep(300)

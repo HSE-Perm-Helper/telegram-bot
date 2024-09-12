@@ -1,10 +1,12 @@
 import asyncio
+
+from aiogram import types
+
 from bot import bot, dp
-from worker import workers
 from routes.command_handle import commands
 from routes.registration import registration
 from routes.schedule_handle import schedule_handle
-from aiogram import types
+from worker import workers
 
 
 async def main():
@@ -12,7 +14,6 @@ async def main():
     dp.include_router(commands.router)
     dp.include_router(registration.router)
     dp.include_router(schedule_handle.router)
-
 
     # Команды бота в списке
 

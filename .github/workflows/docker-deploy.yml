@@ -9,14 +9,14 @@ jobs:
     name: Bot deploying
     runs-on: ubuntu-latest
     steps:
-    - name: executing remote ssh commands
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        script: |
-          cd /projects/HsePermHelperBot
-          git pull
-          docker-compose build
-          docker-compose up -d
+      - name: executing remote ssh commands
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /projects/HsePermHelperBot
+            git pull
+            docker-compose build
+            docker-compose up -d

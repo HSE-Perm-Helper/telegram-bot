@@ -1,8 +1,8 @@
 from aiogram import types
 
-from schedule.schedule_type import ScheduleType
-from callback.schedule_callback import ScheduleCallback
 from callback.callback import insert_data_to_callback
+from callback.schedule_callback import ScheduleCallback
+from schedule.schedule_type import ScheduleType
 
 emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
 
@@ -41,7 +41,7 @@ def get_button_by_schedule_info(schedule_info: dict, need_delete_message: bool) 
     start = schedule_info["start"]
     end = schedule_info["end"]
     data = insert_data_to_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, [start, end, need_delete_message])
-    return types.InlineKeyboardButton(get_button_text_by_schedule_info(schedule_info, start, end),
+    return types.InlineKeyboardButton(text=get_button_text_by_schedule_info(schedule_info, start, end),
                                       callback_data=data)
 
 

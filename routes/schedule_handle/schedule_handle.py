@@ -1,24 +1,23 @@
-import random
-
 from aiogram import Router, types
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
+
+import routes.command_handle.commands as commands
 from api import api
 from bot import bot
+from callback.callback import check_callback, extract_data_from_callback
+from callback.schedule_callback import ScheduleCallback
+from constants import constant
+from decorator.decorators import typing_action, exception_handler
 from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from schedule.schedule_type import ScheduleType
 from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, \
     get_schedule_header_by_schedule_info
 from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
-from constants import constant
-from callback.callback import check_callback, extract_data_from_callback
-from callback.schedule_callback import ScheduleCallback
-from decorator.decorators import typing_action, exception_handler
-import routes.command_handle.commands as commands
 
 router = Router()
 
 
-def get_menu(message):
+async def get_menu(message):
     text_schedule = ("<b>Команды для работы:</b>\n\n"
                      "🔹 /settings — <i>Изменение информации о себе</i>\n\n"
                      "🔹 /menu — <i>Получить меню для работы</i>\n\n"
@@ -28,8 +27,7 @@ def get_menu(message):
                      "❗ При удалении этого сообщения кнопки выбора расписания пропадут. "
                      "Чтобы их вернуть, введи /menu еще раз! 🙂")
 
-    keyboard_markup_up = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard_markup_down = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard_markup_up = ReplyKeyboardBuilder()
     # add_schedule_calendar_button = types.KeyboardButton("Добавить обновляемый календарь")
     get_schedule_text_button = types.KeyboardButton(text="Получить текстовое расписание 💼")
     get_base_schedule_text_button = types.KeyboardButton(text="Получить расписание на модуль 🗓")
@@ -39,13 +37,13 @@ def get_menu(message):
     keyboard_markup_up.row(get_base_schedule_text_button)
     keyboard_markup_up.row_width = 4
 
-    message.answer(text_schedule,
-                   reply_markup=keyboard_markup_up, parse_mode='HTML')
+    await message.answer(text_schedule,
+                         reply_markup=keyboard_markup_up.as_markup(), parse_mode='HTML')
 
 
 # Получение расписания для календаря
-def get_schedule(message):
-    bot.delete_message(message.chat.id, message.message_id)
+async def get_schedule(message):
+    await message.delete()
     text_get_schedule = "🔵 Выбери способ получения расписания:"
 
     markup = InlineKeyboardBuilder()
@@ -58,17 +56,17 @@ def get_schedule(message):
     # markup.add(types.InlineKeyboardButton("Отправлять расписание текстом",
     #                                       callback_data="get_text_schedule"))
 
-    message.answer(text=text_get_schedule, reply_markup=markup)
+    await message.answer(text=text_get_schedule, reply_markup=markup)
 
 
 # Получение текстового расписания
-def get_text_schedule(message):
-    bot.delete_message(message.chat.id, message.message_id)
-    schedule_json = api.get_schedules()
+async def get_text_schedule(message):
+    await message.delete()
+    schedule_json = await api.get_schedules()
 
     if schedule_json['error'] is True:
-        message.answer(text='Для тебя почему-то нет расписания 🤷\nНастрой группу заново '
-                            'командой /settings!')
+        await message.answer(text='Для тебя почему-то нет расписания 🤷\nНастрой группу заново '
+                                  'командой /settings!')
     else:
         schedules_dict = list(filter(lambda schedule: schedule["scheduleType"] != ScheduleType.QUARTER_SCHEDULE.value,
                                      schedule_json['response']))
@@ -77,17 +75,18 @@ def get_text_schedule(message):
             schedule = schedules_dict[0]
             start = schedule["start"]
             end = schedule["end"]
-            schedule_sending(message, api.get_schedule(message.chat.id, start, end)["response"])
+            response = await api.get_schedule(message.chat.id, start, end)
+            await schedule_sending(message, response["response"])
         elif len(schedules_dict) == 0:
-            message.answer(text="Расписания пока нет, отдыхай! 😎")
+            await message.answer(text="Расписания пока нет, отдыхай! 😎")
         else:
             text_message = "🔵 Выбери расписание, которое ты хочешь увидеть:"
             markup = InlineKeyboardBuilder()
 
             for schedule in schedules_dict:
-                markup.add(get_button_by_schedule_info(schedule, True)),
+                markup.row(get_button_by_schedule_info(schedule, True)),
 
-            message.answer(text=text_message, reply_markup=markup)
+            await message.answer(text=text_message, reply_markup=markup.as_markup())
 
 
 def get_lesson_as_string(lesson):
@@ -166,7 +165,7 @@ async def schedule_sending(message: types.Message, schedule_dict):
     else:
         text_for_message = f"<b>{get_schedule_header_by_schedule_info(schedule_dict)}</b>\n\n"
 
-        header_message = bot.send_message(message.chat.id, text_for_message, parse_mode='HTML')
+        header_message = await message.answer(text_for_message, parse_mode='HTML')
 
         if schedule_type == ScheduleType.QUARTER_SCHEDULE.value:
             temp_lessons = group_lessons_by_key(temp_lessons,
@@ -228,8 +227,8 @@ async def schedule_sending(message: types.Message, schedule_dict):
                 number_of_pair += 1
             await message.answer(text=text_for_message, parse_mode='HTML')
 
-        bot.unpin_all_chat_messages(message.chat.id)
-        bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
+        await bot.unpin_all_chat_messages(message.chat.id)
+        await bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
 
 
 # Пользователем выбрано расписание для отправки
@@ -237,7 +236,6 @@ async def schedule_sending(message: types.Message, schedule_dict):
 @router.callback_query(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
 @exception_handler
 async def callback_message(callback_query: types.CallbackQuery):
-
     await bot.answer_callback_query(callback_query.id)
 
     data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
@@ -245,22 +243,23 @@ async def callback_message(callback_query: types.CallbackQuery):
     end = data[1]
     need_delete_message = data[2]
     if need_delete_message == "True":
-        await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    schedule_json = api.get_schedule(callback_query.message.chat.id, start, end)
+        await callback_query.message.delete()
+    schedule_json = await api.get_schedule(callback_query.message.chat.id, start, end)
     if need_delete_message == "False" and schedule_json["error"]:
-        answer_callback(bot, callback_query, text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
+        await answer_callback(callback_query, text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
 
-        keyboard = callback_query.message.reply_markup.keyboard
-        new_keyboard = []
+        keyboard: list[list[types.InlineKeyboardButton]] = callback_query.message.reply_markup.inline_keyboard
+        new_keyboard: list[list[types.InlineKeyboardButton]] = []
         for row in keyboard:
             filtered_row = list(filter(lambda button: button.callback_data != callback_query.data, row))
             if len(filtered_row) > 0:
                 new_keyboard.append(filtered_row)
 
         await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
-                                      message_id=callback_query.message.message_id,
-                                      reply_markup=types.InlineKeyboardMarkup(keyboard=new_keyboard))
+                                            message_id=callback_query.message.message_id,
+                                            reply_markup=types.InlineKeyboardMarkup(inline_keyboard=new_keyboard))
         return
+
     schedule_dict = schedule_json['response']
     await schedule_sending(callback_query.message, schedule_dict)
 
@@ -269,12 +268,11 @@ async def callback_message(callback_query: types.CallbackQuery):
 @router.callback_query(lambda c: c.data.startswith("mailing_course"))
 @exception_handler
 async def callback_message(callback_query: types.CallbackQuery):
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await callback_query.message.delete()
     data = callback_query.data.replace('mailing_course_', "")
     course = None
     if data != "all":
         course = int(data)
-    await bot.send_message(callback_query.message.chat.id,
-                     "Введите сообщение для рассылки: ")
-    bot.register_next_step_handler(callback_query.message, commands.send_mail, course=course)
-
+    await callback_query.message.answer(
+        "Введите сообщение для рассылки: ")
+    await bot.register_next_step_handler(callback_query.message, commands.send_mail, course=course)

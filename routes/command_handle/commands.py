@@ -1,14 +1,15 @@
-from aiogram import Router, types, F
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-from aiogram.filters import CommandStart, Command
+from aiogram import Router, types
+from aiogram.filters import Command
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from api import api
 from bot import bot
-from decorator.decorators import typing_action, exception_handler, required_admin
-from schedule.schedule_type import ScheduleType
-from util.users_utils import send_message_to_users
 from constants import constant
+from decorator.decorators import typing_action, exception_handler, required_admin
 from routes.registration import registration
 from routes.schedule_handle import schedule_handle
+from schedule.schedule_type import ScheduleType
+from util.users_utils import send_message_to_users
 
 router = Router()
 
@@ -20,7 +21,7 @@ router = Router()
 @typing_action
 @exception_handler
 async def get_registration(message):
-    if api.check_registration_user(message.chat.id):
+    if await api.check_registration_user(message.chat.id):
         await schedule_handle.get_menu(message)
     else:
         await registration.get_course(message, True)
@@ -60,7 +61,7 @@ async def start_working(message):
 @typing_action
 @exception_handler
 async def get_settings(message):
-    await bot.delete_message(message.chat.id, message.message_id)
+    await message.delete()
     await registration.get_course(message, False)
 
 
@@ -95,7 +96,7 @@ async def callback_message(message):
 async def get_remote_schedule(message):
     await bot.delete_message(message.chat.id, message.message_id)
     keyword = InlineKeyboardBuilder()
-    link = api.get_remote_schedule_link(message.chat.id)
+    link = await api.get_remote_schedule_link(message.chat.id)
     keyword.add(types.InlineKeyboardButton(text="Добавить расписание в календарь", url=link))
     await message.answer(text="Чтобы добавить расписание в свой календарь тебе всего лишь нужно нажать на кнопку и "
                               "выбрать календарь, который ты используешь."
@@ -107,17 +108,17 @@ async def get_remote_schedule(message):
 @exception_handler
 @required_admin
 async def mailing_to_all(message: types.Message):
-    courses = api.get_courses()
+    courses = await api.get_courses()
     keyboard = InlineKeyboardBuilder()
     text = "Выберите курсы, в которые необходимо сделать рассылку:"
     for i in range(len(courses)):
         emoji_for_button = f"{constant.emojies_for_course[i]} {courses[i]} курс"
-        keyboard.add(types.InlineKeyboardButton(text=emoji_for_button,
+        keyboard.row(types.InlineKeyboardButton(text=emoji_for_button,
                                                 callback_data=f"mailing_course_{courses[i]}"))
-    keyboard.add(types.InlineKeyboardButton(text="Всем",
+    keyboard.row(types.InlineKeyboardButton(text="Всем",
                                             callback_data=f"mailing_course_all"))
 
-    await message.answer(text=text, reply_markup=keyboard)
+    await message.answer(text=text, reply_markup=keyboard.as_markup())
 
 
 @router.message(Command("base_schedule"))
@@ -126,21 +127,21 @@ async def mailing_to_all(message: types.Message):
 @exception_handler
 async def get_base_schedule(message: types.Message):
     await bot.delete_message(message.chat.id, message.message_id)
-    schedules_json = api.get_schedules()
+    schedules_json = await api.get_schedules()
     schedules = list(filter(lambda schedule: schedule["scheduleType"] == ScheduleType.QUARTER_SCHEDULE.value,
                             schedules_json['response']))
     if len(schedules) == 0:
         await message.answer(text="Пока расписания на модуль нет! 🎉🎊")
     else:
         schedule = schedules[0]
-        response_schedule = api.get_schedule(message.chat.id, schedule["start"], schedule["end"])
-        await schedule.schedule_sending(message, response_schedule["response"])
+        response_schedule = await api.get_schedule(message.chat.id, schedule["start"], schedule["end"])
+        await schedule_handle.schedule_sending(message, response_schedule["response"])
 
 
-def send_mail(message: types.Message, course: int = None):
-    bot.send_message(message.chat.id, "Рассылка успешно отправлена!")
+async def send_mail(message: types.Message, course: int = None):
+    await bot.send_message(message.chat.id, "Рассылка успешно отправлена!")
     if not course:
-        users = api.get_user_ids()
+        users = await api.get_user_ids()
     else:
-        users = api.get_user_ids_by_course(course)
-    send_message_to_users(message.html_text, users)
+        users = await api.get_user_ids_by_course(course)
+    await send_message_to_users(message.html_text, users)
