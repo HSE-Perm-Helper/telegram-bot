@@ -38,7 +38,8 @@ async def get_help(message):
                  "🔹 /start — <i>Начало работы. Производится выбор курса, направления, группы и подгруппы</i>\n\n"
                  "🔹 /settings — <i>Изменение информации о себе</i>\n\n"
                  "🔹 /menu — <i>Получить меню для работы</i>\n\n"
-                 "🔹 /schedule_handle — <i>Получить расписание</i>\n\n"
+                 "🔹 /schedule — <i>Получить расписание</i>\n\n"
+                 "🔹 /base_schedule — <i>Получить расписание на модуль</i>\n\n"
                  "Канал для обратной связи — <b>@hse_perm_helper_feedback</b>\n"
                  "Будем рады твоему отзыву или предложению!\n\n"
                  f"Версия <i>{constant.version}</i>")
@@ -65,9 +66,9 @@ async def get_settings(message):
     await registration.get_course(message, False)
 
 
-# Обработка команды /schedule_handle
-@router.message(Command('schedule_handle', 'расписание'))
-@router.message(lambda F: F.text == ('schedule_handle' or 'расписание'))
+# Обработка команды /schedule
+@router.message(Command('schedule', 'расписание'))
+@router.message(lambda F: F.text == ('schedule' or 'расписание'))
 @typing_action
 @exception_handler
 async def get_settings(message):

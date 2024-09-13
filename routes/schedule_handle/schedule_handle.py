@@ -22,23 +22,24 @@ async def get_menu(message):
                      "🔹 /settings — <i>Изменение информации о себе</i>\n\n"
                      "🔹 /menu — <i>Получить меню для работы</i>\n\n"
                      "🔹 /help — <i>Вывод помощи</i>\n\n"
-                     "🔹 /schedule_handle — <i>Получить расписание</i>\n\n"
+                     "🔹 /schedule — <i>Получить расписание</i>\n\n"
                      "🔹 /base_schedule — <i>Получить расписание на модуль</i>\n\n"
                      "❗ При удалении этого сообщения кнопки выбора расписания пропадут. "
                      "Чтобы их вернуть, введи /menu еще раз! 🙂")
 
     keyboard_markup_up = ReplyKeyboardBuilder()
-    # add_schedule_calendar_button = types.KeyboardButton("Добавить обновляемый календарь")
     get_schedule_text_button = types.KeyboardButton(text="Получить текстовое расписание 💼")
     get_base_schedule_text_button = types.KeyboardButton(text="Получить расписание на модуль 🗓")
-    # get_deadlines_button = types.KeyboardButton("Проверить дедлайны")
-    # keyboard_markup_up.row(add_schedule_calendar_button)
+
     keyboard_markup_up.row(get_schedule_text_button)
     keyboard_markup_up.row(get_base_schedule_text_button)
     keyboard_markup_up.row_width = 4
 
+    keyboard = keyboard_markup_up.as_markup()
+    keyboard.resize_keyboard = True
+
     await message.answer(text_schedule,
-                         reply_markup=keyboard_markup_up.as_markup(), parse_mode='HTML')
+                         reply_markup=keyboard, parse_mode='HTML')
 
 
 # Получение расписания для календаря

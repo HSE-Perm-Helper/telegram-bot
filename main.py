@@ -21,7 +21,7 @@ async def main():
         types.BotCommand(command='help', description='Помощь с работой бота'),
         types.BotCommand(command='settings', description='Изменить данные о себе'),
         types.BotCommand(command='menu', description='Вызвать меню'),
-        types.BotCommand(command='schedule_handle', description='Получить расписание'),
+        types.BotCommand(command='schedule', description='Получить расписание'),
         types.BotCommand(command='base_schedule', description='Получить расписание на модуль'),
     ], scope=types.BotCommandScopeDefault())
 
