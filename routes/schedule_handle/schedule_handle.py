@@ -1,5 +1,5 @@
 from aiogram import Router, types
-from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import api
 from bot import bot
