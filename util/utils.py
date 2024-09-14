@@ -1,7 +1,6 @@
 import datetime
 
 import requests
-from aiogram.types import CallbackQuery
 
 import venv
 

@@ -21,6 +21,8 @@ class MailingState(StatesGroup):
 @exception_handler
 @required_admin
 async def mailing_to_all(message: types.Message, state: FSMContext):
+    await state.clear()
+
     courses = await api.get_courses()
     keyboard = InlineKeyboardBuilder()
     text = "Выберите курсы, в которые необходимо сделать рассылку:"
@@ -51,6 +53,8 @@ async def callback_message(callback_query: types.CallbackQuery, state: FSMContex
 
 
 @router.message(StateFilter(MailingState.waiting_mailing_message))
+@exception_handler
+@typing_action
 async def send_mail(message: types.Message, state: FSMContext):
     data = await state.get_data()
     course = data.get("course")
