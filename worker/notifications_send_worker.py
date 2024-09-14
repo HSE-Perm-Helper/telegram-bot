@@ -90,7 +90,7 @@ class NotificationsSendWorker:
                 difference = self.get_difference(schedules)
                 markup = self.get_markup(schedules)
                 try:
-                    await bot.send_message(telegram_id, f"🟣Твоё {difference} было изменено!🟣\n",
+                    await bot.send_message(telegram_id, f"🟣Твоё {difference} изменено!🟣\n",
                                            reply_markup=markup.as_markup())
                 except Exception as e:
                     print(e)
@@ -100,7 +100,7 @@ class NotificationsSendWorker:
                 difference = self.get_difference(schedules)
                 markup = self.get_markup(schedules)
                 try:
-                    await bot.send_message(telegram_id, f"🟣Было добавлено {difference}!🟣\n",
+                    await bot.send_message(telegram_id, f"🟣Добавлено {difference}!🟣\n",
                                            reply_markup=markup.as_markup())
                 except Exception as e:
                     print(e)
