@@ -4,7 +4,6 @@ from notification.notification_processor.schedule_added_notification_processor i
 from notification.notification_processor.schedule_changed_notification_processor import \
     ScheduleChangedNotificationProcessor
 from notification.notification_type import NotificationType
-from util.utils import delete_request
 
 
 class NotificationManager:
@@ -32,6 +31,3 @@ class NotificationManager:
         for type, notifications in grouped_by_type.items():
             processor = await self.get_processor_by_type(type)
             await processor.process(notifications)
-
-        deleting_notifications_id = list(filter(lambda notification: notification.id, notifications))
-        await delete_request(path="/notifications", json=deleting_notifications_id)
