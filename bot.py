@@ -1,4 +1,5 @@
-import telebot
 import venv
+from aiogram import Bot, Dispatcher
 
-bot = telebot.TeleBot(venv.bot_token)
+bot = Bot(venv.bot_token)
+dp = Dispatcher()

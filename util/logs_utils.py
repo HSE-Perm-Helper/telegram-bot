@@ -1,13 +1,13 @@
-from bot import bot
 from api.api import get_admin_ids
+from bot import bot
 
 
-def send_logs_to_admins(data: str):
-    admin_telegram_ids = get_admin_ids()
+async def send_logs_to_admins(data: str):
+    admin_telegram_ids = await get_admin_ids()
     for telegram_id in admin_telegram_ids:
         try:
-            bot.send_message(telegram_id, f"<b>Admin logs</b>\n"
-                                          f"{data}",
-                             parse_mode='HTML')
+            await bot.send_message(telegram_id, f"<b>Admin logs</b>\n"
+                                                f"{data}",
+                                   parse_mode='HTML')
         except Exception as _:
             pass

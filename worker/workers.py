@@ -1,8 +1,9 @@
-from threading import Thread
-from worker.notifications_send_worker import NotificationsSendWorker
-from worker.backend_health_check_worker import BackendCheckHealthWorker
+import asyncio
 
-workers: list[Thread] = [
+from worker.backend_health_check_worker import BackendCheckHealthWorker
+from worker.notifications_send_worker import NotificationsSendWorker
+
+workers: list = [
     NotificationsSendWorker(),
     BackendCheckHealthWorker()
 ]
@@ -10,7 +11,7 @@ workers: list[Thread] = [
 
 def run_workers():
     for worker in workers:
-        worker.start()
+        asyncio.create_task(worker.run())
 
 # def send_new_year_congratulations():
 #     now = datetime.datetime.now()
