@@ -1,59 +1,22 @@
 import asyncio
-import enum
 import traceback
 
 from aiogram import Router
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot import bot
-from schedule import schedule_utils
-from schedule.schedule_type import ScheduleType
+from notification.base_notification import BaseNotification
+from notification.notification_manager import NotificationManager
+from notification.notification_type import NotificationType
 from util.logs_utils import send_logs_to_admins
-from util.utils import get_request, delete_request, format_output_array
+from util.utils import get_request
 
 router = Router()
 
 
-class NotificationType(enum.Enum):
-    SCHEDULE_ADDED = "SCHEDULE_ADDED"
-    SCHEDULE_CHANGED = "SCHEDULE_CHANGED_FOR_USER"
-
-
 class NotificationsSendWorker:
+    notification_manager = NotificationManager()
+
     def __init__(self):
         super().__init__()
-
-    def get_difference(self, schedules):
-        quarter_schedule = []
-        common_schedule = []
-        session_schedule = []
-        difference = []
-        for schedule in schedules:
-            scheduleType = schedule["scheduleType"]
-            match scheduleType:
-                case ScheduleType.QUARTER_SCHEDULE.value:
-                    quarter_schedule.append(schedule)
-                case ScheduleType.COMMON_SCHEDULE.value:
-                    common_schedule.append(schedule)
-                case ScheduleType.SESSION_SCHEDULE.value:
-                    session_schedule.append(schedule)
-        if len(quarter_schedule) > 0:
-            difference.append("базовое расписание")
-        if len(common_schedule) > 0:
-            weeks = []
-            for schedule in common_schedule:
-                weeks.append(schedule["number"])
-            merged_weeks = format_output_array(weeks)
-            difference.append(f"расписание на {merged_weeks} неделю")
-        if len(session_schedule) > 0:
-            difference.append("расписание на сессию")
-        return format_output_array(difference)
-
-    def get_markup(self, schedules) -> InlineKeyboardBuilder:
-        keyword = InlineKeyboardBuilder()
-        for schedule in schedules:
-            keyword.row(schedule_utils.get_button_by_schedule_info(schedule, False))
-        return keyword
 
     async def check_new_notifications(self):
         try:
@@ -64,55 +27,24 @@ class NotificationsSendWorker:
                     f"Проверка уведомлений вернула код {notifications_response.status_code}, вместо OK")
                 return
 
-            new_schedule: dict[int, list] = {}
-            schedule_changing: dict[int, list] = {}
-            notifications = notifications_response.json()
+            notifications = list(map(lambda notify:
+                                     BaseNotification(id=notify["id"],
+                                                      date=notify["date"],
+                                                      payload=notify["payload"],
+                                                      notification_type=NotificationType(notify["notificationType"])),
+                                     notifications_response.json()))
 
-            for notification in notifications:
-                notification_type = notification['notificationType']
-                payload = notification["payload"]
-                users = payload["users"]
+            await self.notification_manager.process(notifications)
 
-                match notification_type:
-                    case NotificationType.SCHEDULE_ADDED.value:
-                        for user in users:
-                            if user not in new_schedule:
-                                new_schedule[user] = []
-                            new_schedule[user].append(payload["targetSchedule"])
-
-                    case NotificationType.SCHEDULE_CHANGED.value:
-                        for user in users:
-                            if user not in schedule_changing:
-                                schedule_changing[user] = []
-                            schedule_changing[user].append(payload["targetSchedule"])
-
-            for telegram_id, schedules in schedule_changing.items():
-                difference = self.get_difference(schedules)
-                markup = self.get_markup(schedules)
-                try:
-                    await bot.send_message(telegram_id, f"🟣Твоё {difference} изменено!🟣\n",
-                                           reply_markup=markup.as_markup())
-                except Exception as e:
-                    print(e)
-                    pass
-
-            for telegram_id, schedules in new_schedule.items():
-                difference = self.get_difference(schedules)
-                markup = self.get_markup(schedules)
-                try:
-                    await bot.send_message(telegram_id, f"🟣Добавлено {difference}!🟣\n",
-                                           reply_markup=markup.as_markup())
-                except Exception as e:
-                    print(e)
-                    pass
-
-            delete_events = await delete_request(path="/notifications", json=notifications)
         except Exception as e:
+            traceback.print_exc()
             await send_logs_to_admins(f"Произошла ошибка при попытке отправить запрос новых уведомлений на сервер!\n"
                                       f"Стэктрейс: \n"
                                       f"{traceback.format_exc()}")
 
     async def run(self):
+        await self.notification_manager.init_processors()
+
         while True:
             await self.check_new_notifications()
             await asyncio.sleep(300)
