@@ -8,7 +8,6 @@ from constants import constant
 from decorator.decorators import typing_action, exception_handler
 from message.common_messages import SUCCESS_REGISTER
 from routes.schedule_handle import schedule_handle
-from util.utils import answer_callback
 
 router = Router()
 
@@ -252,7 +251,7 @@ async def callback_message(callback_query: types.CallbackQuery):
                                          subgroup=subgroup)
 
     if is_success:
-        await answer_callback(callback_query, text=SUCCESS_REGISTER)
+        await callback_query.answer(text=SUCCESS_REGISTER)
         await schedule_handle.get_menu(callback_query.message)
 
     else:

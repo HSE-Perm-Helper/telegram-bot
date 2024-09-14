@@ -18,7 +18,7 @@ async def get_user_ids_by_course(course: int) -> list[int]:
     for user in users["response"]:
         group = user["settings"]["group"]
         num = int(group.split("-")[1])
-        user_course = 23 - num + 1
+        user_course = 25 - num
         if user_course == course:
             user_ids.append(int(user['telegramId']))
     return user_ids

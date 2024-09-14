@@ -9,7 +9,6 @@ from decorator.decorators import typing_action, exception_handler, required_admi
 from routes.registration import registration
 from routes.schedule_handle import schedule_handle
 from schedule.schedule_type import ScheduleType
-from util.users_utils import send_message_to_users
 
 router = Router()
 
@@ -104,24 +103,6 @@ async def get_remote_schedule(message):
                               "И всё. Твое расписание у тебя на устройстве!", reply_markup=keyword)
 
 
-# Обработка команды /mailing
-@router.message(Command("mailing"))
-@exception_handler
-@required_admin
-async def mailing_to_all(message: types.Message):
-    courses = await api.get_courses()
-    keyboard = InlineKeyboardBuilder()
-    text = "Выберите курсы, в которые необходимо сделать рассылку:"
-    for i in range(len(courses)):
-        emoji_for_button = f"{constant.emojies_for_course[i]} {courses[i]} курс"
-        keyboard.row(types.InlineKeyboardButton(text=emoji_for_button,
-                                                callback_data=f"mailing_course_{courses[i]}"))
-    keyboard.row(types.InlineKeyboardButton(text="Всем",
-                                            callback_data=f"mailing_course_all"))
-
-    await message.answer(text=text, reply_markup=keyboard.as_markup())
-
-
 @router.message(Command("base_schedule"))
 @router.message(lambda F: F.text == "Получить расписание на модуль 🗓")
 @typing_action
@@ -137,12 +118,3 @@ async def get_base_schedule(message: types.Message):
         schedule = schedules[0]
         response_schedule = await api.get_schedule(message.chat.id, schedule["start"], schedule["end"])
         await schedule_handle.schedule_sending(message, response_schedule["response"])
-
-
-async def send_mail(message: types.Message, course: int = None):
-    await bot.send_message(message.chat.id, "Рассылка успешно отправлена!")
-    if not course:
-        users = await api.get_user_ids()
-    else:
-        users = await api.get_user_ids_by_course(course)
-    await send_message_to_users(message.html_text, users)

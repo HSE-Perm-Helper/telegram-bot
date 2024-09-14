@@ -57,54 +57,56 @@ class NotificationsSendWorker:
 
     async def check_new_notifications(self):
         try:
-            notifications_response = await get_request(path="/notifications")
-            new_schedule: dict[int, list] = {}
-            schedule_changing: dict[int, list] = {}
-            notifications_data = notifications_response.json()
-            if notifications_response.status_code == 200:
-                if len(notifications_data['response']) != 0:
-                    for notification in notifications_data['response']:
-                        notification_type = notification['notificationType']
-                        users = notification["users"]
+            notifications_response = await get_request(path="/test/notifications/notifications")
 
-                        match notification_type:
-                            case NotificationType.SCHEDULE_ADDED.value:
-                                for user in users:
-                                    if user not in new_schedule:
-                                        new_schedule[user] = []
-                                    new_schedule[user].append(notification["targetSchedule"])
-
-                            case NotificationType.SCHEDULE_CHANGED.value:
-                                for user in users:
-                                    if user not in schedule_changing:
-                                        schedule_changing[user] = []
-                                    schedule_changing[user].append(notification["targetSchedule"])
-
-                    for telegram_id, schedules in schedule_changing.items():
-                        difference = self.get_difference(schedules)
-                        markup = self.get_markup(schedules)
-                        try:
-                            await bot.send_message(telegram_id, f"🟣Твоё {difference} было изменено!🟣\n",
-                                                   reply_markup=markup.as_markup())
-                        except Exception as e:
-                            print(e)
-                            pass
-
-                    for telegram_id, schedules in new_schedule.items():
-                        difference = self.get_difference(schedules)
-                        markup = self.get_markup(schedules)
-                        try:
-                            await bot.send_message(telegram_id, f"🟣Было добавлено {difference}!🟣\n",
-                                                   reply_markup=markup.as_markup())
-                        except Exception as e:
-                            print(e)
-                            pass
-
-                delete_events = await delete_request(path="/notifications", json=notifications_data['response'])
-
-            else:
+            if notifications_response.status_code != 200:
                 await send_logs_to_admins(
                     f"Проверка уведомлений вернула код {notifications_response.status_code}, вместо OK")
+                return
+
+            new_schedule: dict[int, list] = {}
+            schedule_changing: dict[int, list] = {}
+            notifications = notifications_response.json()
+
+            for notification in notifications:
+                notification_type = notification['notificationType']
+                payload = notification["payload"]
+                users = payload["users"]
+
+                match notification_type:
+                    case NotificationType.SCHEDULE_ADDED.value:
+                        for user in users:
+                            if user not in new_schedule:
+                                new_schedule[user] = []
+                            new_schedule[user].append(payload["targetSchedule"])
+
+                    case NotificationType.SCHEDULE_CHANGED.value:
+                        for user in users:
+                            if user not in schedule_changing:
+                                schedule_changing[user] = []
+                            schedule_changing[user].append(payload["targetSchedule"])
+
+            for telegram_id, schedules in schedule_changing.items():
+                difference = self.get_difference(schedules)
+                markup = self.get_markup(schedules)
+                try:
+                    await bot.send_message(telegram_id, f"🟣Твоё {difference} было изменено!🟣\n",
+                                           reply_markup=markup.as_markup())
+                except Exception as e:
+                    print(e)
+                    pass
+
+            for telegram_id, schedules in new_schedule.items():
+                difference = self.get_difference(schedules)
+                markup = self.get_markup(schedules)
+                try:
+                    await bot.send_message(telegram_id, f"🟣Было добавлено {difference}!🟣\n",
+                                           reply_markup=markup.as_markup())
+                except Exception as e:
+                    print(e)
+                    pass
+
+            delete_events = await delete_request(path="/notifications", json=notifications)
         except Exception as e:
             await send_logs_to_admins(f"Произошла ошибка при попытке отправить запрос новых уведомлений на сервер!\n"
                                       f"Стэктрейс: \n"

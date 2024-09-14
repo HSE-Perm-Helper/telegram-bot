@@ -1,7 +1,6 @@
 from aiogram import Router, types
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
-import routes.command_handle.commands as commands
 from api import api
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
@@ -12,7 +11,7 @@ from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_
 from schedule.schedule_type import ScheduleType
 from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, \
     get_schedule_header_by_schedule_info
-from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, answer_callback
+from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug
 
 router = Router()
 
@@ -237,17 +236,18 @@ async def schedule_sending(message: types.Message, schedule_dict):
 @router.callback_query(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
 @exception_handler
 async def callback_message(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-
     data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
     start = data[0]
     end = data[1]
     need_delete_message = data[2]
+
     if need_delete_message == "True":
         await callback_query.message.delete()
+
     schedule_json = await api.get_schedule(callback_query.message.chat.id, start, end)
+
     if need_delete_message == "False" and schedule_json["error"]:
-        await answer_callback(callback_query, text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
+        await callback_query.answer(text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
 
         keyboard: list[list[types.InlineKeyboardButton]] = callback_query.message.reply_markup.inline_keyboard
         new_keyboard: list[list[types.InlineKeyboardButton]] = []
@@ -261,19 +261,6 @@ async def callback_message(callback_query: types.CallbackQuery):
                                             reply_markup=types.InlineKeyboardMarkup(inline_keyboard=new_keyboard))
         return
 
+    await bot.answer_callback_query(callback_query.id)
     schedule_dict = schedule_json['response']
     await schedule_sending(callback_query.message, schedule_dict)
-
-
-@typing_action
-@router.callback_query(lambda c: c.data.startswith("mailing_course"))
-@exception_handler
-async def callback_message(callback_query: types.CallbackQuery):
-    await callback_query.message.delete()
-    data = callback_query.data.replace('mailing_course_', "")
-    course = None
-    if data != "all":
-        course = int(data)
-    await callback_query.message.answer(
-        "Введите сообщение для рассылки: ")
-    await bot.register_next_step_handler(callback_query.message, commands.send_mail, course=course)

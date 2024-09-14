@@ -157,7 +157,3 @@ def get_day_of_week_from_date(date_string: str) -> str:
 
 def get_day_of_week_from_slug(slug: str) -> str:
     return days_of_week_slug.get(slug.upper(), "N/a")
-
-
-async def answer_callback(callback_query: CallbackQuery, text, show_alert=False):
-    await callback_query.answer(text=text, show_alert=show_alert)
