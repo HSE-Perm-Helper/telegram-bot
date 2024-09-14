@@ -1,4 +1,4 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -52,7 +52,7 @@ async def callback_message(callback_query: types.CallbackQuery, state: FSMContex
     await state.update_data(course=course)
 
 
-@router.message(StateFilter(MailingState.waiting_mailing_message))
+@router.message(F.text, MailingState.waiting_mailing_message)
 @exception_handler
 @typing_action
 async def send_mail(message: types.Message, state: FSMContext):
