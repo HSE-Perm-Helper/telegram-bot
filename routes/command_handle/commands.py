@@ -4,7 +4,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import api
 from bot import bot
-from constants import constant
 from decorator.decorators import typing_action, exception_handler, required_admin
 from routes.registration import registration
 from routes.schedule_handle import schedule_handle
@@ -24,35 +23,6 @@ async def get_registration(message):
         await schedule_handle.get_menu(message)
     else:
         await registration.get_course(message, True)
-
-
-# Обработка команды /help
-@router.message(Command('help', 'помощь', 'помоги'))
-@router.message(lambda F: F.text == ('help' or 'помощь' or 'помоги'))
-@typing_action
-@exception_handler
-async def get_help(message):
-    await bot.delete_message(message.chat.id, message.message_id)
-    text_help = ("<b>Вот, что я могу:</b>\n\n"
-                 "🔹 /start — <i>Начало работы. Производится выбор курса, направления, группы и подгруппы</i>\n\n"
-                 "🔹 /settings — <i>Изменение информации о себе</i>\n\n"
-                 "🔹 /menu — <i>Получить меню для работы</i>\n\n"
-                 "🔹 /schedule — <i>Получить расписание</i>\n\n"
-                 "🔹 /base_schedule — <i>Получить расписание на модуль</i>\n\n"
-                 "Канал для обратной связи — <b>@hse_perm_helper_feedback</b>\n"
-                 "Будем рады твоему отзыву или предложению!\n\n"
-                 f"Версия <i>{constant.version}</i>")
-    await message.answer(text_help, parse_mode='HTML')
-
-
-# Обработка команды /menu
-@router.message(Command('menu', 'меню'))
-@router.message(lambda F: F.text == ('menu' or 'меню'))
-@typing_action
-@exception_handler
-async def start_working(message):
-    await bot.delete_message(message.chat.id, message.message_id)
-    await schedule_handle.get_menu(message)
 
 
 # Обработка команды /settings

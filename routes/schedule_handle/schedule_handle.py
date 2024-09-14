@@ -16,31 +16,6 @@ from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug
 router = Router()
 
 
-async def get_menu(message):
-    text_schedule = ("<b>Команды для работы:</b>\n\n"
-                     "🔹 /settings — <i>Изменение информации о себе</i>\n\n"
-                     "🔹 /menu — <i>Получить меню для работы</i>\n\n"
-                     "🔹 /help — <i>Вывод помощи</i>\n\n"
-                     "🔹 /schedule — <i>Получить расписание</i>\n\n"
-                     "🔹 /base_schedule — <i>Получить расписание на модуль</i>\n\n"
-                     "❗ При удалении этого сообщения кнопки выбора расписания пропадут. "
-                     "Чтобы их вернуть, введи /menu еще раз! 🙂")
-
-    keyboard_markup_up = ReplyKeyboardBuilder()
-    get_schedule_text_button = types.KeyboardButton(text="Получить текстовое расписание 💼")
-    get_base_schedule_text_button = types.KeyboardButton(text="Получить расписание на модуль 🗓")
-
-    keyboard_markup_up.row(get_schedule_text_button)
-    keyboard_markup_up.row(get_base_schedule_text_button)
-    keyboard_markup_up.row_width = 4
-
-    keyboard = keyboard_markup_up.as_markup()
-    keyboard.resize_keyboard = True
-
-    await message.answer(text_schedule,
-                         reply_markup=keyboard, parse_mode='HTML')
-
-
 # Получение расписания для календаря
 async def get_schedule(message):
     await message.delete()
