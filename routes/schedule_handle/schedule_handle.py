@@ -200,7 +200,7 @@ async def schedule_sending(message: types.Message, schedule_dict):
                     for lesson in lessons_inner:
                         text_for_message += get_lesson_as_string(lesson)
                 number_of_pair += 1
-            await message.answer(text=text_for_message, parse_mode='HTML')
+            await message.answer(text=text_for_message, parse_mode='HTML', disable_notification=True)
 
         await bot.unpin_all_chat_messages(message.chat.id)
         await bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
