@@ -11,8 +11,9 @@ router = Router()
 @router.message(lambda F: F.text == ('help' or 'помощь' or 'помоги'))
 @typing_action
 @exception_handler
-async def get_help(message: types.Message):
-    await message.delete()
+async def get_help(message: types.Message, is_need_delete: bool = True):
+    if is_need_delete:
+        await message.delete()
     text_help = ("<b>Вот, что я могу:</b>\n\n"
                  "🔹 /start — <i>Начало работы. Производится выбор курса, направления, группы и подгруппы</i>\n\n"
                  "🔹 /settings — <i>Изменение информации о себе</i>\n\n"

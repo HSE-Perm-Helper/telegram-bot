@@ -8,6 +8,7 @@ from notification.notification_manager import NotificationManager
 from notification.notification_type import NotificationType
 from util.logs_utils import send_logs_to_admins
 from util.utils import get_request, delete_request
+from venv import is_prod
 
 router = Router()
 
@@ -38,7 +39,8 @@ class NotificationsSendWorker:
             await self.notification_manager.process(notifications)
 
             deleting_notifications_id = list(map(lambda notification: {"id": notification.id}, notifications))
-            await delete_request(path=self.NOTIFICATIONS_URL, json=deleting_notifications_id)
+            if is_prod:
+                await delete_request(path=self.NOTIFICATIONS_URL, json=deleting_notifications_id)
 
         except Exception as e:
             traceback.print_exc()
