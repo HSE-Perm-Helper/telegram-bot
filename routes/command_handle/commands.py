@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from api import api
 from bot import bot
 from decorator.decorators import typing_action, exception_handler, required_admin
+from routes import menu
 from routes.registration import registration
 from routes.schedule_handle import schedule_handle
 from schedule.schedule_type import ScheduleType
@@ -20,7 +21,7 @@ router = Router()
 @exception_handler
 async def get_registration(message):
     if await api.check_registration_user(message.chat.id):
-        await schedule_handle.get_menu(message)
+        await menu.get_help(message, is_need_delete=False)
     else:
         await registration.get_course(message, True)
 

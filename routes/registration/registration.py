@@ -7,6 +7,7 @@ from api import api
 from constants import constant
 from decorator.decorators import typing_action, exception_handler
 from message.common_messages import SUCCESS_REGISTER
+from routes import menu
 from routes.schedule_handle import schedule_handle
 
 router = Router()
@@ -252,7 +253,7 @@ async def callback_message(callback_query: types.CallbackQuery):
 
     if is_success:
         await callback_query.answer(text=SUCCESS_REGISTER)
-        await schedule_handle.get_menu(callback_query.message)
+        await menu.get_help(callback_query.message)
 
     else:
         await callback_query.message.answer("⚠ Произошла ошибка при внесении данных. 😔 "
