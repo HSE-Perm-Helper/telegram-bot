@@ -38,11 +38,16 @@ def get_schedule_header_by_schedule_info(schedule_info: dict) -> str:
 
 
 def get_button_by_schedule_info(schedule_info: dict, need_delete_message: bool) -> types.InlineKeyboardButton:
+    data, end, start = get_callback_for_schedule(need_delete_message, schedule_info)
+    return types.InlineKeyboardButton(text=get_button_text_by_schedule_info(schedule_info, start, end),
+                                      callback_data=data)
+
+
+def get_callback_for_schedule(need_delete_message, schedule_info):
     start = schedule_info["start"]
     end = schedule_info["end"]
     data = insert_data_to_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, [start, end, need_delete_message])
-    return types.InlineKeyboardButton(text=get_button_text_by_schedule_info(schedule_info, start, end),
-                                      callback_data=data)
+    return data, end, start
 
 
 def group_lessons_by_key(lessons: list[dict], key_func) -> dict[str, list[dict]]:
