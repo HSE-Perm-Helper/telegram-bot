@@ -10,7 +10,7 @@ class BackendCheckHealthWorker:
 
     async def check_health(self):
         try:
-            events_response = await get_request(path="/notifications")
+            events_response = await get_request(path="/v2/notifications")
             if events_response.status_code != 200:
                 await send_logs_to_admins("Проблема с бэкэндом, требуется срочно проверить его работу!")
         except Exception as e:
