@@ -2,6 +2,7 @@ from aiogram import types
 
 from callback.callback import insert_data_to_callback
 from callback.schedule_callback import ScheduleCallback
+from constants import constant
 from schedule.schedule_type import ScheduleType
 
 emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
@@ -58,3 +59,117 @@ def group_lessons_by_key(lessons: list[dict], key_func) -> dict[str, list[dict]]
             lessons_by_key[key] = []
         lessons_by_key[key].append(lesson)
     return lessons_by_key
+
+
+def get_lesson_as_string(lesson):
+    text_for_message = ''
+    '''Если вид пары — майнор'''
+    if lesson['lessonType'] == 'COMMON_MINOR':
+        text_for_message = f"{constant.type_of_lessons_dict[lesson['lessonType']]}\n"
+
+    else:
+        '''Вычисляем время пары'''
+        time_of_pair = f"{lesson['time']['startTime']} — {lesson['time']['endTime']}"
+
+        if lesson['time']['startTime'] is not None and lesson['time']['endTime'] != None:
+            '''Добавляем в сообщение номер пары'''
+            text_for_message += f"<b>{constant.number_of_pair_dict[lesson['time']['startTime']]}</b> — "
+
+            '''Добавляем в сообщение название пары и ее тип'''
+            if lesson['lessonType'] in constant.type_of_lessons_dict.keys():
+                text_for_message += (f"{lesson['subject']} — "
+                                     f"{constant.type_of_lessons_dict[lesson['lessonType']]}\n")
+
+            '''Добавляем в сообщение время пары'''
+            text_for_message += (f"<b>{time_of_pair}</b> ")
+
+        '''Проверяем, дистант или очная'''
+        if lesson['isOnline']:
+
+            '''- Если дистант, добавляем ссылки'''
+            if lesson['links'] is None:
+                text_for_message += (f"Дистанционная пара, ссылки отсутствуют \n")
+
+            else:
+                text_for_message += (f"Дистанционная пара, ссылки:\n")
+                for link in lesson['links']:
+                    text_for_message += (f"{link}\n")
+
+        else:
+            if lesson['places'] is not None:
+                if len(lesson['places']) == 1:
+                    place = lesson['places'][0]
+                    text_for_message += (
+                        f"Корпус {place['building']}, аудитория {place['office']} \n")
+                else:
+                    text_for_message += f'несколько мест:\n'
+                    for place in lesson['places']:
+                        '''- Иначе добавляем номер корпуса и аудиторию'''
+                        text_for_message += (
+                            f"Корпус {place['building']}, аудитория {place['office']} \n")
+
+        if lesson['lecturer'] is not None:
+            '''Добавляем преподавателя пары'''
+            text_for_message += (f"Преподаватель — <i>{lesson['lecturer']}</i> \n")
+
+        '''Проверяем наличие дополнительной информации к паре'''
+        if lesson['additionalInfo'] is not None:
+            for addInfo in lesson['additionalInfo']:
+                text_for_message += (f"\n<i>Доп.информация: — {addInfo}</i> \n")
+
+        text_for_message += "\n"
+    return text_for_message
+
+
+async def get_pair_count(lesson_list):
+    count_pairs = 0
+    for pair in lesson_list:
+        if pair:
+            count_pairs += 1
+    return count_pairs
+
+
+async def group_lessons_by_pair_number(lessons):
+    last_pair = constant.number_of_pair_dict[lessons[- 1]["time"]['startTime']]
+    lessons_list_count = int(last_pair.replace('-ая пара', ''))
+    lesson_list: list[None | list[dict]] = [None] * lessons_list_count
+    ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
+                Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
+                Иначе вывожу сообщение "Окно" '''
+    for lesson in lessons:
+        pair_index_string = constant.number_of_pair_dict[lesson["time"]["startTime"]]
+        pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
+
+        if lesson_list[pair_index] is None:
+            lesson_list[pair_index] = []
+
+        lesson_list[pair_index].append(lesson)
+    return lesson_list
+
+
+async def get_lessons_without_header(lesson_list):
+    text_for_message = ""
+    is_pairs_start = False
+    number_of_pair = 0
+    for lessons_inner in lesson_list:
+        if not is_pairs_start:
+            if lessons_inner:
+                is_pairs_start = True
+        if not lessons_inner:
+            if is_pairs_start:
+                text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
+                text_for_message += f" - ОКНО 🪟\n\n"
+
+        else:
+            for lesson in lessons_inner:
+                text_for_message += get_lesson_as_string(lesson)
+        number_of_pair += 1
+    return text_for_message
+
+
+async def get_lesson_message_header(count_pairs, day, is_session):
+    if is_session:
+        return f"<b>{day}</b>\n\n"
+    else:
+        return (f"<b>{day} — "
+                             f"{constant.count_pairs_dict[count_pairs]}</b>\n\n")

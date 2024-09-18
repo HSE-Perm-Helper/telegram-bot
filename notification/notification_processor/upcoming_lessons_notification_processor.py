@@ -9,7 +9,7 @@ from notification import notification_utils
 from notification.base_notification import BaseNotification
 from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
-from routes.schedule_handle.schedule_handle import get_lessons_without_header
+from schedule.schedule_utils import get_pair_count, group_lessons_by_pair_number, get_lessons_without_header
 from schedule import schedule_utils
 
 
@@ -35,9 +35,11 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                 lessons_message = "<b>Завтра у тебя нет пар 😎</b>"
 
                 if len(lessons) > 0:
-                    lessons_message = f"<b>Завтра у тебя {constants.constant.count_pairs_dict[str(len(lessons))]}</b>"
+                    grouped_lessons = await group_lessons_by_pair_number(lessons)
+                    pair_count = await get_pair_count(grouped_lessons)
+                    lessons_message = f"<b>Завтра у тебя {constants.constant.count_pairs_dict[str(pair_count)]}</b>"
                     lessons_message += "\n\n"
-                    lessons_message += await get_lessons_without_header([lessons])
+                    lessons_message += await get_lessons_without_header(grouped_lessons)
 
                 for user in users:
                     try:
