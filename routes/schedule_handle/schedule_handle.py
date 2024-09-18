@@ -150,60 +150,64 @@ async def schedule_sending(message: types.Message, schedule_dict):
                                                 lambda l: f'{get_day_of_week_from_date(l["time"]["date"])}'
                                                           f', {l["time"]["date"]}')
         for day, lessons in temp_lessons.items():
-            last_pair = constant.number_of_pair_dict[lessons[- 1]["time"]['startTime']]
-            lessons_list_count = int(last_pair.replace('-ая пара', ''))
-
-            lesson_list: list[None | list[dict]] = [None] * lessons_list_count
-
-            ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
-                Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
-                Иначе вывожу сообщение "Окно" '''
-
-            for lesson in lessons:
-                pair_index_string = constant.number_of_pair_dict[lesson["time"]["startTime"]]
-                pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
-
-                if lesson_list[pair_index] is None:
-                    lesson_list[pair_index] = []
-
-                lesson_list[pair_index].append(lesson)
-
-            count_pairs = 0
-            for pair in lesson_list:
-                if pair:
-                    count_pairs += 1
-
-            count_pairs = str(count_pairs)
-
-            text_for_message = ""
-
-            if is_session:
-                text_for_message += f"<b>{day}</b>\n\n"
-            else:
-                text_for_message += (f"<b>{day} — "
-                                     f"{constant.count_pairs_dict[count_pairs]}</b>\n\n")
-
-            '''Проходим по всем парам в данный день'''
-
-            is_pairs_start = False
-            number_of_pair = 0
-            for lessons_inner in lesson_list:
-                if not is_pairs_start:
-                    if lessons_inner:
-                        is_pairs_start = True
-                if not lessons_inner:
-                    if is_pairs_start:
-                        text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
-                        text_for_message += f" - ОКНО 🪟\n\n"
-
-                else:
-                    for lesson in lessons_inner:
-                        text_for_message += get_lesson_as_string(lesson)
-                number_of_pair += 1
+            text_for_message = await get_lessons_as_string(day, is_session, lessons)
             await message.answer(text=text_for_message, parse_mode='HTML', disable_notification=True)
 
         await bot.unpin_all_chat_messages(message.chat.id)
         await bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
+
+
+async def get_lessons_as_string(day, is_session, lessons):
+    last_pair = constant.number_of_pair_dict[lessons[- 1]["time"]['startTime']]
+    lessons_list_count = int(last_pair.replace('-ая пара', ''))
+    lesson_list: list[None | list[dict]] = [None] * lessons_list_count
+    ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
+                Потом иду по этому массиву и проверяю, 0 там или словарь. Если словарь - раскрываю его
+                Иначе вывожу сообщение "Окно" '''
+    for lesson in lessons:
+        pair_index_string = constant.number_of_pair_dict[lesson["time"]["startTime"]]
+        pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
+
+        if lesson_list[pair_index] is None:
+            lesson_list[pair_index] = []
+
+        lesson_list[pair_index].append(lesson)
+    count_pairs = 0
+    for pair in lesson_list:
+        if pair:
+            count_pairs += 1
+    count_pairs = str(count_pairs)
+    text_for_message = await get_lesson_message_header(count_pairs, day, is_session)
+    text_for_message += await get_lessons_without_header(lesson_list)
+    return text_for_message
+
+
+async def get_lessons_without_header(lesson_list):
+    text_for_message = ""
+    is_pairs_start = False
+    number_of_pair = 0
+    for lessons_inner in lesson_list:
+        if not is_pairs_start:
+            if lessons_inner:
+                is_pairs_start = True
+        if not lessons_inner:
+            if is_pairs_start:
+                text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
+                text_for_message += f" - ОКНО 🪟\n\n"
+
+        else:
+            for lesson in lessons_inner:
+                text_for_message += get_lesson_as_string(lesson)
+        number_of_pair += 1
+    return text_for_message
+
+
+async def get_lesson_message_header(count_pairs, day, is_session):
+    if is_session:
+        return f"<b>{day}</b>\n\n"
+    else:
+        return (f"<b>{day} — "
+                             f"{constant.count_pairs_dict[count_pairs]}</b>\n\n")
 
 
 # Пользователем выбрано расписание для отправки

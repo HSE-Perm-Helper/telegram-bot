@@ -21,7 +21,7 @@ class ScheduleAddedNotificationProcessor(BaseNotificationProcessor):
             difference = notification_utils.get_difference_schedule(schedules)
             markup = notification_utils.get_markup_schedule(schedules)
             try:
-                await bot.send_message(telegram_id, f"🔔 Добавлено {difference}!",
+                await bot.send_message(telegram_id, f"{notification_utils.NOTIFICATION_EMOJI} Добавлено {difference}!",
                                        reply_markup=markup.as_markup())
             except Exception as e:
                 print(e)
