@@ -1,3 +1,5 @@
+import traceback
+
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -26,7 +28,7 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                 markup.row(types.InlineKeyboardButton(
                     text="Получить на всю неделю 👀",
                     callback_data=schedule_utils.get_callback_for_schedule(schedule_info=schedule,
-                                                                           need_delete_message=False)))
+                                                                           need_delete_message=False)[0]))
 
                 markup.row(types.InlineKeyboardButton(text="Не хочу получать такие уведомления 🥸", callback_data="no"))
 
@@ -35,7 +37,7 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                 if len(lessons) > 0:
                     lessons_message = f"<b>Завтра у тебя {constants.constant.count_pairs_dict[str(len(lessons))]}</b>"
                     lessons_message += "\n\n"
-                    lessons_message += await get_lessons_without_header(lessons)
+                    lessons_message += await get_lessons_without_header([lessons])
 
                 for user in users:
                     try:
@@ -46,7 +48,7 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                         print(e)
                         pass
             except Exception as e:
-                print(e)
+                traceback.print_exc()
                 pass
 
     async def get_notification_type(self) -> NotificationType:
