@@ -32,6 +32,9 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
 
                 markup.row(types.InlineKeyboardButton(text="Не хочу получать такие уведомления 🥸", callback_data="no"))
 
+                base_message = f"{notification_utils.NOTIFICATION_EMOJI} Напоминание о парах"
+                base_message += "\n\n"
+
                 lessons_message = "<b>Завтра у тебя нет пар 😎</b>"
 
                 if len(lessons) > 0:
@@ -43,9 +46,9 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
 
                 for user in users:
                     try:
-                        await bot.send_message(user, f"{notification_utils.NOTIFICATION_EMOJI} Напоминание о парах")
-                        await bot.send_message(user, lessons_message, parse_mode="HTML", reply_markup=markup.as_markup(),
-                                               disable_notification=True)
+                        message = base_message + lessons_message
+                        await bot.send_message(user, message, parse_mode="HTML",
+                                               reply_markup=markup.as_markup())
                     except Exception as e:
                         print(e)
                         pass
