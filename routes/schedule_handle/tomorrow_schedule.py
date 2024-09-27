@@ -16,6 +16,7 @@ router = Router()
 @typing_action
 @router.message(F.text == "➡️ На завтра")
 async def get_today_lessons(message: Message):
+    await message.delete()
     lessons = await get_lessons(message.chat.id)
 
     if len(lessons) == 0:

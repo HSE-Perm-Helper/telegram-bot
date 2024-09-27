@@ -17,6 +17,7 @@ router = Router()
 @router.message(F.text == "📅 На сегодня")
 async def get_today_lessons(message: Message):
     lessons = await get_lessons(message.chat.id)
+    await message.delete()
 
     if len(lessons) == 0:
         await message.answer("Сегодня у тебя нет пар 😎")
