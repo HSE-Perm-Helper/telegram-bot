@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 
 from api import api
@@ -9,7 +9,6 @@ from routes.registration import registration
 router = Router()
 
 
-# Обработка команды /start и /registration
 @router.message(Command('start', 'старт', 'поехали', 'registration', 'регистрация'))
 @router.message(lambda F: F.text == ('start' or 'старт' or 'поехали'
                                      or 'registration' or 'регистрация'))
@@ -22,9 +21,8 @@ async def get_registration(message):
         await registration.get_course(message, True)
 
 
-# Обработка команды /settings
 @router.message(Command('settings', 'настройки'))
-@router.message(lambda F: F.text == ('settings' or 'настройки'))
+@router.message(F.text == "⚙️ Настройки")
 @typing_action
 @exception_handler
 async def get_settings(message):
