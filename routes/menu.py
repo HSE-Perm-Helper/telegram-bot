@@ -24,11 +24,14 @@ async def get_help(message: types.Message, is_need_delete: bool = True):
                  "Чтобы их вернуть, введи /menu еще раз! 🙂")
 
     keyboard_markup_up = ReplyKeyboardBuilder()
-    get_schedule_text_button = types.KeyboardButton(text="Получить текстовое расписание 💼")
-    get_base_schedule_text_button = types.KeyboardButton(text="Получить расписание на модуль 🗓")
+    get_schedule_text_button = types.KeyboardButton(text="💼 Расписание на неделю")
+    get_base_schedule_text_button = types.KeyboardButton(text="🗓 Расписание на модуль")
 
     keyboard_markup_up.row(get_schedule_text_button)
-    keyboard_markup_up.row(get_base_schedule_text_button)
+    keyboard_markup_up.row(types.KeyboardButton(text="📅 На сегодня"), types.KeyboardButton(text="➡️ На завтра"))
+    keyboard_markup_up.row(get_base_schedule_text_button, types.KeyboardButton(text="🏓 Расписание физ-ры"))
+    keyboard_markup_up.row(types.KeyboardButton(text="⚙️ Настройки"))
+    keyboard_markup_up.row(types.KeyboardButton(text="⚡️ Быстрый VPN от Вышкинцев"))
     keyboard_markup_up.row_width = 4
 
     keyboard = keyboard_markup_up.as_markup()

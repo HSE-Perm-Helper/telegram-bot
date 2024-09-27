@@ -6,7 +6,7 @@ from bot import bot, dp
 from routes import mailing, menu
 from routes.command_handle import commands
 from routes.registration import registration
-from routes.schedule_handle import schedule_handle
+from routes.schedule_handle import schedule_handle, today_schedule, tomorrow_schedule
 from worker import workers
 
 
@@ -15,6 +15,8 @@ async def main():
     dp.include_router(commands.router)
     dp.include_router(registration.router)
     dp.include_router(schedule_handle.router)
+    dp.include_router(today_schedule.router)
+    dp.include_router(tomorrow_schedule.router)
     dp.include_router(mailing.router)
     dp.include_router(menu.router)
 

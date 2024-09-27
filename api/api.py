@@ -126,3 +126,13 @@ async def get_remote_schedule_link(telegram_id: int) -> str:
     response = await get_request_as_json(path=f"/schedule/{telegram_id}/download")
     print(response)
     return f'{response["response"]["linkForRemoteCalendar"]}'
+
+
+async def get_today_lessons(telegram_id: int) -> dict:
+    response = await get_request_as_json(path=f"/v3/schedule/{telegram_id}/today")
+    return response['response']
+
+
+async def get_tomorrow_lessons(telegram_id: int) -> dict:
+    response = await get_request_as_json(path=f"/v3/schedule/{telegram_id}/tomorrow")
+    return response['response']
