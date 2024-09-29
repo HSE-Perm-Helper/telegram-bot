@@ -1,11 +1,16 @@
 import asyncio
+import enum
 import os.path
 from pathlib import Path
+
+
+class DataField(enum.Enum):
+    SPORT_SCHEDULE_FILE_ID = "SPORT_SCHEDULE_FILE_ID"
 
 class DataService:
     __data_file = os.path.join("save", "app.dat")
     __data: dict[str, str]
-    __fields = ["SPORT_SCHEDULE_FILE_ID"]
+    __fields = [DataField.SPORT_SCHEDULE_FILE_ID.value]
 
 
     def __init__(self):
