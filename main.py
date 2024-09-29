@@ -3,12 +3,12 @@ import asyncio
 from aiogram import types
 
 from bot import bot, dp
-from routes import mailing, menu
+from data.data_service import DataService
+from routes import mailing, menu, partnership
 from routes.command_handle import commands
 from routes.registration import registration
-from routes.schedule_handle import schedule_handle, today_schedule, tomorrow_schedule
+from routes.schedule_handle import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
 from worker import workers
-
 
 async def main():
     workers.run_workers()
@@ -17,8 +17,11 @@ async def main():
     dp.include_router(schedule_handle.router)
     dp.include_router(today_schedule.router)
     dp.include_router(tomorrow_schedule.router)
+    dp.include_router(sport_schedule.router)
+    dp.include_router(partnership.router)
     dp.include_router(mailing.router)
     dp.include_router(menu.router)
+
 
     # Команды бота в списке
 
