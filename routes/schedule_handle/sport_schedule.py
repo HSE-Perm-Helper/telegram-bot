@@ -29,6 +29,7 @@ async def get_sport_schedule(message: Message):
 
 @exception_handler
 @router.message(F.text == "🏓 Расписание физ-ры")
+@router.message(Command("sport_schedule"))
 async def get_today_lessons(message: Message):
     file_id = await data_service.get_data(DataField.SPORT_SCHEDULE_FILE_ID.value)
     await message.delete()
