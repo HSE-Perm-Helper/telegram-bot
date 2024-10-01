@@ -6,7 +6,7 @@ from aiogram.types import Message
 
 from api.api import get_today_lessons as get_lessons
 from decorator.decorators import exception_handler, typing_action
-from routes.schedule_handle.schedule_handle import get_lessons_as_string
+from routes.schedule_commands.schedule_handle import get_lessons_as_string
 from schedule.schedule_type import ScheduleType
 from util.utils import get_day_of_week_from_date
 

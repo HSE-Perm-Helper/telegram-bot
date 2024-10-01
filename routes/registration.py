@@ -8,7 +8,6 @@ from constants import constant
 from decorator.decorators import typing_action, exception_handler
 from message.common_messages import SUCCESS_REGISTER
 from routes import menu
-from routes.schedule_handle import schedule_handle
 
 router = Router()
 

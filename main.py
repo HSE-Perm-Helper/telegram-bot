@@ -3,17 +3,15 @@ import asyncio
 from aiogram import types
 
 from bot import bot, dp
-from data.data_service import DataService
-from routes import mailing, menu, partnership
-from routes.command_handle import commands
-from routes.registration import registration
-from routes.schedule_handle import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
+from routes import mailing, menu, partnership, settings_command, registration, start
+from routes.schedule_commands import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
 from worker import workers
 
 async def main():
     workers.run_workers()
-    dp.include_router(commands.router)
+    dp.include_router(start.router)
     dp.include_router(registration.router)
+    dp.include_router(settings_command.router)
     dp.include_router(schedule_handle.router)
     dp.include_router(today_schedule.router)
     dp.include_router(tomorrow_schedule.router)
@@ -31,6 +29,8 @@ async def main():
         types.BotCommand(command='menu', description='Вызвать меню'),
         types.BotCommand(command='schedule', description='Получить расписание'),
         types.BotCommand(command='base_schedule', description='Получить расписание на модуль'),
+        types.BotCommand(command='sport_schedule', description="Получить расписание физ-ры"),
+        types.BotCommand(command='vpn', description="Быстрый VPN от Вышкинцев")
     ], scope=types.BotCommandScopeDefault())
 
     await dp.start_polling(bot)
