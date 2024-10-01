@@ -8,7 +8,7 @@ class DataField(enum.Enum):
     SPORT_SCHEDULE_FILE_ID = "SPORT_SCHEDULE_FILE_ID"
 
 class DataService:
-    __data_file = os.path.join("save", "app.dat")
+    __data_file = os.path.join("app", "save", "app.dat")
     __data: dict[str, str]
     __fields = [DataField.SPORT_SCHEDULE_FILE_ID.value]
 
