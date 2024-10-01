@@ -83,12 +83,11 @@ async def change_state(query: CallbackQuery, state: FSMContext):
     if value == "True":
         new_state = False
 
-    await settings_service.toggle_setting(query.message.chat.id, query.data, new_value=new_state)
-
     new_keyboard = []
 
-
     code = SettingCode("_".join(query.data.split("_")[:-1]))
+
+    await settings_service.toggle_setting(query.message.chat.id, code, new_value=new_state)
 
     setting = await settings_service.get_setting_by_code(code)
     setting_title = setting.title
