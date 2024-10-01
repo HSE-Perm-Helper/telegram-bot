@@ -45,6 +45,21 @@ async def back_to_settings(query: CallbackQuery, state: FSMContext):
     await query.message.edit_reply_markup(reply_markup=keyboard.as_markup())
 
 
+
+@router.callback_query(lambda c: callback.callback.check_callback(c, SettingsCallback.OFF_NOTIFICATION.value))
+async def disable_notification(query: CallbackQuery):
+    await query.message.delete()
+
+    code = SettingCode(callback.callback.extract_data_from_callback(SettingsCallback.OFF_NOTIFICATION.value, query.data)[0])
+
+    setting = await settings_service.get_setting_by_code(code)
+    setting_title = setting.title
+
+    await settings_service.toggle_setting(query.message.chat.id, code, new_value=False)
+
+    await query.answer(text=f"✅ Вы успешно отключили {setting_title.lower()}")
+
+
 @router.callback_query(lambda c: callback.callback.check_callback(c, SettingsCallback.DONE_SETTINGS.value))
 async def done_settings(query: CallbackQuery, state: FSMContext):
     await state.clear()

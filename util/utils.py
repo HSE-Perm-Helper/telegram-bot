@@ -1,8 +1,12 @@
 import datetime
 
 import requests
+from aiogram.types import InlineKeyboardButton
 
+import callback.callback
 import venv
+from callback.settings_callback import SettingsCallback
+from settings.setting_code import SettingCode
 
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key
@@ -156,3 +160,11 @@ def get_day_of_week_from_date(date_string: str) -> str:
 
 def get_day_of_week_from_slug(slug: str) -> str:
     return days_of_week_slug.get(slug.upper(), "N/a")
+
+
+async def get_notification_disable_button(setting_code: SettingCode) -> InlineKeyboardButton:
+    callback_data = callback.callback.insert_data_to_callback(SettingsCallback.OFF_NOTIFICATION.value,
+                                                              [setting_code.value])
+    return InlineKeyboardButton(text="Не хочу получать такие уведомления 🥸",
+                                callback_data=callback_data)
+
