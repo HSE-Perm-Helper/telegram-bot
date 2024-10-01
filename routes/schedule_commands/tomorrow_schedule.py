@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import pytz
 from aiogram import Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -16,7 +17,8 @@ router = Router()
 @exception_handler
 @typing_action
 @router.message(F.text == "➡️ На завтра")
-async def get_today_lessons(message: Message, state: FSMContext):
+@router.message(Command("tomorrow"))
+async def get_tomorrow_lessons(message: Message, state: FSMContext):
     await state.clear()
 
     await message.delete()
