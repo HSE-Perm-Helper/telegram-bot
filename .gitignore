@@ -1,3 +1,5 @@
 __pycache__
 .idea
 venv.py
+.DS_Store
+/save

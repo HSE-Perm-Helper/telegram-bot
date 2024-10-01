@@ -3,6 +3,8 @@ from notification import notification_utils
 from notification.base_notification import BaseNotification
 from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
+from settings.setting_code import SettingCode
+from util.utils import get_notification_disable_button
 
 
 class ScheduleAddedNotificationProcessor(BaseNotificationProcessor):
@@ -20,6 +22,8 @@ class ScheduleAddedNotificationProcessor(BaseNotificationProcessor):
         for telegram_id, schedules in new_schedule.items():
             difference = notification_utils.get_difference_schedule(schedules)
             markup = notification_utils.get_markup_schedule(schedules)
+            markup.row(await get_notification_disable_button(SettingCode.NEW_SCHEDULE_NOTIFICATION))
+
             try:
                 await bot.send_message(telegram_id, f"{notification_utils.NOTIFICATION_EMOJI} Добавлено {difference}!",
                                        reply_markup=markup.as_markup())

@@ -100,6 +100,21 @@ async def edit_user(telegram_id: int, group: str, subgroup: int) -> bool:
     return not bool(user_data['error'])
 
 
+async def edit_user_settings(telegram_id: int, setting: str, new_value: bool) -> bool:
+    user_data = await patch_request_as_json(path=f"/user?telegramId={telegram_id}",
+                                            json={
+                                                f"{setting}": new_value,
+                                            })
+    return not bool(user_data['error'])
+
+
+async def get_user_settings(telegram_id: int) -> dict | None:
+    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
+    if user["error"]:
+        return None
+    return user["response"]["settings"]
+
+
 # -------------  Получение расписания  ------------- #
 
 async def get_schedule(telegram_id: int, start: str, end: str) -> dict[str, any]:
@@ -126,3 +141,13 @@ async def get_remote_schedule_link(telegram_id: int) -> str:
     response = await get_request_as_json(path=f"/schedule/{telegram_id}/download")
     print(response)
     return f'{response["response"]["linkForRemoteCalendar"]}'
+
+
+async def get_today_lessons(telegram_id: int) -> dict:
+    response = await get_request_as_json(path=f"/v3/schedule/{telegram_id}/today")
+    return response['response']
+
+
+async def get_tomorrow_lessons(telegram_id: int) -> dict:
+    response = await get_request_as_json(path=f"/v3/schedule/{telegram_id}/tomorrow")
+    return response['response']

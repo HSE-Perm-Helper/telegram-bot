@@ -5,6 +5,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import constants.constant
 from bot import bot
+from settings.setting_code import SettingCode
+from util.utils import get_notification_disable_button
 from notification.base_notification import BaseNotification
 from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
@@ -29,7 +31,7 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                     callback_data=schedule_utils.get_callback_for_schedule(schedule_info=schedule,
                                                                            need_delete_message=False)[0]))
 
-                markup.row(types.InlineKeyboardButton(text="Не хочу получать такие уведомления 🥸", callback_data="no"))
+                markup.row(await get_notification_disable_button(SettingCode.COMING_LESSONS_NOTIFICATION))
 
                 grouped_lessons = await group_lessons_by_pair_number(lessons)
                 pair_count = await get_pair_count(grouped_lessons)
