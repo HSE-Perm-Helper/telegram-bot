@@ -45,4 +45,4 @@ async def get_today_lessons(message: Message, state: FSMContext):
         await message.answer("Пока расписания физ-ры нет 😕")
         return
 
-    await message.answer_photo(photo=file_id, caption="Расписание физ-ры на этот учебный год 💪")
+    await message.answer_photo(photo=file_id, caption="Расписание физ-ры 💪")
