@@ -1,6 +1,7 @@
 import random
 
 from aiogram import Router, types
+from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import api
@@ -231,7 +232,7 @@ async def program_query_handler(callback_query: types.CallbackQuery):
 @typing_action
 @router.callback_query(lambda c: c.data.startswith("start_working"))
 @exception_handler
-async def callback_message(callback_query: types.CallbackQuery):
+async def callback_message(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.delete()
     data = callback_query.data.replace('start_working', "")
     course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
@@ -252,7 +253,7 @@ async def callback_message(callback_query: types.CallbackQuery):
 
     if is_success:
         await callback_query.answer(text=SUCCESS_REGISTER)
-        await menu.get_help(callback_query.message)
+        await menu.get_help(callback_query.message, state)
 
     else:
         await callback_query.message.answer("⚠ Произошла ошибка при внесении данных. 😔 "

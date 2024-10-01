@@ -1,5 +1,6 @@
 from aiogram import Router, types
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from decorator.decorators import typing_action, exception_handler
@@ -11,7 +12,9 @@ router = Router()
 @router.message(lambda F: F.text == ('help' or 'помощь' or 'помоги'))
 @typing_action
 @exception_handler
-async def get_help(message: types.Message, is_need_delete: bool = True):
+async def get_help(message: types.Message, state: FSMContext, is_need_delete: bool = True):
+    await state.clear()
+
     if is_need_delete:
         await message.delete()
     text_help = ("<b>Вот, что я могу:</b>\n\n"

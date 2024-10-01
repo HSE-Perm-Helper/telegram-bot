@@ -24,7 +24,9 @@ class SettingsState(StatesGroup):
 @router.message(F.text == "⚙️ Настройки")
 @typing_action
 @exception_handler
-async def get_settings(message: Message):
+async def get_settings(message: Message, state: FSMContext):
+    await state.clear()
+
     await message.delete()
     text = "⚙️ Настройки"
     keyboard = InlineKeyboardBuilder()

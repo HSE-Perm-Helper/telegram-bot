@@ -1,5 +1,6 @@
 from aiogram import Router, types
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import api
@@ -30,7 +31,9 @@ async def get_settings(message):
                         F: F.text == "Получить текстовое расписание 💼" or F.text == "💼 Расписание на неделю")
 @typing_action
 @exception_handler
-async def callback_message(message):
+async def callback_message(message, state: FSMContext):
+    await state.clear()
+
     await get_text_schedule(message)
 
 
@@ -52,7 +55,9 @@ async def callback_message(message):
 @router.message(lambda F: F.text == "Получить расписание на модуль 🗓" or F.text == "🗓 Расписание на модуль")
 @typing_action
 @exception_handler
-async def get_base_schedule(message: types.Message):
+async def get_base_schedule(message: types.Message, state: FSMContext):
+    await state.clear()
+
     await bot.delete_message(message.chat.id, message.message_id)
     schedules_json = await api.get_schedules()
     schedules = list(filter(lambda schedule: schedule["scheduleType"] == ScheduleType.QUARTER_SCHEDULE.value,

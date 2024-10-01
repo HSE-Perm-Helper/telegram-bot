@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytz
 from aiogram import Router, F
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from api.api import get_today_lessons as get_lessons
@@ -15,7 +16,9 @@ router = Router()
 @exception_handler
 @typing_action
 @router.message(F.text == "📅 На сегодня")
-async def get_today_lessons(message: Message):
+async def get_today_lessons(message: Message, state: FSMContext):
+    await state.clear()
+
     lessons = await get_lessons(message.chat.id)
     await message.delete()
 
