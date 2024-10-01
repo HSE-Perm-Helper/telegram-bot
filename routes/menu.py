@@ -3,7 +3,9 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from decorator.decorators import typing_action, exception_handler
+import api.api
+from bot import bot
+from decorator.decorators import typing_action, exception_handler, required_admin
 
 router = Router()
 
@@ -44,3 +46,33 @@ async def get_help(message: types.Message, state: FSMContext, is_need_delete: bo
     keyboard.resize_keyboard = True
 
     await message.answer(text_help, reply_markup=keyboard, parse_mode='HTML')
+
+
+
+@router.message(Command("update"))
+@required_admin
+async def update_message(message: types.Message):
+    keyboard_markup_up = ReplyKeyboardBuilder()
+    get_schedule_text_button = types.KeyboardButton(text="💼 Расписание на неделю")
+    get_base_schedule_text_button = types.KeyboardButton(text="🗓 Расписание на модуль")
+
+    keyboard_markup_up.row(get_schedule_text_button)
+    keyboard_markup_up.row(types.KeyboardButton(text="📅 На сегодня"), types.KeyboardButton(text="➡️ На завтра"))
+    keyboard_markup_up.row(get_base_schedule_text_button, types.KeyboardButton(text="🏓 Расписание физ-ры"))
+    keyboard_markup_up.row(types.KeyboardButton(text="⚙️ Настройки"))
+    keyboard_markup_up.row(types.KeyboardButton(text="⚡️ Быстрый VPN от Вышкинцев"))
+    keyboard_markup_up.row_width = 4
+
+    keyboard = keyboard_markup_up.as_markup()
+    keyboard.resize_keyboard = True
+
+    for user_id in await api.api.get_user_ids():
+        try:
+            await bot.send_message(user_id, text="🤩<b>У нас обновление!</b>\n\n" +
+            "Мы полностью обновили меню, настройки, добавили новый тип уведомлений и расписание физры🤌🤌🥳\n\n" +
+            "Скорее изучай новое меню!🫡",
+                             reply_markup=keyboard, parse_mode='HTML')
+        except Exception as e:
+            pass
+
+    await message.answer("Сообщение об обновлении успешно отправлено!")
