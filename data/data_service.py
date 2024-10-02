@@ -5,12 +5,13 @@ from pathlib import Path
 
 
 class DataField(enum.Enum):
-    SPORT_SCHEDULE_FILE_ID = "SPORT_SCHEDULE_FILE_ID"
+    SPORT_SCHEDULE_DOCUMENT_FILE_ID = "SPORT_SCHEDULE_DOCUMENT_FILE_ID"
+    SPORT_SCHEDULE_PHOTO_FILE_ID = "SPORT_SCHEDULE_PHOTO_FILE_ID"
 
 class DataService:
     __data_file = os.path.join("save", "app.dat")
     __data: dict[str, str]
-    __fields = [DataField.SPORT_SCHEDULE_FILE_ID.value]
+    __fields = [DataField.SPORT_SCHEDULE_PHOTO_FILE_ID.value, DataField.SPORT_SCHEDULE_DOCUMENT_FILE_ID.value]
 
 
     def __init__(self):
@@ -20,7 +21,7 @@ class DataService:
         Path(self.__data_file).parent.mkdir(parents=True, exist_ok=True)
         if os.path.exists(self.__data_file):
             with open(self.__data_file, "r") as f:
-                self.__data = dict(map(lambda x: x.split("="), f.readlines()))
+                self.__data = dict(map(lambda x: x.strip().split("=", maxsplit=1), f.readlines()))
                 await self.__check_data()
                 return
 
@@ -33,6 +34,11 @@ class DataService:
 
     async def set_data(self, key, value):
         self.__data[key] = value
+        await self.__save_data()
+
+
+    async def clear_data(self, key):
+        self.__data[key] = ""
         await self.__save_data()
 
 
