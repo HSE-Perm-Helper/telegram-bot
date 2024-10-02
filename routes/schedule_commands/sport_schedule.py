@@ -19,7 +19,20 @@ class SportScheduleState(StatesGroup):
     WAITING_TYPE_OF_SEND = State()
 
 
-@router.message(Command("update_sport_schedule"))
+@router.message(Command("update_sport_schedule"), F.photo)
+@required_admin
+async def get_sport_schedule(message: Message, state: FSMContext):
+    await state.clear()
+
+    photo_id = message.photo[0].file_id
+
+    await data_service.set_data(DataField.SPORT_SCHEDULE_PHOTO_FILE_ID.value, photo_id)
+
+    await message.delete()
+    await message.answer("Фотография расписания успешно обновлена!")
+
+
+@router.message(Command("update_sport_schedule"), F.document)
 @required_admin
 async def get_sport_schedule(message: Message, state: FSMContext):
     await state.clear()
@@ -31,21 +44,15 @@ async def get_sport_schedule(message: Message, state: FSMContext):
     file_name = f"sport-schedule.{file_extension}"
     input_file = BufferedInputFile(file.read(), file_name)
 
-    photo_message = await message.answer_photo(photo=input_file)
-    await photo_message.delete()
-
     document_message = await message.answer_document(input_file)
     await document_message.delete()
 
     document_id = document_message.document.file_id
 
-    photo_id = photo_message.photo[0].file_id
-
     await data_service.set_data(DataField.SPORT_SCHEDULE_DOCUMENT_FILE_ID.value, document_id)
-    await data_service.set_data(DataField.SPORT_SCHEDULE_PHOTO_FILE_ID.value, photo_id)
 
     await message.delete()
-    await message.answer("Фотография расписания успешно обновлена!")
+    await message.answer("Документ расписания успешно обновлена!")
 
 
 @router.message(Command("delete_sport_schedule"))
