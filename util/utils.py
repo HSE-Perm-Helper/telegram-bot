@@ -1,4 +1,5 @@
 import datetime
+from typing import Callable
 
 import requests
 from aiogram.types import InlineKeyboardButton
@@ -167,3 +168,10 @@ async def get_notification_disable_button(setting_code: SettingCode) -> InlineKe
                                                               [setting_code.value])
     return InlineKeyboardButton(text="Не хочу получать такие уведомления 🥸",
                                 callback_data=callback_data)
+
+
+async def do_or_nothing(function: Callable, *args):
+    try:
+        await function(*args)
+    except Exception as e:
+        pass
