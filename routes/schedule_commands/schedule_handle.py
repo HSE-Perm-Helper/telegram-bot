@@ -13,7 +13,7 @@ from schedule.schedule_type import ScheduleType
 from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, \
     get_schedule_header_by_schedule_info, get_pair_count, group_lessons_by_pair_number, get_lessons_without_header, \
     get_lesson_message_header
-from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug
+from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, do_or_nothing
 
 router = Router()
 
@@ -143,7 +143,7 @@ async def schedule_sending(message: types.Message, schedule_dict):
             text_for_message = await get_lessons_as_string(day, is_session, lessons)
             await message.answer(text=text_for_message, parse_mode='HTML', disable_notification=True)
 
-        await bot.unpin_all_chat_messages(message.chat.id)
+        await do_or_nothing(bot.unpin_all_chat_messages, message.chat.id)
         await bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
 
 
