@@ -3,9 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-import api.api
-from bot import bot
-from decorator.decorators import typing_action, exception_handler, required_admin
+from decorator.decorators import typing_action, exception_handler
 
 router = Router()
 

@@ -11,6 +11,7 @@ from util.utils import get_day_of_week_from_date
 
 router = Router()
 
+
 @exception_handler
 @typing_action
 @router.message(F.text == "📅 На сегодня")

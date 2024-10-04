@@ -45,12 +45,12 @@ async def back_to_settings(query: CallbackQuery, state: FSMContext):
     await query.message.edit_reply_markup(reply_markup=keyboard.as_markup())
 
 
-
 @router.callback_query(lambda c: callback.callback.check_callback(c, SettingsCallback.OFF_NOTIFICATION.value))
 async def disable_notification(query: CallbackQuery):
     await query.message.delete()
 
-    code = SettingCode(callback.callback.extract_data_from_callback(SettingsCallback.OFF_NOTIFICATION.value, query.data)[0])
+    code = SettingCode(
+        callback.callback.extract_data_from_callback(SettingsCallback.OFF_NOTIFICATION.value, query.data)[0])
 
     setting = await settings_service.get_setting_by_code(code)
     setting_title = setting.title
@@ -64,6 +64,7 @@ async def disable_notification(query: CallbackQuery):
 async def done_settings(query: CallbackQuery, state: FSMContext):
     await state.clear()
     await query.message.delete()
+
 
 @router.callback_query(lambda c: callback.callback.check_callback(c, SettingsCallback.SET_GROUP.value))
 async def change_group(query: CallbackQuery, state: FSMContext):
@@ -125,11 +126,8 @@ async def change_state(query: CallbackQuery, state: FSMContext):
         await query.answer(f"✅ Вы успешно отключили {setting_title.lower()}")
 
 
-
 async def __get_inline_button_for_setting(data: BaseSetting, value: bool) -> InlineKeyboardButton:
     symbol = "✅"
     if not value:
         symbol = "❌"
     return InlineKeyboardButton(text=f"{symbol} {data.title}", callback_data=f"{data.code.value}_{value}")
-
-

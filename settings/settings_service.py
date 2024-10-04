@@ -8,6 +8,7 @@ from settings.setting_code import SettingCode
 
 class SettingsService:
     __settings: dict[SettingCode, BaseSetting] = {}
+
     def __init__(self):
         self.__settings[SettingCode.CHANGED_SCHEDULE_NOTIFICATION] = ChangedScheduleNotificationSetting()
         self.__settings[SettingCode.NEW_SCHEDULE_NOTIFICATION] = NewScheduleNotificationSetting()
@@ -27,10 +28,8 @@ class SettingsService:
 
         return l
 
-
     async def get_setting_by_code(self, code: SettingCode) -> BaseSetting:
         return self.__settings[code]
-
 
 
 settings_service = SettingsService()
