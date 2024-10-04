@@ -66,7 +66,9 @@ async def done_settings(query: CallbackQuery, state: FSMContext):
     await query.message.delete()
 
 @router.callback_query(lambda c: callback.callback.check_callback(c, SettingsCallback.SET_GROUP.value))
-async def change_group(query: CallbackQuery):
+async def change_group(query: CallbackQuery, state: FSMContext):
+    await query.message.delete()
+    await state.clear()
     await registration.get_course(query.message, False)
 
 
