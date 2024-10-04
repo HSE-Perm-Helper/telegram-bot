@@ -7,7 +7,7 @@ from api import api
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
 from callback.schedule_callback import ScheduleCallback
-from decorator.decorators import typing_action, exception_handler
+from decorator.decorators import typing_action
 from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from schedule.schedule_type import ScheduleType
 from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, \
@@ -21,7 +21,6 @@ router = Router()
 @router.message(Command('schedule', 'расписание'))
 @router.message(lambda F: F.text == ('schedule' or 'расписание'))
 @typing_action
-@exception_handler
 async def get_settings(message):
     await get_text_schedule(message)
 
@@ -30,7 +29,6 @@ async def get_settings(message):
 @router.message(lambda
                         F: F.text == "Получить текстовое расписание 💼" or F.text == "💼 Расписание на неделю")
 @typing_action
-@exception_handler
 async def callback_message(message, state: FSMContext):
     await state.clear()
 
@@ -39,7 +37,6 @@ async def callback_message(message, state: FSMContext):
 
 # @router.message(Command('schedule'))
 # @typing_action
-# @exception_handler
 # @required_admin
 # async def get_remote_schedule(message):
 #     await bot.delete_message(message.chat.id, message.message_id)
@@ -54,7 +51,6 @@ async def callback_message(message, state: FSMContext):
 @router.message(Command("base_schedule"))
 @router.message(lambda F: F.text == "Получить расписание на модуль 🗓" or F.text == "🗓 Расписание на модуль")
 @typing_action
-@exception_handler
 async def get_base_schedule(message: types.Message, state: FSMContext):
     await state.clear()
 
@@ -161,9 +157,7 @@ async def get_lessons_as_string(day, is_session, lessons):
 
 
 # Пользователем выбрано расписание для отправки
-@typing_action
 @router.callback_query(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
-@exception_handler
 async def callback_message(callback_query: types.CallbackQuery):
     data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
     start = data[0]

@@ -7,7 +7,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import callback.callback
 from callback.settings_callback import SettingsCallback
-from decorator.decorators import typing_action, exception_handler
+from decorator.decorators import typing_action
 from routes import registration
 from settings.base_setting import BaseSetting
 from settings.setting_code import SettingCode
@@ -23,7 +23,6 @@ class SettingsState(StatesGroup):
 @router.message(Command('settings', 'настройки'))
 @router.message(F.text == "⚙️ Настройки")
 @typing_action
-@exception_handler
 async def get_settings(message: Message, state: FSMContext):
     await state.clear()
 

@@ -1,10 +1,8 @@
-import traceback
 from functools import wraps
 
 import aiogram
 
 from bot import bot
-from message.common_messages import EXCEPTION_MESSAGE
 from util.users_utils import is_admin
 
 
@@ -23,24 +21,6 @@ def typing_action(func):
         return await func(*args, **kwargs)
 
     return decorator
-
-
-def exception_handler(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        try:
-            return await func(*args, **kwargs)
-        except Exception as e:
-            traceback.print_exc()
-            for arg in args:
-                if isinstance(arg, aiogram.types.Message):
-                    await bot.send_message(arg.chat.id, EXCEPTION_MESSAGE)
-                    break
-                elif isinstance(arg, aiogram.types.CallbackQuery):
-                    await bot.send_message(arg.message.chat.id, EXCEPTION_MESSAGE)
-                    break
-
-    return wrapper
 
 
 def required_admin(func):

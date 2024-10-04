@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from api import api
-from decorator.decorators import typing_action, exception_handler
+from decorator.decorators import typing_action
 from routes import menu, registration
 
 router = Router()
@@ -14,7 +14,6 @@ router = Router()
 @router.message(lambda F: F.text == ('start' or 'старт' or 'поехали'
                                      or 'registration' or 'регистрация'))
 @typing_action
-@exception_handler
 async def get_registration(message: Message, state: FSMContext):
     await state.clear()
 

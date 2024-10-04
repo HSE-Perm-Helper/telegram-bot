@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import api
 from constants import constant
-from decorator.decorators import typing_action, exception_handler
+from decorator.decorators import typing_action
 from message.common_messages import SUCCESS_REGISTER, SUCCESS_DATA_CHANGING
 from routes import menu
 
@@ -170,7 +170,6 @@ async def get_confirmation(message: Message, data):
 # Обработка события нажатия на кнопку выбора курса
 @typing_action
 @router.callback_query(lambda c: c.data.startswith('course_'))
-@exception_handler
 async def course_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("course_", "")
     await callback_query.message.delete()
@@ -180,7 +179,6 @@ async def course_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора программы
 @typing_action
 @router.callback_query(lambda c: c.data.startswith('program_'))
-@exception_handler
 async def program_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("program_", "")
     await callback_query.message.delete()
@@ -190,7 +188,6 @@ async def program_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора группы
 @typing_action
 @router.callback_query(lambda c: c.data.startswith('group_'))
-@exception_handler
 async def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
     await callback_query.message.delete()
@@ -200,7 +197,6 @@ async def group_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку выбора подгруппы
 @typing_action
 @router.callback_query(lambda c: c.data.startswith('subgroup_'))
-@exception_handler
 async def subgroup_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("subgroup_", "")
     await callback_query.message.delete()
@@ -210,7 +206,6 @@ async def subgroup_query_handler(callback_query: types.CallbackQuery):
 # Обработка события возврата на предыдущий выбор
 @typing_action
 @router.callback_query(lambda c: c.data.startswith('back_to_'))
-@exception_handler
 async def program_query_handler(callback_query: types.CallbackQuery):
     await callback_query.message.delete()
 
@@ -231,7 +226,6 @@ async def program_query_handler(callback_query: types.CallbackQuery):
 # Обработка события нажатия на кнопку подтверждения данных
 @typing_action
 @router.callback_query(lambda c: c.data.startswith("start_working"))
-@exception_handler
 async def callback_message(callback_query: types.CallbackQuery):
     await callback_query.message.delete()
     data = callback_query.data.replace('start_working', "")

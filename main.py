@@ -3,6 +3,7 @@ import asyncio
 from aiogram import types
 
 from bot import bot, dp
+from middleware.exception_handler_middleaware import ExceptionHandlerMiddleware
 from routes import mailing, menu, partnership, settings_command, registration, start
 from routes.schedule_commands import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
 from worker import workers
@@ -10,6 +11,9 @@ from worker import workers
 
 async def main():
     workers.run_workers()
+
+    dp.update.middleware.register(ExceptionHandlerMiddleware())
+
     dp.include_router(start.router)
     dp.include_router(registration.router)
     dp.include_router(settings_command.router)
