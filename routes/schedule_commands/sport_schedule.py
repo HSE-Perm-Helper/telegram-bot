@@ -7,7 +7,7 @@ from aiogram.types import Message, BufferedInputFile, CallbackQuery, InlineKeybo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from data.data_service import data_service, DataField
-from decorator.decorators import exception_handler, required_admin
+from decorator.decorators import required_admin
 
 router = Router()
 
@@ -66,7 +66,6 @@ async def get_sport_schedule(message: Message, state: FSMContext):
     await message.answer("Фотография расписания успешно удалена!")
 
 
-@exception_handler
 @router.message(F.text == "🏓 Расписание физ-ры")
 @router.message(Command("sport_schedule"))
 async def get_today_lessons(message: Message, state: FSMContext):
@@ -87,7 +86,6 @@ async def get_today_lessons(message: Message, state: FSMContext):
     await state.set_state(SportScheduleState.WAITING_TYPE_OF_SEND)
 
 
-@exception_handler
 @router.callback_query(SportScheduleState.WAITING_TYPE_OF_SEND, F.data == DOCUMENT_TYPE_CALLBACK)
 async def handle_document_type_schedule(query: CallbackQuery, state: FSMContext):
     await state.clear()
@@ -99,7 +97,6 @@ async def handle_document_type_schedule(query: CallbackQuery, state: FSMContext)
     await query.message.answer_document(document=file_id, caption="Расписание физ-ры 💪")
 
 
-@exception_handler
 @router.callback_query(SportScheduleState.WAITING_TYPE_OF_SEND, F.data == PHOTO_TYPE_CALLBACK)
 async def handle_document_type_schedule(query: CallbackQuery, state: FSMContext):
     await state.clear()

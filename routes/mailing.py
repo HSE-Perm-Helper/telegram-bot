@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import api
 from constants import constant
-from decorator.decorators import exception_handler, required_admin, typing_action
+from decorator.decorators import required_admin, typing_action
 from util.users_utils import send_message_to_users
 
 router = Router()
@@ -18,7 +18,6 @@ class MailingState(StatesGroup):
 
 
 @router.message(Command("mailing"))
-@exception_handler
 @required_admin
 async def mailing_to_all(message: types.Message, state: FSMContext):
     await state.clear()
@@ -39,7 +38,6 @@ async def mailing_to_all(message: types.Message, state: FSMContext):
 
 @typing_action
 @router.callback_query(StateFilter(MailingState.waiting_mailing_target))
-@exception_handler
 async def callback_message(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.delete()
     data = callback_query.data
@@ -53,7 +51,6 @@ async def callback_message(callback_query: types.CallbackQuery, state: FSMContex
 
 
 @router.message(F.text, MailingState.waiting_mailing_message)
-@exception_handler
 @typing_action
 async def send_mail(message: types.Message, state: FSMContext):
     data = await state.get_data()
