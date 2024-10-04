@@ -3,6 +3,7 @@ from message import common_messages
 
 class ServiceUnavailableException(Exception):
     service: str
+
     def __init__(self, service: str):
         self.service = service
         super().__init__(f'Service {service} is Unavailable')
