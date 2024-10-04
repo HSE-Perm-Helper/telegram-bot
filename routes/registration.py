@@ -1,13 +1,13 @@
 import random
 
 from aiogram import Router, types
-from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import api
 from constants import constant
 from decorator.decorators import typing_action, exception_handler
-from message.common_messages import SUCCESS_REGISTER
+from message.common_messages import SUCCESS_REGISTER, SUCCESS_DATA_CHANGING
 from routes import menu
 
 router = Router()
@@ -19,7 +19,7 @@ def rand_emj(count):
 
 
 # Создание кнопок выбора курса
-async def get_course(message, is_new_user: bool):
+async def get_course(message: Message, is_new_user: bool):
     if is_new_user:
         text_hello = "Давай познакомимся! 👋 На каком курсе ты учишься?"
     else:
@@ -39,7 +39,7 @@ async def get_course(message, is_new_user: bool):
 
 
 # Создание кнопок выбора программы
-async def get_program(message, data):
+async def get_program(message: Message, data):
     number_course, is_new_user = data.split('^')
     number_course = int(number_course)
     text_get_course = f"Ты выбрал {number_course} курс! 🎉 На каком направлении ты учишься?"
@@ -66,7 +66,7 @@ async def get_program(message, data):
 
 
 # Создание кнопок выбора группы
-async def get_group(message, data):
+async def get_group(message: Message, data):
     program, course, is_new_user = data.split('^')
     if program in constant.type_of_program_dict.keys():
         text_get_group = f"Отлично, ты выбрал: \n{constant.type_of_program_dict[program]} 😎\nТеперь давай выберем группу!"
@@ -92,7 +92,7 @@ async def get_group(message, data):
 
 
 # Создание кнопок выбора подгруппы
-async def get_subgroup(message, data):
+async def get_subgroup(message: Message, data):
     group, program, course, is_new_user = data.split('^')
 
     text_get_subgroup = f"{group} — твоя группа. Осталось определиться с подгруппой!"
@@ -124,7 +124,7 @@ async def get_subgroup(message, data):
 
 
 # Создание кнопок для подтверждения выбора
-async def get_confirmation(message, data):
+async def get_confirmation(message: Message, data):
     subgroup, group, program, course, is_new_user = data.split('^')
 
     '''Заводим новую переменную номера группы, чтобы в сообщение выводилось полное название направления'''
@@ -232,17 +232,18 @@ async def program_query_handler(callback_query: types.CallbackQuery):
 @typing_action
 @router.callback_query(lambda c: c.data.startswith("start_working"))
 @exception_handler
-async def callback_message(callback_query: types.CallbackQuery, state: FSMContext):
+async def callback_message(callback_query: types.CallbackQuery):
     await callback_query.message.delete()
     data = callback_query.data.replace('start_working', "")
     course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
+    is_new_user = True if is_new_user == "True" else False
 
     if subgroup != "None":
         subgroup = int(subgroup)
     else:
         subgroup = 0
 
-    if is_new_user == "True":
+    if is_new_user:
         is_success = await api.registration_user(telegram_id=telegram_id,
                                                  group=group,
                                                  subgroup=subgroup)
@@ -252,8 +253,12 @@ async def callback_message(callback_query: types.CallbackQuery, state: FSMContex
                                          subgroup=subgroup)
 
     if is_success:
-        await callback_query.answer(text=SUCCESS_REGISTER)
-        await menu.get_help(callback_query.message, state)
+        if is_new_user:
+            await callback_query.answer(text=SUCCESS_REGISTER)
+        else:
+            await callback_query.answer(text=SUCCESS_DATA_CHANGING)
+
+        await menu.send_help_message(callback_query.message)
 
     else:
         await callback_query.message.answer("⚠ Произошла ошибка при внесении данных. 😔 "

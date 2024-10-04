@@ -8,11 +8,11 @@ class DataField(enum.Enum):
     SPORT_SCHEDULE_DOCUMENT_FILE_ID = "SPORT_SCHEDULE_DOCUMENT_FILE_ID"
     SPORT_SCHEDULE_PHOTO_FILE_ID = "SPORT_SCHEDULE_PHOTO_FILE_ID"
 
+
 class DataService:
     __data_file = os.path.join("save", "app.dat")
     __data: dict[str, str]
     __fields = [DataField.SPORT_SCHEDULE_PHOTO_FILE_ID.value, DataField.SPORT_SCHEDULE_DOCUMENT_FILE_ID.value]
-
 
     def __init__(self):
         asyncio.run(self.__read_data())
@@ -31,21 +31,17 @@ class DataService:
     async def get_data(self, key) -> str:
         return self.__data.get(key)
 
-
     async def set_data(self, key, value):
         self.__data[key] = value
         await self.__save_data()
-
 
     async def clear_data(self, key):
         self.__data[key] = ""
         await self.__save_data()
 
-
     async def __save_data(self):
         with open(self.__data_file, "w+") as f:
             f.writelines("\n".join(list(map(lambda item: f"{item[0]}={item[1]}", self.__data.items()))))
-
 
     async def __check_data(self):
         self.__data = dict(map(lambda x: (x, None), self.__fields)) | self.__data
@@ -57,6 +53,3 @@ class DataService:
 
 
 data_service = DataService()
-
-
-

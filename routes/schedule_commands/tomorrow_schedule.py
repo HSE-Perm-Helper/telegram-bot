@@ -14,6 +14,7 @@ from util.utils import get_day_of_week_from_date
 
 router = Router()
 
+
 @exception_handler
 @typing_action
 @router.message(F.text == "➡️ На завтра")
@@ -30,12 +31,12 @@ async def get_tomorrow_lessons(message: Message, state: FSMContext):
             date += timedelta(days=1)
 
         days_of_week = ['понедельник',
-                             'вторник',
-                             'среду',
-                             'четверг',
-                             'пятницу',
-                             'субботу',
-                             'Воскресенье']
+                        'вторник',
+                        'среду',
+                        'четверг',
+                        'пятницу',
+                        'субботу',
+                        'Воскресенье']
 
         day_of_week = days_of_week[date.weekday()].lower()
 

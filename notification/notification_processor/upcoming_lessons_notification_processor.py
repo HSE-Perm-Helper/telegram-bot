@@ -5,13 +5,13 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import constants.constant
 from bot import bot
-from settings.setting_code import SettingCode
-from util.utils import get_notification_disable_button
 from notification.base_notification import BaseNotification
 from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
 from schedule import schedule_utils
 from schedule.schedule_utils import get_pair_count, group_lessons_by_pair_number, get_lessons_without_header
+from settings.setting_code import SettingCode
+from util.utils import get_notification_disable_button
 
 
 class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):

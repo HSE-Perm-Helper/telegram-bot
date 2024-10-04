@@ -7,6 +7,7 @@ from routes import mailing, menu, partnership, settings_command, registration, s
 from routes.schedule_commands import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
 from worker import workers
 
+
 async def main():
     workers.run_workers()
     dp.include_router(start.router)
@@ -19,7 +20,6 @@ async def main():
     dp.include_router(partnership.router)
     dp.include_router(mailing.router)
     dp.include_router(menu.router)
-
 
     # Команды бота в списке
 

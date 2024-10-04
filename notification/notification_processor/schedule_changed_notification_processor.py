@@ -25,7 +25,8 @@ class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
             markup.row(await get_notification_disable_button(SettingCode.CHANGED_SCHEDULE_NOTIFICATION))
 
             try:
-                await bot.send_message(telegram_id, f"{notification_utils.NOTIFICATION_EMOJI} Твоё {difference} изменено!",
+                await bot.send_message(telegram_id,
+                                       f"{notification_utils.NOTIFICATION_EMOJI} Твоё {difference} изменено!",
                                        reply_markup=markup.as_markup())
             except Exception as e:
                 print(e)

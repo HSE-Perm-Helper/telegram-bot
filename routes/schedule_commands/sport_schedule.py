@@ -66,8 +66,6 @@ async def get_sport_schedule(message: Message, state: FSMContext):
     await message.answer("Фотография расписания успешно удалена!")
 
 
-
-
 @exception_handler
 @router.message(F.text == "🏓 Расписание физ-ры")
 @router.message(Command("sport_schedule"))

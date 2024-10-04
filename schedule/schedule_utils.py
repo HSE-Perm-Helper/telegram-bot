@@ -172,4 +172,4 @@ async def get_lesson_message_header(count_pairs, day, is_session):
         return f"<b>{day}</b>\n\n"
     else:
         return (f"<b>{day} — "
-                             f"{constant.count_pairs_dict[count_pairs]}</b>\n\n")
+                f"{constant.count_pairs_dict[count_pairs]}</b>\n\n")

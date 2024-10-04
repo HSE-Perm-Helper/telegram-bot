@@ -39,4 +39,3 @@ class NotificationManager:
                 await processor.process(notifications)
             except Exception as e:
                 traceback.print_exc()
-

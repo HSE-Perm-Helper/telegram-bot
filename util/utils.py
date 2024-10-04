@@ -167,4 +167,3 @@ async def get_notification_disable_button(setting_code: SettingCode) -> InlineKe
                                                               [setting_code.value])
     return InlineKeyboardButton(text="Не хочу получать такие уведомления 🥸",
                                 callback_data=callback_data)
-

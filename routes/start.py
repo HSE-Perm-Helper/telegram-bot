@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 
 from api import api
 from decorator.decorators import typing_action, exception_handler
@@ -14,10 +15,10 @@ router = Router()
                                      or 'registration' or 'регистрация'))
 @typing_action
 @exception_handler
-async def get_registration(message, state: FSMContext):
+async def get_registration(message: Message, state: FSMContext):
     await state.clear()
 
     if await api.check_registration_user(message.chat.id):
-        await menu.get_help(message, state, is_need_delete=False)
+        await menu.send_help_message(message)
     else:
         await registration.get_course(message, True)
