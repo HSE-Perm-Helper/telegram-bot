@@ -18,7 +18,7 @@ class ExceptionHandlerMiddleware(BaseMiddleware):
             await self.send_message(event, e.__str__())
 
         except Exception as e:
-            user_id = self.get_user_id_from_update(event)
+            user_id = await self.get_user_id_from_update(event)
 
             await self.send_message(event, EXCEPTION_MESSAGE)
             logging.error(f"Handling with error for user with id {user_id}", exc_info=e)
