@@ -1,3 +1,6 @@
+from requests import Response
+
+from exception.schedule_service_unavailable_exception import ScheduleServiceUnavailableException
 from util.utils import get_request, get_request_as_json, \
     patch_request_as_json, post_request_as_json
 
@@ -118,13 +121,17 @@ async def get_user_settings(telegram_id: int) -> dict | None:
 # -------------  Получение расписания  ------------- #
 
 async def get_schedule(telegram_id: int, start: str, end: str) -> dict[str, any]:
-    schedule_data = await get_request_as_json(path=f"/v3/schedule/{telegram_id}?start={start}&end={end}")
-    return schedule_data
+    response = await get_request(path=f"/v3/schedule/{telegram_id}?start={start}&end={end}")
+    await __raise_schedule_exception_when_service_unavailable(response)
+
+    return response.json()
 
 
 async def get_schedules() -> dict[str, any]:
-    schedule_data = await get_request_as_json(path=f"/v3/schedules")
-    return schedule_data
+    response = await get_request(path=f"/v3/schedules")
+    await __raise_schedule_exception_when_service_unavailable(response)
+
+    return response.json()
 
 
 # -------------  Проверка обновления расписания  ------------- #
@@ -144,10 +151,19 @@ async def get_remote_schedule_link(telegram_id: int) -> str:
 
 
 async def get_today_lessons(telegram_id: int) -> dict:
-    response = await get_request_as_json(path=f"/v3/schedule/{telegram_id}/today")
-    return response['response']
+    response = await get_request(path=f"/v3/schedule/{telegram_id}/today")
+    await __raise_schedule_exception_when_service_unavailable(response)
+
+    return response.json()['response']
 
 
 async def get_tomorrow_lessons(telegram_id: int) -> dict:
-    response = await get_request_as_json(path=f"/v3/schedule/{telegram_id}/tomorrow")
-    return response['response']
+    response = await get_request(path=f"/v3/schedule/{telegram_id}/tomorrow")
+    await __raise_schedule_exception_when_service_unavailable(response)
+
+    return response.json()['response']
+
+
+async def __raise_schedule_exception_when_service_unavailable(response: Response):
+    if response.status_code == 503:
+        raise ScheduleServiceUnavailableException
