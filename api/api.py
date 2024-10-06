@@ -1,6 +1,7 @@
 from requests import Response
 
 from exception.schedule_service_unavailable_exception import ScheduleServiceUnavailableException
+from exception.user_not_found_exception import UserNotFoundException
 from util.utils import get_request, get_request_as_json, \
     patch_request_as_json, post_request_as_json
 
@@ -113,8 +114,9 @@ async def edit_user_settings(telegram_id: int, setting: str, new_value: bool) ->
 
 async def get_user_settings(telegram_id: int) -> dict | None:
     user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
-    if user["error"]:
-        return None
+
+    await __raise_user_not_found_exception_when_exception_in_response(user)
+
     return user["response"]["settings"]
 
 
@@ -124,7 +126,11 @@ async def get_schedule(telegram_id: int, start: str, end: str) -> dict[str, any]
     response = await get_request(path=f"/v3/schedule/{telegram_id}?start={start}&end={end}")
     await __raise_schedule_exception_when_service_unavailable(response)
 
-    return response.json()
+    data = response.json()
+
+    await __raise_user_not_found_exception_when_exception_in_response(data)
+
+    return data
 
 
 async def get_schedules() -> dict[str, any]:
@@ -154,16 +160,30 @@ async def get_today_lessons(telegram_id: int) -> dict:
     response = await get_request(path=f"/v3/schedule/{telegram_id}/today")
     await __raise_schedule_exception_when_service_unavailable(response)
 
-    return response.json()['response']
+    data = response.json()
+
+    await __raise_user_not_found_exception_when_exception_in_response(data)
+
+    return data['response']
 
 
 async def get_tomorrow_lessons(telegram_id: int) -> dict:
     response = await get_request(path=f"/v3/schedule/{telegram_id}/tomorrow")
     await __raise_schedule_exception_when_service_unavailable(response)
 
-    return response.json()['response']
+    data = response.json()
+
+    await __raise_user_not_found_exception_when_exception_in_response(data)
+
+    return data['response']
 
 
 async def __raise_schedule_exception_when_service_unavailable(response: Response):
     if response.status_code == 503:
         raise ScheduleServiceUnavailableException
+
+
+async def __raise_user_not_found_exception_when_exception_in_response(data):
+    if data["error"]:
+        if data["errorDescription"]["code"] == "UserNotFoundException":
+            raise UserNotFoundException
