@@ -22,7 +22,6 @@ class ScheduleAddedNotificationProcessor(BaseNotificationProcessor):
         for telegram_id, schedules in new_schedule.items():
             difference = notification_utils.get_difference_schedule(schedules)
             markup = notification_utils.get_markup_schedule(schedules)
-            markup.row(await get_notification_disable_button(SettingCode.NEW_SCHEDULE_NOTIFICATION))
 
             try:
                 await bot.send_message(telegram_id, f"{notification_utils.NOTIFICATION_EMOJI} Добавлено {difference}!",
