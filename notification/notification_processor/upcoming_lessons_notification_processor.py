@@ -31,8 +31,6 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                     callback_data=schedule_utils.get_callback_for_schedule(schedule_info=schedule,
                                                                            need_delete_message=False)[0]))
 
-                markup.row(await get_notification_disable_button(SettingCode.COMING_LESSONS_NOTIFICATION))
-
                 grouped_lessons = await group_lessons_by_pair_number(lessons)
                 pair_count = await get_pair_count(grouped_lessons)
 
