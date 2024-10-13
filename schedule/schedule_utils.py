@@ -114,8 +114,8 @@ def get_lesson_as_string(lesson):
             '''- Если дистант, добавляем ссылки'''
 
             '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-            if lesson['lessonType'] == "SEMINAR":
-                text_for_message += f" {subgroup} п.г."
+            if subgroup != "":
+                text_for_message += f", {subgroup} п.г."
             else:
                 text_for_message += "\n"
             '''КОНЕЦ КОСТЫЛЯ'''
@@ -138,7 +138,7 @@ def get_lesson_as_string(lesson):
 
                     '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
                     if subgroup != "":
-                        text_for_message += f" {subgroup} п.г.\n"
+                        text_for_message += f", {subgroup} п.г.\n"
                     else:
                         text_for_message += "\n"
                     '''КОНЕЦ КОСТЫЛЯ'''
@@ -152,7 +152,7 @@ def get_lesson_as_string(lesson):
 
                         '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
                         if subgroup != "":
-                            text_for_message += f" {subgroup} п.г.\n"
+                            text_for_message += f", {subgroup} п.г.\n"
                         else:
                             text_for_message += "\n"
                         '''КОНЕЦ КОСТЫЛЯ'''
