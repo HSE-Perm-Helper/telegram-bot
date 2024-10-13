@@ -65,7 +65,11 @@ def get_lesson_as_string(lesson):
     text_for_message = ''
 
     '''ОТНОСИТСЯ К КОСТЫЛЮ С ПОДГРУППАМИ'''
-    subgroup = ""
+    subgroup = ''
+    if "подгруппа" in lesson['subject']:
+        pair_name_with_subgroup: str = lesson['subject']
+        pair_name = pair_name_with_subgroup[:len(pair_name_with_subgroup) - 21]
+        subgroup = pair_name_with_subgroup[len(pair_name) + 5]
 
     '''Если вид пары — майнор'''
     if lesson['lessonType'] == 'COMMON_MINOR':
@@ -79,9 +83,41 @@ def get_lesson_as_string(lesson):
             '''Добавляем в сообщение номер пары'''
             text_for_message += f"<b>{constant.number_of_pair_dict[lesson['time']['startTime']]} </b>"
 
-            '''Добавляем в сообщение время пары и ее тип'''
-            text_for_message += (f"{time_of_pair} "
-                                 f"{constant.type_of_lessons_dict[lesson['lessonType']]}\n")
+            '''Добавляем в сообщение время пары'''
+            text_for_message += (f"<i>{time_of_pair}</i> ")
+
+            '''Проверяем, дистант или очная'''
+            if not lesson['isOnline']:
+
+                '''Если не дистант, добавляем корпус и кабинет'''
+                if lesson['places'] is not None:
+                    if len(lesson['places']) == 1:
+                        place = lesson['places'][0]
+                        text_for_message += (
+                            f"<b>{place['office']} [{place['building']}]</b>")
+
+                        '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
+
+                        if subgroup != "":
+                            text_for_message += f", {subgroup} п.г.\n"
+                        else:
+                            text_for_message += "\n"
+                        '''КОНЕЦ КОСТЫЛЯ'''
+
+                    else:
+                        text_for_message += f'несколько мест:\n'
+                        for place in lesson['places']:
+                            '''- Иначе добавляем номер корпуса и аудиторию'''
+                            text_for_message += (
+                                f"<b>{place['office']} [{place['building']}]</b>")
+
+                            '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
+
+                            if subgroup != "":
+                                text_for_message += f", {subgroup} п.г.\n"
+                            else:
+                                text_for_message += "\n"
+                            '''КОНЕЦ КОСТЫЛЯ'''
 
             '''Добавляем в сообщение название пары'''
 
@@ -95,8 +131,6 @@ def get_lesson_as_string(lesson):
                 if "подгруппа" in lesson['subject']:
                     pair_name_with_subgroup: str = lesson['subject']
                     pair_name = pair_name_with_subgroup[:len(pair_name_with_subgroup) - 21]
-                    ' <b>(8 подгруппа)</b>'
-                    subgroup = pair_name_with_subgroup[len(pair_name) + 5]
                     text_for_message += pair_name + "\n"
                 else:
                     if lesson['lessonType'] in constant.type_of_lessons_dict.keys():
@@ -108,59 +142,34 @@ def get_lesson_as_string(lesson):
             '''Добавляем преподавателя пары'''
             text_for_message += (f"<i>{lesson['lecturer']} </i>")
 
-        '''Проверяем, дистант или очная'''
-        if lesson['isOnline']:
+        '''Добавляем в сообщение тип пары'''
+        text_for_message += (f"{constant.type_of_lessons_dict[lesson['lessonType']]}")
 
-            '''- Если дистант, добавляем ссылки'''
+        if lesson['isOnline']:
+            '''...иначе добавляем ссылки'''
 
             '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
+
             if subgroup != "":
-                text_for_message += f", {subgroup} п.г."
+                text_for_message += f", {subgroup} п.г.\n"
             else:
                 text_for_message += "\n"
             '''КОНЕЦ КОСТЫЛЯ'''
 
             if lesson['links'] is None:
-                text_for_message += (f"\nДистанционная пара, ссылки отсутствуют\n")
+                text_for_message += (f"Дистанционная пара, ссылки отсутствуют\n")
 
             else:
-                text_for_message += (f"\nДистанционная пара, ссылки:\n")
+                text_for_message += (f"Дистанционная пара, ссылки:\n")
                 for link in lesson['links']:
                     text_for_message += (f"{link}\n")
-
         else:
-            '''...иначе добавляем корпус и кабинет'''
-            if lesson['places'] is not None:
-                if len(lesson['places']) == 1:
-                    place = lesson['places'][0]
-                    text_for_message += (
-                        f"{place['office']} [{place['building']}]")
-
-                    '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-                    if subgroup != "":
-                        text_for_message += f", {subgroup} п.г.\n"
-                    else:
-                        text_for_message += "\n"
-                    '''КОНЕЦ КОСТЫЛЯ'''
-
-                else:
-                    text_for_message += f'несколько мест:\n'
-                    for place in lesson['places']:
-                        '''- Иначе добавляем номер корпуса и аудиторию'''
-                        text_for_message += (
-                            f"{place['office']} [{place['building']}]")
-
-                        '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-                        if subgroup != "":
-                            text_for_message += f", {subgroup} п.г.\n"
-                        else:
-                            text_for_message += "\n"
-                        '''КОНЕЦ КОСТЫЛЯ'''
+            text_for_message += '\n'
 
         '''Проверяем наличие дополнительной информации к паре'''
         if lesson['additionalInfo'] is not None:
             for addInfo in lesson['additionalInfo']:
-                text_for_message += (f"\n<i>Доп.информация: — {addInfo}</i> \n")
+                text_for_message += (f"<i>Доп.информация: — {addInfo}</i> \n")
 
         text_for_message += "\n"
     return text_for_message
