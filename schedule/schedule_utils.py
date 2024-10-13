@@ -84,7 +84,7 @@ def get_lesson_as_string(lesson):
             text_for_message += f"<b>{constant.number_of_pair_dict[lesson['time']['startTime']]} </b>"
 
             '''Добавляем в сообщение время пары'''
-            text_for_message += (f"<i>{time_of_pair}</i> ")
+            text_for_message += (f"<i>{time_of_pair}</i>")
 
             '''Проверяем, дистант или очная'''
             if not lesson['isOnline']:
@@ -94,7 +94,7 @@ def get_lesson_as_string(lesson):
                     if len(lesson['places']) == 1:
                         place = lesson['places'][0]
                         text_for_message += (
-                            f"<b>{place['office']} [{place['building']}]</b>")
+                            f"<b> {place['office']} [{place['building']}]</b>")
 
                         '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
 
@@ -118,6 +118,16 @@ def get_lesson_as_string(lesson):
                             else:
                                 text_for_message += "\n"
                             '''КОНЕЦ КОСТЫЛЯ'''
+            else:
+                '''...иначе добавляем просто подгруппу'''
+
+                '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
+
+                if subgroup != "":
+                    text_for_message += f", {subgroup} п.г.\n"
+                else:
+                    text_for_message += "\n"
+                '''КОНЕЦ КОСТЫЛЯ'''
 
             '''Добавляем в сообщение название пары'''
 
@@ -143,18 +153,10 @@ def get_lesson_as_string(lesson):
             text_for_message += (f"<i>{lesson['lecturer']} </i>")
 
         '''Добавляем в сообщение тип пары'''
-        text_for_message += (f"{constant.type_of_lessons_dict[lesson['lessonType']]}")
+        text_for_message += (f"{constant.type_of_lessons_dict[lesson['lessonType']]}\n")
 
         if lesson['isOnline']:
             '''...иначе добавляем ссылки'''
-
-            '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-
-            if subgroup != "":
-                text_for_message += f", {subgroup} п.г.\n"
-            else:
-                text_for_message += "\n"
-            '''КОНЕЦ КОСТЫЛЯ'''
 
             if lesson['links'] is None:
                 text_for_message += (f"Дистанционная пара, ссылки отсутствуют\n")
@@ -163,8 +165,6 @@ def get_lesson_as_string(lesson):
                 text_for_message += (f"Дистанционная пара, ссылки:\n")
                 for link in lesson['links']:
                     text_for_message += (f"{link}\n")
-        else:
-            text_for_message += '\n'
 
         '''Проверяем наличие дополнительной информации к паре'''
         if lesson['additionalInfo'] is not None:
