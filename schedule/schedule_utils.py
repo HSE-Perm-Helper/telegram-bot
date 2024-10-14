@@ -129,6 +129,10 @@ def get_lesson_as_string(lesson):
                     text_for_message += "\n"
                 '''КОНЕЦ КОСТЫЛЯ'''
 
+            '''Если не дистант и нет аудиторий'''
+            if lesson["places"] is None and not lesson["isOnline"]:
+                text_for_message += '\n'
+
             '''Добавляем в сообщение название пары'''
 
             # if lesson['lessonType'] in constant.type_of_lessons_dict.keys():
