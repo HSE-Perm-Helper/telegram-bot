@@ -5,8 +5,8 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from api import user_service, schedule_service
 import callback.callback
+from api import user_service, schedule_service
 from callback.settings_callback import SettingsCallback
 from decorator.decorators import typing_action
 from exception.quarter_schedule_not_found_exception import QuarterScheduleNotFoundException
@@ -144,7 +144,9 @@ async def hiding_lessons_settings(query: CallbackQuery, state: FSMContext):
         return
 
     hidden_lessons = await user_service.get_user_hidden_lessons(query.message.chat.id)
-    hidden_lessons = set(map(lambda lesson: AvailableForHidingLesson(lesson.lesson, lesson.lesson_type, lesson.sub_group), hidden_lessons))
+    hidden_lessons = set(
+        map(lambda lesson: AvailableForHidingLesson(lesson.lesson, lesson.lesson_type, lesson.sub_group),
+            hidden_lessons))
 
     values = []
 
@@ -153,7 +155,6 @@ async def hiding_lessons_settings(query: CallbackQuery, state: FSMContext):
             values.append(True)
         else:
             values.append(False)
-
 
     await query.message.edit_text("Выберите предметы, которые хотите скрыть:")
 

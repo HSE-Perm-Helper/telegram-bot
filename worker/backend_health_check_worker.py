@@ -1,7 +1,7 @@
 import asyncio
 
-from util.logs_utils import send_logs_to_admins
 from api.utils import get_request
+from util.logs_utils import send_logs_to_admins
 
 
 class BackendCheckHealthWorker:

@@ -1,12 +1,9 @@
 import requests
-
-import venv
-
 from requests import Response
 
+import venv
 from exception.schedule_service_unavailable_exception import ScheduleServiceUnavailableException
 from exception.user_not_found_exception import UserNotFoundException
-
 
 base_url = venv.base_url
 x_secret_key = venv.x_secret_key

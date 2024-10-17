@@ -74,7 +74,7 @@ async def get_group(message: Message, data):
         text_get_group = f"Отлично, ты выбрал {program} направление! 😎\nТеперь давай выберем группу!"
     random.shuffle(constant.emojies_for_groups)
     groups = await schedule_service.get_groups(course,
-                                  program)
+                                               program)
 
     keyboard = InlineKeyboardBuilder()
     for i in range(len(groups)):
@@ -98,8 +98,8 @@ async def get_subgroup(message: Message, data):
     text_get_subgroup = f"{group} — твоя группа. Осталось определиться с подгруппой!"
 
     subgroups = await schedule_service.get_subgroups(course,
-                                        program,
-                                        group)
+                                                     program,
+                                                     group)
     keyboard = InlineKeyboardBuilder()
     for i in range(len(subgroups)):
         emoji_for_button = f"{constant.emojies_for_subgroups[rand_emj(len(constant.emojies_for_subgroups))]} {subgroups[i]}"
@@ -239,12 +239,12 @@ async def callback_message(callback_query: types.CallbackQuery):
 
     if is_new_user:
         is_success = await user_service.registration_user(telegram_id=telegram_id,
-                                                 group=group,
-                                                 subgroup=subgroup)
+                                                          group=group,
+                                                          subgroup=subgroup)
     else:
         is_success = await user_service.edit_user(telegram_id=telegram_id,
-                                         group=group,
-                                         subgroup=subgroup)
+                                                  group=group,
+                                                  subgroup=subgroup)
 
     if is_success:
         if is_new_user:

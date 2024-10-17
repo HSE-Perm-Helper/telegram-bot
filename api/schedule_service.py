@@ -39,7 +39,8 @@ async def get_available_for_hiding_lessons(telegram_id: int) -> list[AvailableFo
             raise QuarterScheduleNotFoundException()
 
     return list(map(
-        lambda lesson: AvailableForHidingLesson(lesson["lesson"], LessonType[lesson["lessonType"]], lesson["subGroup"]), data
+        lambda lesson: AvailableForHidingLesson(lesson["lesson"], LessonType[lesson["lessonType"]], lesson["subGroup"]),
+        data
     ))
 
 

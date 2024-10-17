@@ -3,8 +3,6 @@ from notification import notification_utils
 from notification.base_notification import BaseNotification
 from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
-from settings.setting_code import SettingCode
-from util.utils import get_notification_disable_button
 
 
 class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
