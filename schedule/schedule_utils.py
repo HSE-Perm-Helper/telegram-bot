@@ -65,12 +65,7 @@ def group_lessons_by_key(lessons: list[dict], key_func) -> dict[str, list[dict]]
 def get_lesson_as_string(lesson):
     text_for_message = ''
 
-    '''ОТНОСИТСЯ К КОСТЫЛЮ С ПОДГРУППАМИ'''
-    subgroup = ''
-    if "подгруппа" in lesson['subject']:
-        pair_name_with_subgroup: str = lesson['subject']
-        pair_name = pair_name_with_subgroup[:len(pair_name_with_subgroup) - 21]
-        subgroup = pair_name_with_subgroup[len(pair_name) + 5]
+    subgroup = lesson["subGroup"]
 
     lesson_type = LessonType[lesson['lessonType']]
     '''Если вид пары — майнор'''
@@ -98,13 +93,10 @@ def get_lesson_as_string(lesson):
                         text_for_message += (
                             f"<b> {place['office']} [{place['building']}]</b>")
 
-                        '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-
-                        if subgroup != "":
+                        if subgroup:
                             text_for_message += f", {subgroup} п.г.\n"
                         else:
                             text_for_message += "\n"
-                        '''КОНЕЦ КОСТЫЛЯ'''
 
                     else:
                         text_for_message += f'несколько мест:\n'
@@ -113,23 +105,17 @@ def get_lesson_as_string(lesson):
                             text_for_message += (
                                 f"<b>{place['office']} [{place['building']}]</b>")
 
-                            '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-
-                            if subgroup != "":
+                            if subgroup:
                                 text_for_message += f", {subgroup} п.г.\n"
                             else:
                                 text_for_message += "\n"
-                            '''КОНЕЦ КОСТЫЛЯ'''
             else:
                 '''...иначе добавляем просто подгруппу'''
 
-                '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-
-                if subgroup != "":
+                if subgroup:
                     text_for_message += f", {subgroup} п.г.\n"
                 else:
                     text_for_message += "\n"
-                '''КОНЕЦ КОСТЫЛЯ'''
 
             '''Если не дистант и нет аудиторий'''
             if lesson["places"] is None and not lesson["isOnline"]:
@@ -144,12 +130,7 @@ def get_lesson_as_string(lesson):
             И РАСКОМЕНТИРОВАТЬ ВЕРХНИЙ, НО СНИЗУ НАДО БУДЕТ ЕЩЕ ДОПИСАТЬ КОД'''
 
             if lesson_type:
-                if "подгруппа" in lesson['subject']:
-                    pair_name_with_subgroup: str = lesson['subject']
-                    pair_name = pair_name_with_subgroup[:len(pair_name_with_subgroup) - 21]
-                    text_for_message += pair_name + "\n"
-                else:
-                    text_for_message += (f"{lesson['subject']}\n")
+                text_for_message += f"{lesson['subject']}\n"
 
             '''КОНЕЦ КОСТЫЛЯ'''
 
