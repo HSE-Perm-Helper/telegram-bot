@@ -3,11 +3,11 @@ import traceback
 
 from aiogram import Router
 
+from api.utils import get_request, delete_request
 from notification.base_notification import BaseNotification
 from notification.notification_manager import NotificationManager
 from notification.notification_type import NotificationType
 from util.logs_utils import send_logs_to_admins
-from util.utils import get_request, delete_request
 from venv import is_prod
 
 router = Router()

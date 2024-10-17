@@ -1,4 +1,4 @@
-from api.api import get_admin_ids
+from api.user_service import get_admin_ids
 from bot import bot
 
 

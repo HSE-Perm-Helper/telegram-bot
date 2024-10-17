@@ -3,6 +3,7 @@ from aiogram import types
 from callback.callback import insert_data_to_callback
 from callback.schedule_callback import ScheduleCallback
 from constants import constant
+from model.lesson_type import LessonType
 from schedule.schedule_type import ScheduleType
 
 emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
@@ -64,16 +65,12 @@ def group_lessons_by_key(lessons: list[dict], key_func) -> dict[str, list[dict]]
 def get_lesson_as_string(lesson):
     text_for_message = ''
 
-    '''ОТНОСИТСЯ К КОСТЫЛЮ С ПОДГРУППАМИ'''
-    subgroup = ''
-    if "подгруппа" in lesson['subject']:
-        pair_name_with_subgroup: str = lesson['subject']
-        pair_name = pair_name_with_subgroup[:len(pair_name_with_subgroup) - 21]
-        subgroup = pair_name_with_subgroup[len(pair_name) + 5]
+    subgroup = lesson["subGroup"]
 
+    lesson_type = LessonType[lesson['lessonType']]
     '''Если вид пары — майнор'''
     if lesson['lessonType'] == 'COMMON_MINOR':
-        text_for_message = f"{constant.type_of_lessons_dict[lesson['lessonType']]}\n"
+        text_for_message = f"{lesson_type.display_name}\n"
 
     else:
         '''Вычисляем время пары'''
@@ -96,13 +93,10 @@ def get_lesson_as_string(lesson):
                         text_for_message += (
                             f"<b> {place['office']} [{place['building']}]</b>")
 
-                        '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-
-                        if subgroup != "":
+                        if subgroup:
                             text_for_message += f", {subgroup} п.г.\n"
                         else:
                             text_for_message += "\n"
-                        '''КОНЕЦ КОСТЫЛЯ'''
 
                     else:
                         text_for_message += f'несколько мест:\n'
@@ -111,23 +105,17 @@ def get_lesson_as_string(lesson):
                             text_for_message += (
                                 f"<b>{place['office']} [{place['building']}]</b>")
 
-                            '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-
-                            if subgroup != "":
+                            if subgroup:
                                 text_for_message += f", {subgroup} п.г.\n"
                             else:
                                 text_for_message += "\n"
-                            '''КОНЕЦ КОСТЫЛЯ'''
             else:
                 '''...иначе добавляем просто подгруппу'''
 
-                '''ТОТ САМЫЙ КОСТЫЛЬ ВНИЗУ'''
-
-                if subgroup != "":
+                if subgroup:
                     text_for_message += f", {subgroup} п.г.\n"
                 else:
                     text_for_message += "\n"
-                '''КОНЕЦ КОСТЫЛЯ'''
 
             '''Если не дистант и нет аудиторий'''
             if lesson["places"] is None and not lesson["isOnline"]:
@@ -141,14 +129,8 @@ def get_lesson_as_string(lesson):
             '''ТУТ ПОКА ЧТО КОСТЫЛЬ, В СЛУЧАЕ ИЗМЕНЕНИЯ НАЗВАНИЯ ПАР НА БЭКЕ СНЕСТИ ЭТОТ КУСОК И
             И РАСКОМЕНТИРОВАТЬ ВЕРХНИЙ, НО СНИЗУ НАДО БУДЕТ ЕЩЕ ДОПИСАТЬ КОД'''
 
-            if lesson['lessonType'] in constant.type_of_lessons_dict.keys():
-                if "подгруппа" in lesson['subject']:
-                    pair_name_with_subgroup: str = lesson['subject']
-                    pair_name = pair_name_with_subgroup[:len(pair_name_with_subgroup) - 21]
-                    text_for_message += pair_name + "\n"
-                else:
-                    if lesson['lessonType'] in constant.type_of_lessons_dict.keys():
-                        text_for_message += (f"{lesson['subject']}\n")
+            if lesson_type:
+                text_for_message += f"{lesson['subject']}\n"
 
             '''КОНЕЦ КОСТЫЛЯ'''
 
@@ -157,7 +139,7 @@ def get_lesson_as_string(lesson):
             text_for_message += (f"<i>{lesson['lecturer']} </i>")
 
         '''Добавляем в сообщение тип пары'''
-        text_for_message += (f"{constant.type_of_lessons_dict[lesson['lessonType']]}\n")
+        text_for_message += (f"{lesson_type.display_name}\n")
 
         if lesson['isOnline']:
             '''...иначе добавляем ссылки'''

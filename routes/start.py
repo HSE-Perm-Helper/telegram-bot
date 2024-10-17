@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from api import api
+from api import user_service
 from decorator.decorators import typing_action
 from routes import menu, registration
 
@@ -17,7 +17,7 @@ router = Router()
 async def get_registration(message: Message, state: FSMContext):
     await state.clear()
 
-    if await api.check_registration_user(message.chat.id):
+    if await user_service.check_registration_user(message.chat.id):
         await menu.send_help_message(message)
     else:
         await registration.get_course(message, True)

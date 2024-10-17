@@ -1,4 +1,4 @@
-import api.api
+from api import user_service
 from settings.base_setting import BaseSetting
 from settings.impl.changed_schedule_notification_setting import ChangedScheduleNotificationSetting
 from settings.impl.coming_lessons_notification_setting import ComingLessonsNotificationSetting
@@ -16,11 +16,11 @@ class SettingsService:
 
     async def toggle_setting(self, id: int, code: SettingCode, new_value: bool):
         setting = await self.get_setting_by_code(code)
-        await api.api.edit_user_settings(id, setting.api_code, new_value)
+        await user_service.edit_user_settings(id, setting.api_code, new_value)
 
     async def get_settings(self, id: int, codes: list[SettingCode]) -> list[(BaseSetting, bool)]:
         l = []
-        settings = await api.api.get_user_settings(id)
+        settings = await user_service.get_user_settings(id)
 
         for code in codes:
             setting = self.__settings[code]

@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from api.api import get_tomorrow_lessons as get_lessons
+from api.schedule_service import get_tomorrow_lessons as get_lessons
 from decorator.decorators import typing_action
 from routes.schedule_commands.schedule_handle import get_lessons_as_string
 from schedule.schedule_type import ScheduleType

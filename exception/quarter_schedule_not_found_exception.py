@@ -1,0 +1,2 @@
+class QuarterScheduleNotFoundException(Exception):
+    pass
