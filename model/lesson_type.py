@@ -2,7 +2,7 @@ import enum
 
 
 class LessonType(enum.Enum):
-    def __new__(cls, display_name, short_name):
+    def __new__(cls, display_name: str, short_name: str):
         obj = object.__new__(cls)
         obj._value_ = display_name
         obj.display_name = display_name

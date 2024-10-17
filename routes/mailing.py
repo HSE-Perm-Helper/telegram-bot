@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from api import api
+from api import user_service, schedule_service
 from constants import constant
 from decorator.decorators import required_admin, typing_action
 from util.users_utils import send_message_to_users
@@ -22,7 +22,7 @@ class MailingState(StatesGroup):
 async def mailing_to_all(message: types.Message, state: FSMContext):
     await state.clear()
 
-    courses = await api.get_courses()
+    courses = await schedule_service.get_courses()
     keyboard = InlineKeyboardBuilder()
     text = "Выберите курсы, в которые необходимо сделать рассылку:"
     for i in range(len(courses)):
@@ -58,8 +58,8 @@ async def send_mail(message: types.Message, state: FSMContext):
 
     await message.answer("Рассылка успешно отправлена!")
     if not course:
-        users = await api.get_user_ids()
+        users = await user_service.get_user_ids()
     else:
-        users = await api.get_user_ids_by_course(course)
+        users = await user_service.get_user_ids_by_course(course)
     await send_message_to_users(message.html_text, users)
     await state.clear()

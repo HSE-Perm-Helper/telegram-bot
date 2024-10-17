@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from api import api
+from api import schedule_service
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
 from callback.schedule_callback import ScheduleCallback
@@ -55,14 +55,14 @@ async def get_base_schedule(message: types.Message, state: FSMContext):
     await state.clear()
 
     await bot.delete_message(message.chat.id, message.message_id)
-    schedules_json = await api.get_schedules()
+    schedules_json = await schedule_service.get_schedules()
     schedules = list(filter(lambda schedule: schedule["scheduleType"] == ScheduleType.QUARTER_SCHEDULE.value,
                             schedules_json['response']))
     if len(schedules) == 0:
         await message.answer(text="Пока расписания на модуль нет! 🎉🎊")
     else:
         schedule = schedules[0]
-        response_schedule = await api.get_schedule(message.chat.id, schedule["start"], schedule["end"])
+        response_schedule = await schedule_service.get_schedule(message.chat.id, schedule["start"], schedule["end"])
         await schedule_sending(message, response_schedule["response"])
 
 
@@ -87,7 +87,7 @@ async def get_schedule(message):
 # Получение текстового расписания
 async def get_text_schedule(message):
     await message.delete()
-    schedule_json = await api.get_schedules()
+    schedule_json = await schedule_service.get_schedules()
 
     if schedule_json['error'] is True:
         await message.answer(text='Для тебя почему-то нет расписания 🤷\nНастрой группу заново '
@@ -100,7 +100,7 @@ async def get_text_schedule(message):
             schedule = schedules_dict[0]
             start = schedule["start"]
             end = schedule["end"]
-            response = await api.get_schedule(message.chat.id, start, end)
+            response = await schedule_service.get_schedule(message.chat.id, start, end)
             await schedule_sending(message, response["response"])
         elif len(schedules_dict) == 0:
             await message.answer(text="Расписания пока нет, отдыхай! 😎")
@@ -167,7 +167,7 @@ async def callback_message(callback_query: types.CallbackQuery):
     if need_delete_message == "True":
         await callback_query.message.delete()
 
-    schedule_json = await api.get_schedule(callback_query.message.chat.id, start, end)
+    schedule_json = await schedule_service.get_schedule(callback_query.message.chat.id, start, end)
 
     if need_delete_message == "False" and schedule_json["error"]:
         await callback_query.answer(text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)

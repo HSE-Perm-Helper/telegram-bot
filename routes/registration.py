@@ -4,7 +4,7 @@ from aiogram import Router, types
 from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from api import api
+from api import user_service, schedule_service
 from constants import constant
 from decorator.decorators import typing_action
 from message.common_messages import SUCCESS_REGISTER, SUCCESS_DATA_CHANGING
@@ -24,7 +24,7 @@ async def get_course(message: Message, is_new_user: bool):
         text_hello = "Давай познакомимся! 👋 На каком курсе ты учишься?"
     else:
         text_hello = "Немного изменим данные. ✏ На каком курсе ты учишься?"
-    courses = await api.get_courses()
+    courses = await schedule_service.get_courses()
     random.shuffle(constant.emojies_for_course)
 
     keyboard = InlineKeyboardBuilder()
@@ -44,7 +44,7 @@ async def get_program(message: Message, data):
     number_course = int(number_course)
     text_get_course = f"Ты выбрал {number_course} курс! 🎉 На каком направлении ты учишься?"
     random.shuffle(constant.emojies_for_programs)
-    programs = await api.get_programs(number_course)
+    programs = await schedule_service.get_programs(number_course)
 
     keyboard = InlineKeyboardBuilder()
 
@@ -73,7 +73,7 @@ async def get_group(message: Message, data):
     else:
         text_get_group = f"Отлично, ты выбрал {program} направление! 😎\nТеперь давай выберем группу!"
     random.shuffle(constant.emojies_for_groups)
-    groups = await api.get_groups(course,
+    groups = await schedule_service.get_groups(course,
                                   program)
 
     keyboard = InlineKeyboardBuilder()
@@ -97,7 +97,7 @@ async def get_subgroup(message: Message, data):
 
     text_get_subgroup = f"{group} — твоя группа. Осталось определиться с подгруппой!"
 
-    subgroups = await api.get_subgroups(course,
+    subgroups = await schedule_service.get_subgroups(course,
                                         program,
                                         group)
     keyboard = InlineKeyboardBuilder()
@@ -238,11 +238,11 @@ async def callback_message(callback_query: types.CallbackQuery):
         subgroup = 0
 
     if is_new_user:
-        is_success = await api.registration_user(telegram_id=telegram_id,
+        is_success = await user_service.registration_user(telegram_id=telegram_id,
                                                  group=group,
                                                  subgroup=subgroup)
     else:
-        is_success = await api.edit_user(telegram_id=telegram_id,
+        is_success = await user_service.edit_user(telegram_id=telegram_id,
                                          group=group,
                                          subgroup=subgroup)
 
