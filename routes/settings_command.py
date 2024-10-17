@@ -156,7 +156,7 @@ async def hiding_lessons_settings(query: CallbackQuery, state: FSMContext):
         else:
             values.append(False)
 
-    await query.message.edit_text("Выберите предметы, которые хотите скрыть:")
+    await query.message.edit_text("Выберите предметы, которые хотите скрыть 👀")
 
     await state.update_data(lessons=data, values=values)
     await state.set_state(SettingsState.HIDING_LESSONS_SETTING)
