@@ -34,6 +34,7 @@ async def get_available_for_hiding_lessons(telegram_id: int) -> list[AvailableFo
     data = response.json()
 
     if response.status_code != 200:
+        await raise_user_not_found_exception_when_exception_in_response(data)
         if data["errorDescription"]["code"] == "ScheduleNotFoundException":
             raise QuarterScheduleNotFoundException()
 
