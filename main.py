@@ -29,7 +29,7 @@ async def main():
 
     await bot.set_my_commands([
         types.BotCommand(command='help', description='Помощь с работой бота'),
-        types.BotCommand(command='settings', description='Изменить данные о себе'),
+        types.BotCommand(command='settings', description='Настройки'),
         types.BotCommand(command='menu', description='Вызвать меню'),
         types.BotCommand(command='schedule', description='Получить расписание'),
         types.BotCommand(command='base_schedule', description='Получить расписание на модуль'),
