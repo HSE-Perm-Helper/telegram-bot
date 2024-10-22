@@ -6,8 +6,11 @@ from constants import constant
 from model.lesson_type import LessonType
 from schedule.schedule_type import ScheduleType
 
-emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
+# emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
+emojies_for_week_color = ['🟧', '⬛️', '🟧', '⬛️', '🟧', '⬛️'] # halloween emoji
 
+# session_schedule_emoji = "🍀"
+session_schedule_emoji = "🎃" # halloween
 
 def get_button_text_by_schedule_info(schedule_info: dict, start: str, end: str) -> str:
     schedule_type = schedule_info["scheduleType"]
@@ -32,7 +35,7 @@ def get_schedule_header_by_schedule_info(schedule_info: dict) -> str:
             emoji = emojies_for_week_color[emoji_index]
             return f"{emoji} Расписание на {number} неделю {emoji}"
         case ScheduleType.SESSION_SCHEDULE.value:
-            return f"🍀 Расписание на сессию 🍀"
+            return f"{session_schedule_emoji} Расписание на сессию {session_schedule_emoji}"
         case ScheduleType.QUARTER_SCHEDULE.value:
             number = schedule_info["number"]
             return f"🗓 Расписание на {number} модуль 🗓"

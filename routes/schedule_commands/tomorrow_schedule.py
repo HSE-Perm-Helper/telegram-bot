@@ -39,7 +39,8 @@ async def get_tomorrow_lessons(message: Message, state: FSMContext):
 
         day_of_week = days_of_week[date.weekday()].lower()
 
-        await message.answer(f"На {day_of_week} у тебя нет пар 😎")
+        # await message.answer(f"На {day_of_week} у тебя нет пар 😎")
+        await message.answer(f"На {day_of_week} у тебя нет пар 🃏") # halloween
         return
 
     is_session = lessons[0]["parentScheduleType"] == ScheduleType.SESSION_SCHEDULE.value
