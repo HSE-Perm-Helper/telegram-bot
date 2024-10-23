@@ -13,16 +13,28 @@ async def get_user_ids() -> list[int]:
     return user_ids
 
 
-async def get_user_ids_by_course(course: int) -> list[int]:
-    user_ids: list[int] = []
-    users = await get_request_as_json("/users")
-    for user in users["response"]:
-        group = user["settings"]["group"]
-        num = int(group.split("-")[1])
-        user_course = 25 - num
-        if user_course == course:
-            user_ids.append(int(user['telegramId']))
-    return user_ids
+async def filter_user_ids(course: int | None = None, program: str | None = None, group: str | None = None) -> list[int]:
+    users = list(map(lambda x: (int(x["telegramId"]), x["settings"]["group"]),
+                     (await get_request_as_json("/users"))["response"]))
+    if course:
+        users = list(filter(lambda x: __get_user_course(x[1]) == course, users))
+
+    if program:
+        users = list(filter(lambda x: __get_user_program(x[1]) == program, users))
+
+    if group:
+        users = list(filter(lambda x: x[1] == group, users))
+
+    return list(map(lambda x: x[0], users))
+
+
+def __get_user_course(group: str) -> int:
+    num = int(group.split("-")[1])
+    return 25 - num
+
+
+def __get_user_program(group: str) -> str:
+    return group.split("-")[0]
 
 
 async def get_admin_ids() -> list[int]:
