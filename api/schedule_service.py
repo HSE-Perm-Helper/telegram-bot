@@ -84,7 +84,7 @@ async def get_programs(course: int) -> list[str]:
 
 # -------------  Группы  ------------- #
 
-async def get_groups(course: int, program: int) -> list[str]:
+async def get_groups(course: int, program: str) -> list[str]:
     groups: list[str] = []
     groups_data = await get_request_as_json(path=f"/schedule/available_groups?course={course}"
                                                  f"&program={program}")
