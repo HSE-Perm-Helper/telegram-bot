@@ -1,12 +1,11 @@
-version: "3"
+version: "3.8"
 
 services:
   redis:
     container_name: bot-storage
     image: redis:7.2.0-alpine3.18
     restart: always
-    env_file:
-      - .env
+    env_file: .env
     expose:
       - ${RD_PORT}
     volumes:
@@ -17,8 +16,7 @@ services:
     container_name: hse-perm-helper-bot
     build: .
     restart: always
-    env_file:
-      - .env
+    env_file: .env
     depends_on:
       - redis
     volumes:
