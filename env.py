@@ -10,5 +10,4 @@ is_prod = parse_boolean(os.getenv("is_prod"))
 
 if is_prod:
     RD_HOST = os.getenv("RD_HOST")
-    RD_PORT = int(os.getenv("RD_PORT"))
-    RD_DB = os.getenv("RD_DB")
+    RD_PORT = os.getenv("RD_PORT")
