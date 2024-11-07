@@ -1,0 +1,10 @@
+**/.git
+tests
+venv
+.idea
+.env
+LICENSE
+**/.gitignore
+Dockerfile
+README.md
+docker-compose.yml
