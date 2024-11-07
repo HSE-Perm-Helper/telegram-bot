@@ -1,33 +1,63 @@
+from aiogram.enums import ParseMode
+
 from bot import bot
 from notification import notification_utils
 from notification.base_notification import BaseNotification
 from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
+from schedule.schedule_type import ScheduleType
+from util.utils import format_output_array
+
+
+def _get_name_by_schedule_type(schedule_type: ScheduleType, number: int) -> str:
+    d = {
+        ScheduleType.COMMON_SCHEDULE: f"{number} неделю",
+        ScheduleType.QUARTER_SCHEDULE: "модуль",
+        ScheduleType.SESSION_SCHEDULE: "сессию"
+    }
+
+    return d[schedule_type]
+
+
+def _get_plural_name_day_of_week(day: str) -> str:
+    days = {
+        "MONDAY": "понедельник",
+        "TUESDAY": "вторник",
+        "WEDNESDAY": "среду",
+        "THURSDAY": "четверг",
+        "FRIDAY": "пятницу",
+        "SATURDAY": "субботу",
+        "SUNDAY": "воскресенье"
+    }
+
+    return days[day]
 
 
 class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
-    async def process(self, notifications: list[BaseNotification]) -> None:
-        changed_schedule: dict[int, list] = {}
+    async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
+        processed_notifications = []
         for notification in notifications:
             payload = notification.payload
+            schedule = payload["targetSchedule"]
             users = payload["users"]
+            schedule_type = ScheduleType(schedule["scheduleType"])
+            number = schedule["number"]
+            days = list(map(lambda day: f"<b>{_get_plural_name_day_of_week(day)}</b>", payload["differentDays"]))
+
+            message = (f"{notification_utils.NOTIFICATION_EMOJI} В расписании на <b>{_get_name_by_schedule_type(schedule_type, number)}</b>"
+                       f" появились изменения на {format_output_array(days)}")
+
+            keyboard = notification_utils.get_markup_schedule([schedule])
 
             for user in users:
-                if user not in changed_schedule:
-                    changed_schedule[user] = []
-                changed_schedule[user].append(payload["targetSchedule"])
+                try:
+                    await bot.send_message(user, message, reply_markup=keyboard.as_markup(), parse_mode=ParseMode.HTML)
+                except Exception as e:
+                    print(e)
+                    pass
 
-        for telegram_id, schedules in changed_schedule.items():
-            difference = notification_utils.get_difference_schedule(schedules)
-            markup = notification_utils.get_markup_schedule(schedules)
-
-            try:
-                await bot.send_message(telegram_id,
-                                       f"{notification_utils.NOTIFICATION_EMOJI} Твоё {difference} изменено!",
-                                       reply_markup=markup.as_markup())
-            except Exception as e:
-                print(e)
-                pass
+        return processed_notifications
 
     async def get_notification_type(self) -> NotificationType:
         return NotificationType.SCHEDULE_CHANGED
+

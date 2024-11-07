@@ -13,7 +13,8 @@ from schedule.schedule_utils import get_pair_count, group_lessons_by_pair_number
 
 
 class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
-    async def process(self, notifications: list[BaseNotification]) -> None:
+    async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
+        processed_notifications = []
         for notification in notifications:
             try:
 
@@ -43,11 +44,13 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                         await bot.send_message(user, message, parse_mode="HTML",
                                                reply_markup=markup.as_markup())
                     except Exception as e:
-                        print(e)
                         pass
+
+                processed_notifications.append(notification)
             except Exception as e:
                 traceback.print_exc()
                 pass
+        return processed_notifications
 
     async def get_notification_type(self) -> NotificationType:
         return NotificationType.UPCOMING_LESSONS

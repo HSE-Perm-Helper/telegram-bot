@@ -3,7 +3,7 @@ from notification.notification_type import NotificationType
 
 
 class BaseNotificationProcessor:
-    async def process(self, notifications: list[BaseNotification]) -> None:
+    async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
         raise NotImplementedError
 
     async def get_notification_type(self) -> NotificationType:
