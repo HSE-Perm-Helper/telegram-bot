@@ -29,12 +29,14 @@ class NotificationsSendWorker:
                     f"Проверка уведомлений вернула код {notifications_response.status_code}, вместо OK")
                 return
 
-            notifications = list(map(lambda notify:
+            data = notifications_response.json()
+
+            notifications = list(filter(lambda notification: notification.notification_type != NotificationType.NONE, map(lambda notify:
                                      BaseNotification(id=notify["id"],
                                                       date=notify["date"],
                                                       payload=notify["payload"],
                                                       notification_type=NotificationType(notify["notificationType"])),
-                                     notifications_response.json()))
+                                     data)))
 
             notifications = await self.notification_manager.process(notifications)
 
