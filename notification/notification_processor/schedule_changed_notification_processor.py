@@ -1,3 +1,5 @@
+from aiogram.enums import ParseMode
+
 from bot import bot
 from notification import notification_utils
 from notification.base_notification import BaseNotification
@@ -38,7 +40,7 @@ class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
             payload = notification.payload
             schedule = payload["targetSchedule"]
             users = payload["users"]
-            schedule_type = schedule["schedule_type"]
+            schedule_type = ScheduleType(schedule["scheduleType"])
             number = schedule["number"]
             days = list(map(lambda day: f"<b>{_get_plural_name_day_of_week(day)}</b>", payload["differentDays"]))
 
@@ -49,8 +51,9 @@ class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
 
             for user in users:
                 try:
-                    await bot.send_message(user, message, keyboard.as_markup())
+                    await bot.send_message(user, message, reply_markup=keyboard.as_markup(), parse_mode=ParseMode.HTML)
                 except Exception as e:
+                    print(e)
                     pass
 
         return processed_notifications

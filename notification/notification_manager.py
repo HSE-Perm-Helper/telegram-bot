@@ -40,7 +40,8 @@ class NotificationManager:
         for type, notifications in grouped_by_type.items():
             processor = await self.get_processor_by_type(type)
             try:
-                processed_notifications.append(*await processor.process(notifications))
+                for notification in await processor.process(notifications):
+                    processed_notifications.append(notification)
             except Exception as e:
                 traceback.print_exc()
 
