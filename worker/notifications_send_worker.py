@@ -36,7 +36,7 @@ class NotificationsSendWorker:
                                                       notification_type=NotificationType(notify["notificationType"])),
                                      notifications_response.json()))
 
-            await self.notification_manager.process(notifications)
+            notifications = await self.notification_manager.process(notifications)
 
             deleting_notifications_id = list(map(lambda notification: {"id": notification.id}, notifications))
             if is_prod:

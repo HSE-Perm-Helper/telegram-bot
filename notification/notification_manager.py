@@ -5,6 +5,8 @@ from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_processor.schedule_added_notification_processor import ScheduleAddedNotificationProcessor
 from notification.notification_processor.schedule_changed_notification_processor import \
     ScheduleChangedNotificationProcessor
+from notification.notification_processor.service_warning_notification_processor import \
+    ServiceWarningNotificationProcessor
 from notification.notification_processor.upcoming_lessons_notification_processor import \
     UpcomingLessonsNotificationProcessor
 from notification.notification_type import NotificationType
@@ -17,6 +19,7 @@ class NotificationManager:
         await self.add_processor(ScheduleAddedNotificationProcessor())
         await self.add_processor(ScheduleChangedNotificationProcessor())
         await self.add_processor(UpcomingLessonsNotificationProcessor())
+        await self.add_processor(ServiceWarningNotificationProcessor())
 
     async def add_processor(self, processor: BaseNotificationProcessor):
         self.processors[await processor.get_notification_type()] = processor
@@ -24,8 +27,9 @@ class NotificationManager:
     async def get_processor_by_type(self, notification_type: NotificationType) -> BaseNotificationProcessor:
         return self.processors.get(notification_type)
 
-    async def process(self, notifications: list[BaseNotification]) -> None:
+    async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
         grouped_by_type = {}
+        processed_notifications = []
         for notification in notifications:
             notification_type = notification.notification_type
             if notification_type not in grouped_by_type:
@@ -36,6 +40,8 @@ class NotificationManager:
         for type, notifications in grouped_by_type.items():
             processor = await self.get_processor_by_type(type)
             try:
-                await processor.process(notifications)
+                processed_notifications.append(*await processor.process(notifications))
             except Exception as e:
                 traceback.print_exc()
+
+        return processed_notifications
