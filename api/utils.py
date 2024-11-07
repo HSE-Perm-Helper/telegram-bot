@@ -1,12 +1,12 @@
 import requests
 from requests import Response
 
-import venv
+import env
 from exception.schedule_service_unavailable_exception import ScheduleServiceUnavailableException
 from exception.user_not_found_exception import UserNotFoundException
 
-base_url = venv.base_url
-x_secret_key = venv.x_secret_key
+base_url = env.base_url
+x_secret_key = env.x_secret_key
 accept_data = "application/json"
 required_headers = {"X-Secret-Key": x_secret_key, "Accept": accept_data,
                     "Content-Type": "application/json; charset=utf-8"}
