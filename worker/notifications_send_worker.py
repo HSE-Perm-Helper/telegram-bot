@@ -9,6 +9,8 @@ from notification.notification_manager import NotificationManager
 from notification.notification_type import NotificationType
 from util.logs_utils import send_logs_to_admins
 from env import is_prod
+from data.data_service import data_service, DataField
+from util.utils import parse_boolean
 
 router = Router()
 
@@ -54,5 +56,6 @@ class NotificationsSendWorker:
         await self.notification_manager.init_processors()
 
         while True:
-            await self.check_new_notifications()
+            if parse_boolean(await data_service.get_data(DataField.IS_ENABLED_NOTIFICATIONS_FETCH.value)):
+                await self.check_new_notifications()
             await asyncio.sleep(300)
