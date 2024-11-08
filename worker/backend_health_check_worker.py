@@ -1,7 +1,9 @@
 import asyncio
 
 from api.utils import get_request
+from data.data_service import DataField, data_service
 from util.logs_utils import send_logs_to_admins
+from util.utils import parse_boolean
 
 
 class BackendCheckHealthWorker:
@@ -18,5 +20,6 @@ class BackendCheckHealthWorker:
 
     async def run(self):
         while True:
-            await self.check_health()
+            if parse_boolean(await data_service.get_data(DataField.IS_ENABLED_BACKEND_HEALTH_CHECK.value)):
+                await self.check_health()
             await asyncio.sleep(300)

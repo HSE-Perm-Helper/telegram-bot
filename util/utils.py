@@ -66,7 +66,8 @@ async def do_or_nothing(function: Callable, *args):
 
 
 def parse_boolean(value: str) -> bool:
-    if value.lower() == "true":
+    value = str(value).lower()
+    if value == "true":
         return True
     else:
         return False
