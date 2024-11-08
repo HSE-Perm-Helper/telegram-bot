@@ -1,3 +1,6 @@
+import traceback
+from traceback import print_exc
+
 from aiogram.enums import ParseMode
 
 from bot import bot
@@ -37,24 +40,28 @@ class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
     async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
         processed_notifications = []
         for notification in notifications:
-            payload = notification.payload
-            schedule = payload["targetSchedule"]
-            users = payload["users"]
-            schedule_type = ScheduleType(schedule["scheduleType"])
-            number = schedule["number"]
-            days = list(map(lambda day: f"<b>{_get_plural_name_day_of_week(day)}</b>", payload["differentDays"]))
+            try:
+                payload = notification.payload
+                schedule = payload["targetSchedule"]
+                users = payload["users"]
+                schedule_type = ScheduleType(schedule["scheduleType"])
+                number = schedule["number"]
+                days = list(map(lambda day: f"<b>{_get_plural_name_day_of_week(day)}</b>", payload["differentDays"]))
 
-            message = (f"{notification_utils.NOTIFICATION_EMOJI} В расписании на <b>{_get_name_by_schedule_type(schedule_type, number)}</b>"
-                       f" появились изменения на {format_output_array(days)}")
+                message = (f"{notification_utils.NOTIFICATION_EMOJI} В расписании на <b>{_get_name_by_schedule_type(schedule_type, number)}</b>"
+                           f" появились изменения на {format_output_array(days)}")
 
-            keyboard = notification_utils.get_markup_schedule([schedule])
+                keyboard = notification_utils.get_markup_schedule([schedule])
 
-            for user in users:
-                try:
-                    await bot.send_message(user, message, reply_markup=keyboard.as_markup(), parse_mode=ParseMode.HTML)
-                except Exception as e:
-                    print(e)
-                    pass
+                for user in users:
+                    try:
+                        await bot.send_message(user, message, reply_markup=keyboard.as_markup(), parse_mode=ParseMode.HTML)
+                    except Exception as e:
+                        print(e)
+
+                processed_notifications.append(notification)
+            except Exception as e:
+                traceback.print_exc()
 
         return processed_notifications
 

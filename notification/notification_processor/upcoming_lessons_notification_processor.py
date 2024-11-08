@@ -49,7 +49,7 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                 processed_notifications.append(notification)
             except Exception as e:
                 traceback.print_exc()
-                pass
+
         return processed_notifications
 
     async def get_notification_type(self) -> NotificationType:
