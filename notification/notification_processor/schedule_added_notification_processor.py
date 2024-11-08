@@ -30,7 +30,6 @@ class ScheduleAddedNotificationProcessor(BaseNotificationProcessor):
                                        reply_markup=markup.as_markup())
             except Exception as e:
                 print(e)
-                pass
 
         return processed_notification
 
