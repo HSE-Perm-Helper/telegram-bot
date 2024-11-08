@@ -78,12 +78,7 @@ def __get_state_for_setting(value: bool) -> str:
     return symbol
 
 
-@router.message(Command("sorry"))
-async def sorry_notifications(message: Message):
-    await message.answer("Прости за флуд от бота, он больше так не будет 😔")
-    await message.bot.send_sticker(message.chat.id, sticker="CAACAgIAAxkBAAIQY2ct8ukfy3TW-l3RaEnueMQFwUwpAAK2EQAC0KdoS7opz7ewoj-9NgQ")
-
-
+@required_admin
 @router.message(Command("sorry_2"))
 async def sorry_notifications2(message: Message):
     ids = {1620810043, 550344858, 391917168, 668836447, 886202688, 834260019, 407642716, 1314704840, 1021434584,
@@ -162,9 +157,10 @@ async def sorry_notifications2(message: Message):
            }
     for user in ids:
         try:
-            await message.bot.send_message(user, "Прости за флуд от бота, он больше так не будет 😔")
+            await message.bot.send_message(user, "Прости за флуд от бота, он больше так не будет 😔", disable_notification=True)
             await message.bot.send_sticker(user,
-                                           sticker="CAACAgIAAxkBAAIQY2ct8ukfy3TW-l3RaEnueMQFwUwpAAK2EQAC0KdoS7opz7ewoj-9NgQ")
+                                           sticker="CAACAgIAAxkBAAIQY2ct8ukfy3TW-l3RaEnueMQFwUwpAAK2EQAC0KdoS7opz7ewoj-9NgQ",
+                                           disable_notification=True)
             await sleep(0.5)
         except Exception as e:
             continue
