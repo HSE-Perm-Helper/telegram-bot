@@ -6,11 +6,11 @@ from constants import constant
 from model.lesson_type import LessonType
 from schedule.schedule_type import ScheduleType
 
-# emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
-emojies_for_week_color = ['🟧', '⬛️', '🟧', '⬛️', '🟧', '⬛️'] # halloween emoji
+emojies_for_week_color = ['🟥', '🟪', '🟦', '🟩', '🟧', '🟨']
+# emojies_for_week_color = ['🟧', '⬛️', '🟧', '⬛️', '🟧', '⬛️'] # halloween emoji
 
-# session_schedule_emoji = "🍀"
-session_schedule_emoji = "🎃" # halloween
+session_schedule_emoji = "🍀"
+# session_schedule_emoji = "🎃" # halloween
 
 def get_button_text_by_schedule_info(schedule_info: dict, start: str, end: str) -> str:
     schedule_type = schedule_info["scheduleType"]
