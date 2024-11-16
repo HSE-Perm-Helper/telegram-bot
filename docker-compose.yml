@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  redis:
+    container_name: bot-storage
+    image: redis:7.2.0-alpine3.18
+    restart: always
+    env_file: .env
+    expose:
+      - ${RD_PORT}
+    volumes:
+      - redis_data:/bitnami/redis/data
+
+  hse-perm-helper-bot:
+    image: 'hse-perm-helper-bot'
+    container_name: hse-perm-helper-bot
+    build: .
+    restart: always
+    env_file: .env
+    depends_on:
+      - redis
+    volumes:
+      - tg-bot-data:/app/save
+
+volumes:
+  redis_data:
+  tg-bot-data:

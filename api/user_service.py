@@ -41,6 +41,10 @@ async def get_admin_ids() -> list[int]:
     return [646596194, 774471737]
 
 
+async def get_service_admin_ids() -> list[int]:
+    return [646596194]
+
+
 async def registration_user(telegram_id: int, group: str, subgroup: int) -> bool:
     user_data = await post_request_as_json(path=f"/users",
                                            json={

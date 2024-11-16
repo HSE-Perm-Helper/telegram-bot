@@ -63,3 +63,11 @@ async def do_or_nothing(function: Callable, *args):
         await function(*args)
     except Exception as e:
         pass
+
+
+def parse_boolean(value: str) -> bool:
+    value = str(value).lower()
+    if value == "true":
+        return True
+    else:
+        return False

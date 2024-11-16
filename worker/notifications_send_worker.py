@@ -8,7 +8,9 @@ from notification.base_notification import BaseNotification
 from notification.notification_manager import NotificationManager
 from notification.notification_type import NotificationType
 from util.logs_utils import send_logs_to_admins
-from venv import is_prod
+from env import is_prod
+from data.data_service import data_service, DataField
+from util.utils import parse_boolean
 
 router = Router()
 
@@ -29,14 +31,16 @@ class NotificationsSendWorker:
                     f"Проверка уведомлений вернула код {notifications_response.status_code}, вместо OK")
                 return
 
-            notifications = list(map(lambda notify:
+            data = notifications_response.json()
+
+            notifications = list(filter(lambda notification: notification.notification_type != NotificationType.NONE, map(lambda notify:
                                      BaseNotification(id=notify["id"],
                                                       date=notify["date"],
                                                       payload=notify["payload"],
                                                       notification_type=NotificationType(notify["notificationType"])),
-                                     notifications_response.json()))
+                                     data)))
 
-            await self.notification_manager.process(notifications)
+            notifications = await self.notification_manager.process(notifications)
 
             deleting_notifications_id = list(map(lambda notification: {"id": notification.id}, notifications))
             if is_prod:
@@ -52,5 +56,6 @@ class NotificationsSendWorker:
         await self.notification_manager.init_processors()
 
         while True:
-            await self.check_new_notifications()
+            if parse_boolean(await data_service.get_data(DataField.IS_ENABLED_NOTIFICATIONS_FETCH.value)):
+                await self.check_new_notifications()
             await asyncio.sleep(300)

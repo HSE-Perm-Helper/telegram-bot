@@ -157,8 +157,8 @@ async def hiding_lessons_settings(query: CallbackQuery, state: FSMContext):
             values.append(False)
 
     await query.message.edit_text("Выберите предметы, которые хотите скрыть 👀")
-
-    await state.update_data(lessons=data, values=values)
+    converted_data = list(map(lambda lesson: lesson.to_dict(), data))
+    await state.update_data(lessons=converted_data, values=values)
     await state.set_state(SettingsState.HIDING_LESSONS_SETTING)
 
     await show_hiding_lessons(query, state, 1)
@@ -167,7 +167,7 @@ async def hiding_lessons_settings(query: CallbackQuery, state: FSMContext):
 async def show_hiding_lessons(query: CallbackQuery, state: FSMContext, page: int, count_by_page: int = 8):
     data = await state.get_data()
 
-    lessons = data["lessons"]
+    lessons = from_dict_list_to_lessons(data["lessons"])
     values = data["values"]
 
     keyboard = InlineKeyboardBuilder()
@@ -233,7 +233,7 @@ async def hiding_lessons_handle(query: CallbackQuery, state: FSMContext):
     index = int(query.data)
 
     data = await state.get_data()
-    lessons: list[AvailableForHidingLesson] = data["lessons"]
+    lessons: list[AvailableForHidingLesson] = from_dict_list_to_lessons(data["lessons"])
     values = data["values"]
 
     lesson = lessons[index]
@@ -264,3 +264,8 @@ async def __get_inline_button_for_setting(data: BaseSetting, value: bool) -> Inl
     if not value:
         symbol = "❌"
     return InlineKeyboardButton(text=f"{symbol} {data.title}", callback_data=f"{data.code.value}_{value}")
+
+
+def from_dict_list_to_lessons(l: list[dict]) -> list[AvailableForHidingLesson]:
+    return list(map(lambda lesson: AvailableForHidingLesson.from_dict(lesson), l))
+
