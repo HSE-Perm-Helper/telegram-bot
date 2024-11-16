@@ -2,7 +2,9 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types.web_app_info import WebAppInfo
 
+import venv
 from api import schedule_service
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
@@ -67,21 +69,16 @@ async def get_base_schedule(message: types.Message, state: FSMContext):
 
 
 # Получение расписания для календаря
-async def get_schedule(message):
-    await message.delete()
-    text_get_schedule = "🔵 Выбери способ получения расписания:"
-
-    markup = InlineKeyboardBuilder()
-    # markup.add(types.InlineKeyboardButton("Добавить автообновляемый календарь",
-    #                                       url="webcal://https://hse-schedule-bot.xenforo-studio.ru/api/files/user_files/db625264-0a6c-4b25-b074-4f2f290e76fe/schedule.ics"))
-    markup.add(types.InlineKeyboardButton(text="Добавить автообновляемый календарь",
-                                          callback_data="add_calendar"))
-    markup.add(types.InlineKeyboardButton(text="Получить расписание файлом .ics",
-                                          callback_data="get_file"))
-    # markup.add(types.InlineKeyboardButton("Отправлять расписание текстом",
-    #                                       callback_data="get_text_schedule"))
-
-    await message.answer(text=text_get_schedule, reply_markup=markup)
+# @router.message(Command("cal"))
+# @typing_action
+# async def get_schedule(message):
+#     await message.delete()
+#     text_get_schedule = "Открой и следуй инструкциям:"
+#
+#     markup = InlineKeyboardBuilder()
+#     markup.add(types.InlineKeyboardButton(text="Настроить календарь!", web_app=WebAppInfo(url=venv.mini_app_url)))
+#
+#     await message.answer(text=text_get_schedule, reply_markup=markup.as_markup())
 
 
 # Получение текстового расписания
