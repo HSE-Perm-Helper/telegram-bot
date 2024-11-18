@@ -92,15 +92,3 @@ async def get_groups(course: int, program: str) -> list[str]:
         groups.append(i)
 
     return groups
-
-
-# -------------  Подгруппы  ------------- #
-
-async def get_subgroups(course: int, program: str, group: str) -> list[int]:
-    subgroups: list[int] = []
-    subgroups_data = await get_request_as_json(path=f"/schedule/available_subgroups?course={course}"
-                                                    f"&program={program}&group={group}")
-    for i in subgroups_data["response"]:
-        subgroups.append(int(i))
-
-    return subgroups
