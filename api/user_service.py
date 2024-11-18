@@ -45,23 +45,21 @@ async def get_service_admin_ids() -> list[int]:
     return [646596194]
 
 
-async def registration_user(telegram_id: int, group: str, subgroup: int) -> bool:
+async def registration_user(telegram_id: int, group: str) -> bool:
     user_data = await post_request_as_json(path=f"/users",
                                            json={
                                                "telegramId": int(telegram_id),
                                                "settings": {
                                                    "group": group,
-                                                   "subGroup": subgroup
                                                }
                                            })
     return not bool(user_data['error'])
 
 
-async def edit_user(telegram_id: int, group: str, subgroup: int) -> bool:
+async def edit_user(telegram_id: int, group: str) -> bool:
     user_data = await patch_request_as_json(path=f"/user?telegramId={telegram_id}",
                                             json={
                                                 "group": group,
-                                                "subGroup": subgroup
                                             })
     return not bool(user_data['error'])
 
