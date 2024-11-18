@@ -24,6 +24,7 @@ async def get_course(message: Message, is_new_user: bool):
         text_hello = "Давай познакомимся! 👋 На каком курсе ты учишься?"
     else:
         text_hello = "Немного изменим данные. ✏ На каком курсе ты учишься?"
+
     courses = await schedule_service.get_courses()
     random.shuffle(constant.emojies_for_course)
 
@@ -91,41 +92,9 @@ async def get_group(message: Message, data):
     await message.answer(text_get_group, reply_markup=keyboard.as_markup())
 
 
-# Создание кнопок выбора подгруппы
-async def get_subgroup(message: Message, data):
-    group, program, course, is_new_user = data.split('^')
-
-    text_get_subgroup = f"{group} — твоя группа. Осталось определиться с подгруппой!"
-
-    subgroups = await schedule_service.get_subgroups(course,
-                                                     program,
-                                                     group)
-    keyboard = InlineKeyboardBuilder()
-    for i in range(len(subgroups)):
-        emoji_for_button = f"{constant.emojies_for_subgroups[rand_emj(len(constant.emojies_for_subgroups))]} {subgroups[i]}"
-        keyboard.row(types.InlineKeyboardButton(text=emoji_for_button,
-                                                callback_data=f"subgroup_{subgroups[i]}"
-                                                              f"^{group}"
-                                                              f"^{program}"
-                                                              f"^{course}"
-                                                              f"^{is_new_user}"))
-    keyboard.row(types.InlineKeyboardButton(text="🚫 Нет подгруппы",
-                                            callback_data=f"subgroup_None"
-                                                          f"^{group}"
-                                                          f"^{program}"
-                                                          f"^{course}"
-                                                          f"^{is_new_user}"))
-    keyboard.row(types.InlineKeyboardButton(text="⬅ Назад",
-                                            callback_data=f"back_to_group{program}"
-                                                          f"^{course}"
-                                                          f"^{is_new_user}"))
-
-    await message.answer(text_get_subgroup, reply_markup=keyboard.as_markup())
-
-
 # Создание кнопок для подтверждения выбора
 async def get_confirmation(message: Message, data):
-    subgroup, group, program, course, is_new_user = data.split('^')
+    group, program, course, is_new_user = data.split('^')
 
     '''Заводим новую переменную номера группы, чтобы в сообщение выводилось полное название направления'''
     if program in constant.type_of_program_dict.keys():
@@ -133,34 +102,25 @@ async def get_confirmation(message: Message, data):
     else:
         program_for_message = program
 
-    '''Два различных варианта вывода информации — с подгруппой и без нее'''
-    if subgroup == "None":
-        text_confirmation = ("Отлично! ✅ Теперь давай проверим, всё ли верно:\n" +
+    text_confirmation = ("Отлично! ✅ Теперь давай проверим, всё ли верно:\n" +
                              f"{course}-й курс,\n"
                              f"{program_for_message},\n"
                              f"{group} — группа,"
                              f"\n\nВсе верно?")
-    else:
-        text_confirmation = ("Отлично! ✅ Теперь давай проверим, всё ли верно:\n" +
-                             f"{course}-й курс,\n"
-                             f"{program_for_message},\n"
-                             f"{group} — группа,\n"
-                             f"{subgroup} — подгруппа.\n\nВсе верно?")
+
 
     keyboard = InlineKeyboardBuilder()
     keyboard.row(types.InlineKeyboardButton(text="Все верно! 🎉🎊",
                                             callback_data=f"start_working{course}"
                                                           f"^{program}"
                                                           f"^{group}"
-                                                          f"^{subgroup}"
                                                           f"^{message.chat.id}"
                                                           f"^{is_new_user}"))
     keyboard.row(types.InlineKeyboardButton(text="Начать сначала ✏",
                                             callback_data=f"back_to_start"
                                                           f"{is_new_user}"))
     keyboard.row(types.InlineKeyboardButton(text="⬅ Назад",
-                                            callback_data=f"back_to_subgroup{group}"
-                                                          f"^{program}"
+                                            callback_data=f"back_to_group{program}"
                                                           f"^{course}"
                                                           f"^{is_new_user}"))
 
@@ -191,15 +151,6 @@ async def program_query_handler(callback_query: types.CallbackQuery):
 async def group_query_handler(callback_query: types.CallbackQuery):
     data = callback_query.data.replace("group_", "")
     await callback_query.message.delete()
-    await get_subgroup(callback_query.message, data)
-
-
-# Обработка события нажатия на кнопку выбора подгруппы
-@typing_action
-@router.callback_query(lambda c: c.data.startswith('subgroup_'))
-async def subgroup_query_handler(callback_query: types.CallbackQuery):
-    data = callback_query.data.replace("subgroup_", "")
-    await callback_query.message.delete()
     await get_confirmation(callback_query.message, data)
 
 
@@ -215,9 +166,6 @@ async def program_query_handler(callback_query: types.CallbackQuery):
     elif callback_query.data.startswith('back_to_group'):
         data = callback_query.data.replace('back_to_group', "")
         await get_group(callback_query.message, data)
-    elif callback_query.data.startswith('back_to_subgroup'):
-        data = callback_query.data.replace('back_to_subgroup', "")
-        await get_subgroup(callback_query.message, data)
     elif callback_query.data.startswith('back_to_start'):
         data = callback_query.data.replace('back_to_start', "")
         await get_course(callback_query.message, data == "True")
@@ -229,22 +177,15 @@ async def program_query_handler(callback_query: types.CallbackQuery):
 async def callback_message(callback_query: types.CallbackQuery):
     await callback_query.message.delete()
     data = callback_query.data.replace('start_working', "")
-    course, program, group, subgroup, telegram_id, is_new_user = data.split("^")
+    course, program, group, telegram_id, is_new_user = data.split("^")
     is_new_user = True if is_new_user == "True" else False
-
-    if subgroup != "None":
-        subgroup = int(subgroup)
-    else:
-        subgroup = 0
 
     if is_new_user:
         is_success = await user_service.registration_user(telegram_id=telegram_id,
-                                                          group=group,
-                                                          subgroup=subgroup)
+                                                          group=group)
     else:
         is_success = await user_service.edit_user(telegram_id=telegram_id,
-                                                  group=group,
-                                                  subgroup=subgroup)
+                                                  group=group)
 
     if is_success:
         if is_new_user:
