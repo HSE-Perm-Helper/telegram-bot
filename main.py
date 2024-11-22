@@ -19,9 +19,9 @@ async def main():
     dp.update.middleware.register(ExceptionHandlerMiddleware())
 
     dp.include_router(start.router)
+    dp.include_router(schedule_handle.router)
     dp.include_router(registration.router)
     dp.include_router(settings_command.router)
-    dp.include_router(schedule_handle.router)
     dp.include_router(today_schedule.router)
     dp.include_router(tomorrow_schedule.router)
     dp.include_router(sport_schedule.router)
