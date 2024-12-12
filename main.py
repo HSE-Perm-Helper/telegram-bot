@@ -41,7 +41,7 @@ async def main():
         types.BotCommand(command='sport_schedule', description="Получить расписание физ-ры"),
         types.BotCommand(command='today', description="Получить расписание на сегодня"),
         types.BotCommand(command='tomorrow', description="Получить расписание на завтра"),
-        types.BotCommand(command='vpn', description="Быстрый VPN от Вышкинцев")
+        types.BotCommand(command='vpn', description="VPN от создателей бота")
     ], scope=types.BotCommandScopeDefault())
 
     await dp.start_polling(bot)
