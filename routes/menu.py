@@ -8,6 +8,20 @@ from decorator.decorators import typing_action
 router = Router()
 
 
+# @router.message(Command("test"))
+# async def test(message: types.Message, state: FSMContext):
+#     keyboard = ReplyKeyboardBuilder()
+#
+#     keyboard.row(KeyboardButton(text="test Select People", callback_data="132",
+#                                       request_users=KeyboardButtonRequestUsers(request_id=123, request_username=True, max_quantity=1)))
+#     await message.answer("Выбери чела", reply_markup=keyboard.as_markup())
+#
+# @router.message(F.content_type == ContentType.USER_SHARED)
+# async def test2(message: Message, state: FSMContext):
+#     await message.answer("123")
+#     #print(message.users_shared.users[0].username)
+
+
 @router.message(Command('help', 'menu'))
 @router.message(lambda F: F.text == ('help' or 'помощь' or 'помоги'))
 @typing_action
@@ -39,8 +53,8 @@ async def send_help_message(message: types.Message):
     keyboard_markup_up.row(get_schedule_text_button)
     keyboard_markup_up.row(types.KeyboardButton(text="📅 На сегодня"), types.KeyboardButton(text="➡️ На завтра"))
     keyboard_markup_up.row(get_base_schedule_text_button, types.KeyboardButton(text="🏓 Расписание физ-ры"))
-    keyboard_markup_up.row(types.KeyboardButton(text="⚙️ Настройки"))
-    keyboard_markup_up.row(types.KeyboardButton(text="⚡️ Быстрый VPN от Вышкинцев"))
+    keyboard_markup_up.row(types.KeyboardButton(text="🖥️ Добавить в календарь"), types.KeyboardButton(text="⚙️ Настройки"))
+    keyboard_markup_up.row(types.KeyboardButton(text="⚡️ Быстрый VPN от Вышкинцев"), types.KeyboardButton(text="💳 Поддержать разработчиков"))
     keyboard_markup_up.row_width = 4
 
     keyboard = keyboard_markup_up.as_markup()
