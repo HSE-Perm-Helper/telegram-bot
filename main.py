@@ -8,7 +8,7 @@ from aiogram import types
 
 from bot import bot, dp
 from middleware.exception_handler_middleware import ExceptionHandlerMiddleware
-from routes import mailing, menu, partnership, settings_command, registration, start, admin_settings
+from routes import mailing, menu, partnership, settings_command, registration, start, admin_settings, donation, remote_schedule
 from routes.schedule_commands import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
 from worker import workers
 
@@ -22,6 +22,8 @@ async def main():
     dp.include_router(schedule_handle.router)
     dp.include_router(registration.router)
     dp.include_router(settings_command.router)
+    dp.include_router(remote_schedule.router)
+    dp.include_router(donation.router)
     dp.include_router(today_schedule.router)
     dp.include_router(tomorrow_schedule.router)
     dp.include_router(sport_schedule.router)

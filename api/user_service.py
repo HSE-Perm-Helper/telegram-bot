@@ -3,6 +3,7 @@ from api.utils import raise_user_not_found_exception_when_exception_in_response,
 from model.available_for_hiding_lesson import AvailableForHidingLesson
 from model.hidden_lesson import HiddenLesson
 from model.lesson_type import LessonType
+from model.remote_schedule_connect_link import RemoteScheduleConnectLink
 
 
 async def get_user_ids() -> list[int]:
@@ -115,3 +116,12 @@ async def remove_user_hidden_lesson(telegram_id: int, lesson: AvailableForHiding
 async def check_registration_user(telegram_id: int) -> bool:
     response = await get_request(path=f"/user?telegramId={telegram_id}")
     return response.status_code == 200
+
+
+async def get_remote_schedule_link(telegram_id: int) -> RemoteScheduleConnectLink:
+    response = await get_request_as_json(path=f"/user/remote-schedule?telegramId={telegram_id}")
+
+    return RemoteScheduleConnectLink(response["direct"])
+
+
+
