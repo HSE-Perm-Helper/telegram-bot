@@ -138,7 +138,7 @@ async def schedule_sending(message: types.Message, schedule_dict):
                                                           f', {l["time"]["date"]}')
         for day, lessons in temp_lessons.items():
             text_for_message = await get_lessons_as_string(day, is_session, lessons)
-            await message.answer(text=text_for_message, parse_mode='HTML', disable_notification=True)
+            await message.answer(text=text_for_message, parse_mode='HTML', disable_notification=True, disable_web_page_preview=True)
 
         await do_or_nothing(bot.unpin_all_chat_messages, message.chat.id)
         await bot.pin_chat_message(message.chat.id, message_id=header_message.message_id, disable_notification=True)
