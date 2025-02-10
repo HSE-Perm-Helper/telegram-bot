@@ -1,0 +1,2 @@
+class CanNotResentEmailByAttemptsException(Exception):
+    pass

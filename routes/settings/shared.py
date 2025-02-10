@@ -15,6 +15,7 @@ class SettingsCallback(enum.Enum):
     SET_GROUP = "SET_GROUP_SETTINGS"
     NOTIFICATION_SETTINGS = "NOTIFICATION_SETTINGS"
     HIDING_LESSONS_SETTINGS = "HIDING_LESSONS_SETTINGS"
+    EMAIL_SETTINGS = "EMAIL_SETTINGS"
     DONE_SETTINGS = "DONE_SETTINGS"
     OFF_NOTIFICATION = "OFF_NOTIFICATION"
 
@@ -32,5 +33,6 @@ async def __get_settings_keyboard():
     keyboard.row(
         InlineKeyboardButton(text="👁️ Скрытие предметов", callback_data=SettingsCallback.HIDING_LESSONS_SETTINGS.value))
     keyboard.row(InlineKeyboardButton(text="🔔 Уведомления", callback_data=SettingsCallback.NOTIFICATION_SETTINGS.value))
+    keyboard.row(InlineKeyboardButton(text="📧 Почта", callback_data=SettingsCallback.EMAIL_SETTINGS.value))
     keyboard.row(InlineKeyboardButton(text="✅ Готово ✅", callback_data=SettingsCallback.DONE_SETTINGS.value))
     return keyboard
