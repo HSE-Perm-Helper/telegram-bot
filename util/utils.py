@@ -4,7 +4,7 @@ from typing import Callable
 from aiogram.types import InlineKeyboardButton
 
 import callback.callback
-from callback.settings_callback import SettingsCallback
+from routes.settings.shared import SettingsCallback
 from settings.setting_code import SettingCode
 
 days_of_week_list = ['Понедельник',
