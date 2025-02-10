@@ -1,9 +1,13 @@
 from api.utils import raise_user_not_found_exception_when_exception_in_response, get_request_as_json, \
     patch_request_as_json, get_request, post_request_as_json, post_request, delete_request
+from exception.verification.invalid_email_format_exception import InvalidEmailFormatException
+from exception.verification.user_already_exists_with_this_email_exception import UserAlreadyExistsWithThisEmailException
 from model.available_for_hiding_lesson import AvailableForHidingLesson
 from model.hidden_lesson import HiddenLesson
 from model.lesson_type import LessonType
 from model.remote_schedule_connect_link import RemoteScheduleConnectLink
+from model.verification_info import VerificationInfo
+from mapper import verification_info_mapper
 
 
 async def get_user_ids() -> list[int]:
@@ -72,6 +76,29 @@ async def edit_user_settings(telegram_id: int, setting: str, new_value: bool) ->
                                             })
     return not bool(user_data['error'])
 
+
+async def set_or_update_user_email(telegram_id: int, email: str) -> VerificationInfo:
+    response = await post_request(path=f"/v2/users/{telegram_id}/email", json={"email": email})
+
+    if response.status_code == 400:
+        raise InvalidEmailFormatException()
+
+    if response.status_code == 409:
+        raise UserAlreadyExistsWithThisEmailException()
+
+    return verification_info_mapper.from_json(response.json())
+
+
+async def delete_user_email(telegram_id: int):
+    await delete_request(path=f"/v2/users/{telegram_id}/email")
+
+
+async def get_user(telegram_id: int) -> dict:
+    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
+
+    await raise_user_not_found_exception_when_exception_in_response(user)
+
+    return user["response"]
 
 async def get_user_settings(telegram_id: int) -> dict | None:
     user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")

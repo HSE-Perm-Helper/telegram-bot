@@ -8,7 +8,8 @@ from aiogram import types
 
 from bot import bot, dp
 from middleware.exception_handler_middleware import ExceptionHandlerMiddleware
-from routes import mailing, menu, partnership, settings_command, registration, start, admin_settings, donation, remote_schedule
+from routes import mailing, menu, partnership, registration, start, donation, remote_schedule
+from routes.settings import settings_command, admin_settings
 from routes.schedule_commands import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
 from worker import workers
 

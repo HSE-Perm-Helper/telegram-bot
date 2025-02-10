@@ -1,0 +1,2 @@
+class VerificationRequestNotFoundException(Exception):
+    pass
