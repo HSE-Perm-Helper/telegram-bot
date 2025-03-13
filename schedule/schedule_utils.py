@@ -102,16 +102,15 @@ def get_lesson_as_string(lesson):
                             text_for_message += "\n"
 
                     else:
-                        text_for_message += f'несколько мест:\n'
+                        text_for_message += f', {subgroup} п.г.\n'
+                        places = []
                         for place in lesson['places']:
-                            '''- Иначе добавляем номер корпуса и аудиторию'''
-                            text_for_message += (
-                                f"<b>{place['office']} [{place['building']}]</b>")
+                            message = f"<b>{place['office']} [{place['building']}]</b>"
 
-                            if subgroup:
-                                text_for_message += f", {subgroup} п.г.\n"
-                            else:
-                                text_for_message += "\n"
+                            places.append(message)
+
+                        text_for_message += ", ".join(places)
+                        text_for_message += "\n"
             else:
                 '''...иначе добавляем просто подгруппу'''
 
@@ -126,16 +125,8 @@ def get_lesson_as_string(lesson):
 
             '''Добавляем в сообщение название пары'''
 
-            # if lesson['lessonType'] in constant.type_of_lessons_dict.keys():
-            #     text_for_message += (f"{lesson['subject']}\n")
-
-            '''ТУТ ПОКА ЧТО КОСТЫЛЬ, В СЛУЧАЕ ИЗМЕНЕНИЯ НАЗВАНИЯ ПАР НА БЭКЕ СНЕСТИ ЭТОТ КУСОК И
-            И РАСКОМЕНТИРОВАТЬ ВЕРХНИЙ, НО СНИЗУ НАДО БУДЕТ ЕЩЕ ДОПИСАТЬ КОД'''
-
             if lesson_type:
                 text_for_message += f"{lesson['subject']}\n"
-
-            '''КОНЕЦ КОСТЫЛЯ'''
 
         if lesson['lecturer'] is not None:
             '''Добавляем преподавателя пары'''
