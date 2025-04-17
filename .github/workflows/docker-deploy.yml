@@ -12,11 +12,11 @@ jobs:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          host: ${{ secrets.DEPLOY_SERVER_HOST }}
+          username: ${{ secrets.DEPLOY_SERVER_USER }}
+          key: ${{ secrets.DEPLOY_SERVER_KEY }}
           script: |
-            cd /projects/HsePermHelperBot
+            cd services/telegram-bot
             git pull
-            docker-compose build
-            docker-compose up -d
+            docker compose build
+            docker compose up -d
