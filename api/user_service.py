@@ -54,9 +54,7 @@ async def registration_user(telegram_id: int, group: str) -> bool:
     user_data = await post_request_as_json(path=f"/users",
                                            json={
                                                "telegramId": int(telegram_id),
-                                               "settings": {
-                                                   "group": group,
-                                               }
+                                               "group": group
                                            })
     return not bool(user_data['error'])
 
