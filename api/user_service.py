@@ -51,12 +51,10 @@ async def get_service_admin_ids() -> list[int]:
 
 
 async def registration_user(telegram_id: int, group: str) -> bool:
-    user_data = await post_request_as_json(path=f"/users",
+    user_data = await post_request_as_json(path=f"/v2/users",
                                            json={
                                                "telegramId": int(telegram_id),
-                                               "settings": {
-                                                   "group": group,
-                                               }
+                                               "group": group
                                            })
     return not bool(user_data['error'])
 
