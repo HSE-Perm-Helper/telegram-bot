@@ -5,8 +5,6 @@ from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_processor.schedule_added_notification_processor import ScheduleAddedNotificationProcessor
 from notification.notification_processor.schedule_changed_notification_processor import \
     ScheduleChangedNotificationProcessor
-from notification.notification_processor.service_warning_notification_processor import \
-    ServiceWarningNotificationProcessor
 from notification.notification_processor.upcoming_lessons_notification_processor import \
     UpcomingLessonsNotificationProcessor
 from notification.notification_type import NotificationType
@@ -19,7 +17,6 @@ class NotificationManager:
         await self.add_processor(ScheduleAddedNotificationProcessor())
         await self.add_processor(ScheduleChangedNotificationProcessor())
         await self.add_processor(UpcomingLessonsNotificationProcessor())
-        await self.add_processor(ServiceWarningNotificationProcessor())
 
     async def add_processor(self, processor: BaseNotificationProcessor):
         self.processors[await processor.get_notification_type()] = processor

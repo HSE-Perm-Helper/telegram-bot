@@ -68,19 +68,6 @@ async def get_base_schedule(message: types.Message, state: FSMContext):
         await schedule_sending(message, response_schedule["response"])
 
 
-# Получение расписания для календаря
-# @router.message(Command("cal"))
-# @typing_action
-# async def get_schedule(message):
-#     await message.delete()
-#     text_get_schedule = "Открой и следуй инструкциям:"
-#
-#     markup = InlineKeyboardBuilder()
-#     markup.add(types.InlineKeyboardButton(text="Настроить календарь!", web_app=WebAppInfo(url=venv.mini_app_url)))
-#
-#     await message.answer(text=text_get_schedule, reply_markup=markup.as_markup())
-
-
 # Получение текстового расписания
 async def get_text_schedule(message):
     await message.delete()

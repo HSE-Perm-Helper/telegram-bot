@@ -81,7 +81,7 @@ def get_lesson_as_string(lesson):
 
         if lesson['time']['startTime'] is not None and lesson['time']['endTime'] != None:
             '''Добавляем в сообщение номер пары'''
-            text_for_message += f"<b>{constant.number_of_pair_dict[lesson['time']['startTime']]} </b>"
+            text_for_message += f"<b>{constant.number_of_pair_dict.get(lesson['time']['startTime'], 'ℹ️')} </b>"
 
             '''Добавляем в сообщение время пары'''
             text_for_message += (f"<i>{time_of_pair}</i>")
@@ -165,7 +165,6 @@ async def get_pair_count(lesson_list):
 
 async def group_lessons_by_pair_number(lessons):
     last_pair = constant.number_of_pair_dict[lessons[- 1]["time"]['startTime']]
-    # lessons_list_count = int(last_pair.replace('-ая пара', ''))
     lessons_list_count = constant.emoji_to_int_dict[last_pair]
     lesson_list: list[None | list[dict]] = [None] * lessons_list_count
     ''' Тут я делаю проход по парам за день, в нем расставляю в массиве пары
@@ -173,7 +172,6 @@ async def group_lessons_by_pair_number(lessons):
                 Иначе вывожу сообщение "Окно" '''
     for lesson in lessons:
         pair_index_string = constant.number_of_pair_dict[lesson["time"]["startTime"]]
-        # pair_index = int(pair_index_string.replace('-ая пара', '')) - 1
         pair_index = constant.emoji_to_int_dict[pair_index_string] - 1
 
         if lesson_list[pair_index] is None:
@@ -193,7 +191,6 @@ async def get_lessons_without_header(lesson_list):
                 is_pairs_start = True
         if not lessons_inner:
             if is_pairs_start:
-                # text_for_message += f"<b>{number_of_pair + 1}-ая пара</b>"
                 text_for_message += constant.int_to_emoji_dict[number_of_pair + 1]
                 text_for_message += f" - ОКНО 🪟\n\n"
 
