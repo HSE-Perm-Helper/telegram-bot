@@ -49,4 +49,5 @@ async def get_today_lessons(message: Message, state: FSMContext):
     await state.clear()
 
     await message.bot.send_chat_action(message.chat.id, ChatAction.UPLOAD_PHOTO)
-    await message.answer_photo(photo=file_id, caption="**Расписание физ-ры 💪**", show_caption_above_media=True)
+    await message.answer_photo(photo=file_id, caption="**Расписание физ-ры 💪**", show_caption_above_media=True,
+                               parse_mode="Markdown")
