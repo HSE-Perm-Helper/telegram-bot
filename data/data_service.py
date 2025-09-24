@@ -5,7 +5,6 @@ from pathlib import Path
 
 
 class DataField(enum.Enum):
-    SPORT_SCHEDULE_DOCUMENT_FILE_ID = "SPORT_SCHEDULE_DOCUMENT_FILE_ID"
     SPORT_SCHEDULE_PHOTO_FILE_ID = "SPORT_SCHEDULE_PHOTO_FILE_ID"
     IS_ENABLED_NOTIFICATIONS_FETCH = "IS_ENABLED_NOTIFICATIONS_FETCH"
     IS_ENABLED_BACKEND_HEALTH_CHECK = "IS_ENABLED_BACKEND_HEALTH_CHECK"
@@ -14,7 +13,7 @@ class DataField(enum.Enum):
 class DataService:
     __data_file = os.path.join("save", "app.dat")
     __data: dict[str, str]
-    __fields = [DataField.SPORT_SCHEDULE_PHOTO_FILE_ID.value, DataField.SPORT_SCHEDULE_DOCUMENT_FILE_ID.value,
+    __fields = [DataField.SPORT_SCHEDULE_PHOTO_FILE_ID.value,
                 DataField.IS_ENABLED_NOTIFICATIONS_FETCH.value, DataField.IS_ENABLED_BACKEND_HEALTH_CHECK.value]
 
     def __init__(self):
