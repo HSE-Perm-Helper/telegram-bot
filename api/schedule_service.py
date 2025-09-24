@@ -64,7 +64,7 @@ async def get_schedules() -> dict[str, any]:
 
 async def get_courses() -> list[int]:
     courses: list[int] = []
-    courses_data = await get_request_as_json("/schedule-info/courses")
+    courses_data = await get_request_as_json("/v1/schedule-info/courses")
     for i in courses_data["response"]:
         courses.append(int(i))
 
@@ -75,7 +75,7 @@ async def get_courses() -> list[int]:
 
 async def get_programs(course: int) -> list[str]:
     programs: list[str] = []
-    programs_data = await get_request_as_json(f"/schedule-info/programs?course={course}")
+    programs_data = await get_request_as_json(f"/v1/schedule-info/programs?course={course}")
     for i in programs_data["response"]:
         programs.append(i)
 
@@ -86,7 +86,7 @@ async def get_programs(course: int) -> list[str]:
 
 async def get_groups(course: int, program: str) -> list[str]:
     groups: list[str] = []
-    groups_data = await get_request_as_json(path=f"/schedule-info/groups?course={course}"
+    groups_data = await get_request_as_json(path=f"/v1/schedule-info/groups?course={course}"
                                                  f"&program={program}")
     for i in groups_data["response"]:
         groups.append(i)
