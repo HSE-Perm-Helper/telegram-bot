@@ -4,8 +4,8 @@ from schedule import schedule_utils
 from schedule.schedule_type import ScheduleType
 from util.utils import format_output_array
 
-NOTIFICATION_EMOJI = "🔔"
-# NOTIFICATION_EMOJI = "🧙‍♀️" # Halloween
+# NOTIFICATION_EMOJI = "🔔"
+NOTIFICATION_EMOJI = "🧙‍♀️" # Halloween
 
 
 def get_difference_schedule(schedules):
