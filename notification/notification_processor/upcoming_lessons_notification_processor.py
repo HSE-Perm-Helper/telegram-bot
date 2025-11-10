@@ -27,8 +27,8 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
 
                 markup.row(types.InlineKeyboardButton(
                     text="Получить на всю неделю 👀",
-                    callback_data=schedule_utils.get_callback_for_schedule(schedule_info=schedule,
-                                                                           need_delete_message=False)[0]))
+                    callback_data=schedule_utils.get_callback_for_timetable(timetable_info=schedule,
+                                                                            need_delete_message=False)[0]))
 
                 grouped_lessons = await group_lessons_by_pair_number(lessons)
                 pair_count = await get_pair_count(grouped_lessons)

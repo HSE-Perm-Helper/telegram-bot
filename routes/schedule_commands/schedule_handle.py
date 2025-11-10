@@ -5,15 +5,18 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types.web_app_info import WebAppInfo
 
 import venv
-from api import schedule_service
+
+from typing_extensions import deprecated
+
+from api import schedule_service, timetable_service
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
-from callback.schedule_callback import ScheduleCallback
+from callback.schedule_callback import ScheduleCallback, TimetableCallback
 from decorator.decorators import typing_action
 from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from schedule.schedule_type import ScheduleType
-from schedule.schedule_utils import get_button_by_schedule_info, group_lessons_by_key, \
-    get_schedule_header_by_schedule_info, get_pair_count, group_lessons_by_pair_number, get_lessons_without_header, \
+from schedule.schedule_utils import get_button_by_timetable_info, group_lessons_by_key, \
+    get_timetable_header_by_timetable_info, get_pair_count, group_lessons_by_pair_number, get_lessons_without_header, \
     get_lesson_message_header
 from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, do_or_nothing
 
@@ -57,43 +60,42 @@ async def get_base_schedule(message: types.Message, state: FSMContext):
     await state.clear()
 
     await bot.delete_message(message.chat.id, message.message_id)
-    schedules_json = await schedule_service.get_schedules()
-    schedules = list(filter(lambda schedule: schedule["scheduleType"] == ScheduleType.QUARTER_SCHEDULE.value,
-                            schedules_json['response']))
-    if len(schedules) == 0:
+    timetable_json = await timetable_service.get_timetables(message.chat.id)
+
+    timetables = list(filter(lambda timetable: timetable["scheduleType"] == ScheduleType.QUARTER_SCHEDULE.value,
+                             timetable_json))
+    if len(timetables) == 0:
         await message.answer(text="Пока расписания на модуль нет! 🎉🎊")
     else:
-        schedule = schedules[0]
-        response_schedule = await schedule_service.get_schedule(message.chat.id, schedule["start"], schedule["end"])
-        await schedule_sending(message, response_schedule["response"])
+        timetable = timetables[0]
+        response_schedule = await timetable_service.get_timetable(message.chat.id, timetable["id"])
+        await schedule_sending(message, response_schedule)
 
 
 # Получение текстового расписания
 async def get_text_schedule(message):
     await message.delete()
-    schedule_json = await schedule_service.get_schedules()
+    timetable_json = await timetable_service.get_timetables(message.chat.id)
 
-    if schedule_json['error'] is True:
+    if timetable_json is None:
         await message.answer(text='Для тебя почему-то нет расписания 🤷\nНастрой группу заново '
                                   'командой /settings!')
     else:
-        schedules_dict = list(filter(lambda schedule: schedule["scheduleType"] != ScheduleType.QUARTER_SCHEDULE.value,
-                                     schedule_json['response']))
+        timetables_dict = list(filter(lambda schedule: schedule["scheduleType"] != ScheduleType.QUARTER_SCHEDULE.value,
+                                     timetable_json))
 
-        if len(schedules_dict) == 1:
-            schedule = schedules_dict[0]
-            start = schedule["start"]
-            end = schedule["end"]
-            response = await schedule_service.get_schedule(message.chat.id, start, end)
-            await schedule_sending(message, response["response"])
-        elif len(schedules_dict) == 0:
+        if len(timetables_dict) == 1:
+            timetable = timetables_dict[0]
+            response = await timetable_service.get_timetable(message.chat.id, timetable["id"])
+            await schedule_sending(message, response)
+        elif len(timetables_dict) == 0:
             await message.answer(text="Расписания пока нет, отдыхай! 😎")
         else:
             text_message = "🔵 Выбери расписание, которое ты хочешь увидеть:"
             markup = InlineKeyboardBuilder()
 
-            for schedule in schedules_dict:
-                markup.row(get_button_by_schedule_info(schedule, True)),
+            for timetable in timetables_dict:
+                markup.row(get_button_by_timetable_info(timetable, True)),
 
             await message.answer(text=text_message, reply_markup=markup.as_markup())
 
@@ -112,7 +114,7 @@ async def schedule_sending(message: types.Message, schedule_dict):
         return
 
     else:
-        text_for_message = f"<b>{get_schedule_header_by_schedule_info(schedule_dict)}</b>\n\n"
+        text_for_message = f"<b>{get_timetable_header_by_timetable_info(schedule_dict)}</b>\n\n"
 
         header_message = await message.answer(text_for_message, parse_mode='HTML')
 
@@ -141,6 +143,7 @@ async def get_lessons_as_string(day, is_session, lessons):
 
 
 # Пользователем выбрано расписание для отправки
+# Todo: remove
 @router.callback_query(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
 async def callback_message(callback_query: types.CallbackQuery):
     data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
@@ -170,4 +173,35 @@ async def callback_message(callback_query: types.CallbackQuery):
 
     await bot.answer_callback_query(callback_query.id)
     schedule_dict = schedule_json['response']
+    await schedule_sending(callback_query.message, schedule_dict)
+
+
+@router.callback_query(lambda c: check_callback(c, TimetableCallback.TIMETABLE_CHOICE.value))
+async def callback_message_v2(callback_query: types.CallbackQuery):
+    data = extract_data_from_callback(TimetableCallback.TIMETABLE_CHOICE.value, callback_query.data)
+    id = data[0]
+    need_delete_message = data[1]
+
+    if need_delete_message == "True":
+        await callback_query.message.delete()
+
+    timetable_json = await timetable_service.get_timetable(callback_query.message.chat.id, id)
+
+    if need_delete_message == "False" and timetable_json is None:
+        await callback_query.answer(text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
+
+        keyboard: list[list[types.InlineKeyboardButton]] = callback_query.message.reply_markup.inline_keyboard
+        new_keyboard: list[list[types.InlineKeyboardButton]] = []
+        for row in keyboard:
+            filtered_row = list(filter(lambda button: button.callback_data != callback_query.data, row))
+            if len(filtered_row) > 0:
+                new_keyboard.append(filtered_row)
+
+        await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
+                                            message_id=callback_query.message.message_id,
+                                            reply_markup=types.InlineKeyboardMarkup(inline_keyboard=new_keyboard))
+        return
+
+    await bot.answer_callback_query(callback_query.id)
+    schedule_dict = timetable_json
     await schedule_sending(callback_query.message, schedule_dict)

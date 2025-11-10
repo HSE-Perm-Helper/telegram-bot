@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from api import user_service, schedule_service
+from api import user_settings_service
 from exception.quarter_schedule_not_found_exception import QuarterScheduleNotFoundException
 from message.settings_messages import HIDING_LESSONS_YET_UNAVAILABLE
 from model.available_for_hiding_lesson import AvailableForHidingLesson
@@ -14,12 +14,12 @@ router = Router()
 @router.callback_query(F.data == SettingsCallback.HIDING_LESSONS_SETTINGS.value)
 async def hiding_lessons_settings(query: CallbackQuery, state: FSMContext):
     try:
-        data = await schedule_service.get_available_for_hiding_lessons(query.message.chat.id)
+        data = await user_settings_service.get_available_for_hiding_lessons(query.message.chat.id)
     except QuarterScheduleNotFoundException as e:
         await query.message.answer(HIDING_LESSONS_YET_UNAVAILABLE)
         return
 
-    hidden_lessons = await user_service.get_user_hidden_lessons(query.message.chat.id)
+    hidden_lessons = await user_settings_service.get_user_hidden_lessons(query.message.chat.id)
     hidden_lessons = set(
         map(lambda lesson: AvailableForHidingLesson(lesson.lesson, lesson.lesson_type, lesson.sub_group),
             hidden_lessons))
@@ -115,10 +115,10 @@ async def hiding_lessons_handle(query: CallbackQuery, state: FSMContext):
     lesson = lessons[index]
 
     if not values[index]:
-        await user_service.add_user_hidden_lesson(query.message.chat.id, lesson)
+        await user_settings_service.add_user_hidden_lesson(query.message.chat.id, lesson)
         await query.answer(f"✅ Вы успешно добавили в скрытые предмет {lesson.lesson}!")
     else:
-        await user_service.remove_user_hidden_lesson(query.message.chat.id, lesson)
+        await user_settings_service.remove_user_hidden_lesson(query.message.chat.id, lesson)
         await query.answer(f"✅ Вы успешно убрали из скрытых предмет {lesson.lesson}!")
 
     values[index] = not values[index]

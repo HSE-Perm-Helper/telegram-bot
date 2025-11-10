@@ -1,6 +1,6 @@
 from aiogram import types
 
-CALLBACK_DELIMITER = "|"
+CALLBACK_DELIMITER = ":"
 
 
 def extract_data_from_callback(callback_prefix: str, callback: str) -> list[str]:
