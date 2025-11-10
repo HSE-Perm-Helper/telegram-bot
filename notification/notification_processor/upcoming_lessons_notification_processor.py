@@ -23,12 +23,12 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
 
                 schedule = payload["targetSchedule"]
                 lessons = schedule["lessons"]
-                markup = InlineKeyboardBuilder()
-
-                markup.row(types.InlineKeyboardButton(
-                    text="Получить на всю неделю 👀",
-                    callback_data=schedule_utils.get_callback_for_timetable(timetable_info=schedule,
-                                                                            need_delete_message=False)[0]))
+                # markup = InlineKeyboardBuilder()
+                #
+                # markup.row(types.InlineKeyboardButton(
+                #     text="Получить на всю неделю 👀",
+                #     callback_data=schedule_utils.get_callback_for_timetable(timetable_info=schedule,
+                #                                                             need_delete_message=False)[0]))
 
                 grouped_lessons = await group_lessons_by_pair_number(lessons)
                 pair_count = await get_pair_count(grouped_lessons)
@@ -41,8 +41,7 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                 for user in users:
                     try:
                         message = base_message + lessons_message
-                        await bot.send_message(user, message, parse_mode="HTML",
-                                               reply_markup=markup.as_markup())
+                        await bot.send_message(user, message, parse_mode="HTML")
                     except Exception as e:
                         pass
 

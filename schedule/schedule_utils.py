@@ -13,16 +13,16 @@ emojies_for_week_color = ['🟧', '⬛️', '🟧', '⬛️', '🟧', '⬛️'] 
 # session_schedule_emoji = "🍀"
 session_schedule_emoji = "🎃" # halloween
 
-def get_button_text_by_timetable_info(timmetable_info: dict, start: str, end: str) -> str:
-    schedule_type = timmetable_info["scheduleType"]
+def get_button_text_by_timetable_info(timetable_info: dict, start: str, end: str) -> str:
+    schedule_type = timetable_info["scheduleType"]
     match schedule_type:
         case ScheduleType.COMMON_SCHEDULE.value:
-            number = timmetable_info["number"]
+            number = timetable_info["number"]
             return f"Неделя {number}, {start} — {end}"
         case ScheduleType.SESSION_SCHEDULE.value:
             return f"Сессия, {start} — {end}"
         case ScheduleType.QUARTER_SCHEDULE.value:
-            number = timmetable_info["number"]
+            number = timetable_info["number"]
             return f"Базовое расписание на {number} модуль"
     return "N/a"
 

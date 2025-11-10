@@ -1,17 +1,13 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types.web_app_info import WebAppInfo
 
-import venv
-
-from typing_extensions import deprecated
-
-from api import schedule_service, timetable_service
+from api import timetable_service
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
-from callback.schedule_callback import ScheduleCallback, TimetableCallback
+from callback.schedule_callback import TimetableCallback
 from decorator.decorators import typing_action
 from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from schedule.schedule_type import ScheduleType
@@ -21,6 +17,12 @@ from schedule.schedule_utils import get_button_by_timetable_info, group_lessons_
 from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, do_or_nothing
 
 router = Router()
+
+@router.message(Command('test'))
+async def test(message):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(InlineKeyboardButton(text='test', callback_data='timetable:ajkiyaz0'))
+    await message.answer("test", reply_markup=keyboard.as_markup())
 
 
 @router.message(Command('schedule', 'расписание'))
@@ -38,19 +40,6 @@ async def callback_message(message, state: FSMContext):
     await state.clear()
 
     await get_text_schedule(message)
-
-
-# @router.message(Command('schedule'))
-# @typing_action
-# @required_admin
-# async def get_remote_schedule(message):
-#     await bot.delete_message(message.chat.id, message.message_id)
-#     keyword = InlineKeyboardBuilder()
-#     link = await api.get_remote_schedule_link(message.chat.id)
-#     keyword.add(types.InlineKeyboardButton(text="Добавить расписание в календарь", url=link))
-#     await message.answer(text="Чтобы добавить расписание в свой календарь тебе всего лишь нужно нажать на кнопку и "
-#                               "выбрать календарь, который ты используешь."
-#                               "И всё. Твое расписание у тебя на устройстве!", reply_markup=keyword)
 
 
 @router.message(Command("base_schedule"))
@@ -142,52 +131,20 @@ async def get_lessons_as_string(day, is_session, lessons):
     return text_for_message
 
 
-# Пользователем выбрано расписание для отправки
-# Todo: remove
-@router.callback_query(lambda c: check_callback(c, ScheduleCallback.TEXT_SCHEDULE_CHOICE.value))
-async def callback_message(callback_query: types.CallbackQuery):
-    data = extract_data_from_callback(ScheduleCallback.TEXT_SCHEDULE_CHOICE.value, callback_query.data)
-    start = data[0]
-    end = data[1]
-    need_delete_message = data[2]
-
-    if need_delete_message == "True":
-        await callback_query.message.delete()
-
-    schedule_json = await schedule_service.get_schedule(callback_query.message.chat.id, start, end)
-
-    if need_delete_message == "False" and schedule_json["error"]:
-        await callback_query.answer(text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
-
-        keyboard: list[list[types.InlineKeyboardButton]] = callback_query.message.reply_markup.inline_keyboard
-        new_keyboard: list[list[types.InlineKeyboardButton]] = []
-        for row in keyboard:
-            filtered_row = list(filter(lambda button: button.callback_data != callback_query.data, row))
-            if len(filtered_row) > 0:
-                new_keyboard.append(filtered_row)
-
-        await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
-                                            message_id=callback_query.message.message_id,
-                                            reply_markup=types.InlineKeyboardMarkup(inline_keyboard=new_keyboard))
-        return
-
-    await bot.answer_callback_query(callback_query.id)
-    schedule_dict = schedule_json['response']
-    await schedule_sending(callback_query.message, schedule_dict)
-
-
 @router.callback_query(lambda c: check_callback(c, TimetableCallback.TIMETABLE_CHOICE.value))
-async def callback_message_v2(callback_query: types.CallbackQuery):
+async def callback_message(callback_query: types.CallbackQuery):
     data = extract_data_from_callback(TimetableCallback.TIMETABLE_CHOICE.value, callback_query.data)
     id = data[0]
-    need_delete_message = data[1]
+    need_delete_message = True if len(data) > 1 and data[1] == "True" else False
+    print(data)
+    print(callback_query.data)
 
-    if need_delete_message == "True":
+    if need_delete_message:
         await callback_query.message.delete()
 
     timetable_json = await timetable_service.get_timetable(callback_query.message.chat.id, id)
 
-    if need_delete_message == "False" and timetable_json is None:
+    if not need_delete_message and timetable_json is None:
         await callback_query.answer(text=SCHEDULE_NOT_FOUND_ANYMORE, show_alert=True)
 
         keyboard: list[list[types.InlineKeyboardButton]] = callback_query.message.reply_markup.inline_keyboard

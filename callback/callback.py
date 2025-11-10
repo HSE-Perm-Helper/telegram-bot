@@ -4,7 +4,7 @@ CALLBACK_DELIMITER = ":"
 
 
 def extract_data_from_callback(callback_prefix: str, callback: str) -> list[str]:
-    return callback.replace(callback_prefix, "", 1).split(CALLBACK_DELIMITER)
+    return callback.replace(callback_prefix + CALLBACK_DELIMITER, "", 1).split(CALLBACK_DELIMITER)
 
 
 def insert_data_to_callback(callback_prefix: str, data: list) -> str:
