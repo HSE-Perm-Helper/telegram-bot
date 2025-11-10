@@ -1,7 +1,6 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from api import timetable_service
@@ -17,13 +16,6 @@ from schedule.schedule_utils import get_button_by_timetable_info, group_lessons_
 from util.utils import get_day_of_week_from_date, get_day_of_week_from_slug, do_or_nothing
 
 router = Router()
-
-@router.message(Command('test'))
-async def test(message):
-    keyboard = InlineKeyboardBuilder()
-    keyboard.row(InlineKeyboardButton(text='test', callback_data='timetable:ajkiyaz0'))
-    await message.answer("test", reply_markup=keyboard.as_markup())
-
 
 @router.message(Command('schedule', 'расписание'))
 @router.message(lambda F: F.text == ('schedule' or 'расписание'))
@@ -136,8 +128,6 @@ async def callback_message(callback_query: types.CallbackQuery):
     data = extract_data_from_callback(TimetableCallback.TIMETABLE_CHOICE.value, callback_query.data)
     id = data[0]
     need_delete_message = True if len(data) > 1 and data[1] == "True" else False
-    print(data)
-    print(callback_query.data)
 
     if need_delete_message:
         await callback_query.message.delete()
