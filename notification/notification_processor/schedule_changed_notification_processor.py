@@ -37,7 +37,6 @@ def _get_plural_name_day_of_week(day: str) -> str:
     return days[day]
 
 
-@deprecated
 class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
     async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
         processed_notifications = []
