@@ -7,7 +7,6 @@ from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
 
 
-@deprecated
 class ScheduleAddedNotificationProcessor(BaseNotificationProcessor):
     async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
         new_schedule: dict[int, list] = {}
