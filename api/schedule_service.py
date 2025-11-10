@@ -1,19 +1,4 @@
-from typing_extensions import deprecated
-
-from api.utils import raise_schedule_exception_when_service_unavailable, \
-    raise_user_not_found_exception_when_exception_in_response, get_request, get_request_as_json
-
-
-@deprecated("use timetable_service")
-async def get_schedule(telegram_id: int, start: str, end: str) -> dict[str, any]:
-    response = await get_request(path=f"/v3/schedule/{telegram_id}?start={start}&end={end}")
-    await raise_schedule_exception_when_service_unavailable(response)
-
-    data = response.json()
-
-    await raise_user_not_found_exception_when_exception_in_response(data)
-
-    return data
+from api.utils import get_request_as_json
 
 
 async def get_courses() -> list[int]:
