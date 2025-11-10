@@ -2,12 +2,9 @@ from api.utils import raise_user_not_found_exception_when_exception_in_response,
     patch_request_as_json, get_request, post_request_as_json, post_request, delete_request
 from exception.verification.invalid_email_format_exception import InvalidEmailFormatException
 from exception.verification.user_already_exists_with_this_email_exception import UserAlreadyExistsWithThisEmailException
-from model.available_for_hiding_lesson import AvailableForHidingLesson
-from model.hidden_lesson import HiddenLesson
-from model.lesson_type import LessonType
+from mapper import verification_info_mapper
 from model.remote_schedule_connect_link import RemoteScheduleConnectLink
 from model.verification_info import VerificationInfo
-from mapper import verification_info_mapper
 
 
 async def get_user_ids() -> list[int]:
@@ -104,38 +101,6 @@ async def get_user_settings(telegram_id: int) -> dict | None:
     await raise_user_not_found_exception_when_exception_in_response(user)
 
     return user["response"]["settings"]
-
-
-async def get_user_hidden_lessons(telegram_id: int) -> list[HiddenLesson]:
-    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
-
-    await raise_user_not_found_exception_when_exception_in_response(user)
-
-    data = user["response"]["settings"]["hiddenLessons"]
-
-    return list(map(
-        lambda lesson: HiddenLesson(lesson["lesson"], LessonType[lesson["lessonType"]], lesson["subGroup"]), data
-    ))
-
-
-async def add_user_hidden_lesson(telegram_id: int, lesson: AvailableForHidingLesson) -> None:
-    data = {
-        "lesson": lesson.lesson,
-        "lessonType": lesson.lesson_type.name,
-        "subGroup": lesson.sub_group,
-    }
-
-    await post_request(path=f"/user/hidden-lessons?telegramId={telegram_id}", json=data)
-
-
-async def remove_user_hidden_lesson(telegram_id: int, lesson: AvailableForHidingLesson) -> None:
-    data = {
-        "lesson": lesson.lesson,
-        "lessonType": lesson.lesson_type.name,
-        "subGroup": lesson.sub_group,
-    }
-
-    await delete_request(path=f"/user/hidden-lessons?telegramId={telegram_id}", json=data)
 
 
 async def check_registration_user(telegram_id: int) -> bool:
