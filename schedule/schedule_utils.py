@@ -1,8 +1,7 @@
 from aiogram import types
-from typing_extensions import deprecated
 
 from callback.callback import insert_data_to_callback
-from callback.schedule_callback import ScheduleCallback, TimetableCallback
+from callback.timetable_callback import TimetableCallback
 from constants import constant
 from model.lesson_type import LessonType
 from schedule.schedule_type import ScheduleType
