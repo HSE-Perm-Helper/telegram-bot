@@ -1,5 +1,6 @@
 import traceback
 from traceback import print_exc
+from typing_extensions import deprecated
 
 from aiogram.enums import ParseMode
 
@@ -36,6 +37,7 @@ def _get_plural_name_day_of_week(day: str) -> str:
     return days[day]
 
 
+@deprecated
 class ScheduleChangedNotificationProcessor(BaseNotificationProcessor):
     async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
         processed_notifications = []

@@ -1,3 +1,5 @@
+from typing_extensions import deprecated
+
 from bot import bot
 from notification import notification_utils
 from notification.base_notification import BaseNotification
@@ -5,6 +7,7 @@ from notification.base_notification_processor import BaseNotificationProcessor
 from notification.notification_type import NotificationType
 
 
+@deprecated
 class ScheduleAddedNotificationProcessor(BaseNotificationProcessor):
     async def process(self, notifications: list[BaseNotification]) -> list[BaseNotification]:
         new_schedule: dict[int, list] = {}
