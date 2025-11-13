@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from api import timetable_service
 from bot import bot
 from callback.callback import check_callback, extract_data_from_callback
-from callback.schedule_callback import TimetableCallback
+from callback.timetable_callback import TimetableCallback
 from decorator.decorators import typing_action
 from message.schedule_messages import SCHEDULE_NOT_FOUND_ANYMORE, NO_LESSONS_IN_SCHEDULE
 from schedule.schedule_type import ScheduleType
