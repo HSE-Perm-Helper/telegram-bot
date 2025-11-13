@@ -8,7 +8,7 @@ def extract_data_from_callback(callback_prefix: str, callback: str) -> list[str]
 
 
 def insert_data_to_callback(callback_prefix: str, data: list) -> str:
-    return callback_prefix + CALLBACK_DELIMITER.join(list(map(str, data)))
+    return callback_prefix + CALLBACK_DELIMITER + CALLBACK_DELIMITER.join(list(map(str, data)))
 
 
 def check_callback(callback: types.CallbackQuery, target_callback: str) -> bool:
