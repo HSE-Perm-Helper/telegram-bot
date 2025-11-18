@@ -21,8 +21,7 @@ class UpcomingLessonsNotificationProcessor(BaseNotificationProcessor):
                 payload = notification.payload
                 users = payload["users"]
 
-                schedule = payload["targetSchedule"]
-                lessons = schedule["lessons"]
+                lessons = payload["lessons"]
                 # markup = InlineKeyboardBuilder()
                 #
                 # markup.row(types.InlineKeyboardButton(
