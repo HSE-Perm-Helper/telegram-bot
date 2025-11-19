@@ -5,6 +5,7 @@ from exception.verification.user_already_exists_with_this_email_exception import
 from mapper import verification_info_mapper
 from model.remote_schedule_connect_link import RemoteScheduleConnectLink
 from model.verification_info import VerificationInfo
+from util.utils import parse_boolean
 
 
 async def get_user_ids() -> list[int]:
@@ -48,32 +49,32 @@ async def get_service_admin_ids() -> list[int]:
 
 
 async def registration_user(telegram_id: int, group: str) -> bool:
-    user_data = await post_request_as_json(path=f"/v2/users",
+    user_data = await post_request_as_json(path=f"/v3/users",
                                            json={
                                                "telegramId": int(telegram_id),
                                                "group": group
                                            })
-    return not bool(user_data['error'])
+    return not parse_boolean(user_data.get('error', 'false'))
 
 
 async def edit_user(telegram_id: int, group: str) -> bool:
-    user_data = await patch_request_as_json(path=f"/user?telegramId={telegram_id}",
+    user_data = await patch_request_as_json(f"/v3/users/{telegram_id}/settings",
                                             json={
                                                 "group": group,
                                             })
-    return not bool(user_data['error'])
+    return not parse_boolean(user_data.get('error', 'false'))
 
 
 async def edit_user_settings(telegram_id: int, setting: str, new_value: bool) -> bool:
-    user_data = await patch_request_as_json(path=f"/user?telegramId={telegram_id}",
+    user_data = await patch_request_as_json(path=f"/v3/users/{telegram_id}/settings",
                                             json={
                                                 f"{setting}": new_value,
                                             })
-    return not bool(user_data['error'])
+    return not parse_boolean(user_data.get('error', 'false'))
 
 
 async def set_or_update_user_email(telegram_id: int, email: str) -> VerificationInfo:
-    response = await post_request(path=f"/v2/users/{telegram_id}/email", json={"email": email})
+    response = await post_request(path=f"/v3/users/{telegram_id}/settings/email", json={"email": email})
 
     if response.status_code == 400:
         raise InvalidEmailFormatException()
@@ -85,31 +86,31 @@ async def set_or_update_user_email(telegram_id: int, email: str) -> Verification
 
 
 async def delete_user_email(telegram_id: int):
-    await delete_request(path=f"/v2/users/{telegram_id}/email")
+    await delete_request(path=f"/v3/users/{telegram_id}/settings/email")
 
 
 async def get_user(telegram_id: int) -> dict:
-    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
+    user = await get_request_as_json(path=f"/v3/users/{telegram_id}")
 
     await raise_user_not_found_exception_when_exception_in_response(user)
 
-    return user["response"]
+    return user
 
 async def get_user_settings(telegram_id: int) -> dict | None:
-    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
+    user = await get_request_as_json(path=f"/v3/users/{telegram_id}")
 
     await raise_user_not_found_exception_when_exception_in_response(user)
 
-    return user["response"]["settings"]
+    return user["settings"]
 
 
 async def check_registration_user(telegram_id: int) -> bool:
-    response = await get_request(path=f"/user?telegramId={telegram_id}")
+    response = await get_request(path=f"/v3/users/{telegram_id}")
     return response.status_code == 200
 
 
 async def get_remote_schedule_link(telegram_id: int) -> RemoteScheduleConnectLink:
-    response = await get_request_as_json(path=f"/user/remote-schedule?telegramId={telegram_id}")
+    response = await get_request_as_json(path=f"/v3/users/{telegram_id}/remote-timetable")
 
     return RemoteScheduleConnectLink(response["direct"])
 
