@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 
 import custom_logging
+from middleware.tracing_middleware import TracingMiddleware
 from util.utils import generate_instance_id
 
 load_dotenv()
@@ -23,6 +24,7 @@ async def main():
 
     workers.run_workers()
 
+    dp.update.middleware.register(TracingMiddleware())
     dp.update.middleware.register(ExceptionHandlerMiddleware())
 
     dp.include_router(start.router)
