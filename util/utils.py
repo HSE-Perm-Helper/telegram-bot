@@ -1,4 +1,6 @@
 import datetime
+import random
+import time
 from typing import Callable
 
 from aiogram.types import InlineKeyboardButton
@@ -80,3 +82,12 @@ def number_format(n: int, variant_1, variant_2, variant_3) -> str:
         return f"{n} {variant_2}"
     else:
         return f"{n} {variant_3}"
+
+
+def to_base36(num: int) -> str:
+    return format(num, 'x')
+
+def generate_instance_id() -> str:
+    time_part = f"{int(time.time() * 1000) % 1679616:04x}"
+    random_part = f"{random.randint(0, 1679615):04x}"
+    return (time_part + random_part)[:8]

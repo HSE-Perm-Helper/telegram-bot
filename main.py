@@ -1,5 +1,8 @@
 from dotenv import load_dotenv
 
+import custom_logging
+from util.utils import generate_instance_id
+
 load_dotenv()
 
 import asyncio
@@ -15,6 +18,9 @@ from worker import workers
 
 
 async def main():
+    instance_id = generate_instance_id()
+    custom_logging.init_logging(instance_id)
+
     workers.run_workers()
 
     dp.update.middleware.register(ExceptionHandlerMiddleware())
