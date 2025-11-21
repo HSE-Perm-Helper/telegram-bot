@@ -1,9 +1,9 @@
-import logging
 from typing import Callable, Dict, Any, Awaitable
 
 import requests
 from aiogram import BaseMiddleware
-from aiogram.types import TelegramObject, Update
+from aiogram.types import TelegramObject, Update, Message, CallbackQuery
+from structlog import get_logger
 
 from exception.service_unavailable_exception import ServiceUnavailableException
 from exception.user_not_found_exception import UserNotFoundException
@@ -25,5 +25,12 @@ class ExceptionHandlerMiddleware(BaseMiddleware):
         except requests.exceptions.ConnectionError as e:
             await send_message(user_id, event, CONNECTION_ERROR)
         except Exception as e:
-            await send_message(user_id, event, EXCEPTION_MESSAGE)
-            logging.error(f"Handling with error for user with id {user_id}", exc_info=e)
+            await send_message(user_id, event, EXCEPTION_MESSAGE.format(event.update_id))
+            if event.message is not None:
+                payload = f"text='{event.message.text}'"
+            elif event.callback_query is not None:
+                payload = f"data='{event.callback_query.data}'"
+            else:
+                payload = ""
+
+            get_logger().exception(f"Error when handling update {payload}", exc_info=e)

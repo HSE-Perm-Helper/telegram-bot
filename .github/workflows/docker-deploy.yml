@@ -1,4 +1,4 @@
-name: Bot CI
+name: Bot CD
 
 on:
   push:
