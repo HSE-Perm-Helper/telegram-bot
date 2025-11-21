@@ -10,6 +10,8 @@ services:
       - ${RD_PORT}
     volumes:
       - redis_data:/bitnami/redis/data
+    networks:
+      - internal
 
   hse-perm-helper-bot:
     image: 'hse-perm-helper-bot'
@@ -27,12 +29,15 @@ services:
       - tg-bot-data:/app/save
     networks:
       - logging
+      - internal
 
 volumes:
   redis_data:
   tg-bot-data:
 
 networks:
+  internal:
+    name: internal
   logging:
     name: logging
     external: true
