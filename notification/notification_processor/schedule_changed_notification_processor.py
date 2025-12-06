@@ -1,5 +1,6 @@
 import traceback
 from traceback import print_exc
+from typing_extensions import deprecated
 
 from aiogram.enums import ParseMode
 

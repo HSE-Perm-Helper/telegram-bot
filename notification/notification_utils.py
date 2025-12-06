@@ -38,5 +38,5 @@ def get_difference_schedule(schedules):
 def get_markup_schedule(schedules) -> InlineKeyboardBuilder:
     keyword = InlineKeyboardBuilder()
     for schedule in schedules:
-        keyword.row(schedule_utils.get_button_by_schedule_info(schedule, False))
+        keyword.row(schedule_utils.get_button_by_timetable_info(schedule, False))
     return keyword

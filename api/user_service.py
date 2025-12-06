@@ -2,12 +2,10 @@ from api.utils import raise_user_not_found_exception_when_exception_in_response,
     patch_request_as_json, get_request, post_request_as_json, post_request, delete_request
 from exception.verification.invalid_email_format_exception import InvalidEmailFormatException
 from exception.verification.user_already_exists_with_this_email_exception import UserAlreadyExistsWithThisEmailException
-from model.available_for_hiding_lesson import AvailableForHidingLesson
-from model.hidden_lesson import HiddenLesson
-from model.lesson_type import LessonType
+from mapper import verification_info_mapper
 from model.remote_schedule_connect_link import RemoteScheduleConnectLink
 from model.verification_info import VerificationInfo
-from mapper import verification_info_mapper
+from util.utils import parse_boolean
 
 
 async def get_user_ids() -> list[int]:
@@ -51,32 +49,32 @@ async def get_service_admin_ids() -> list[int]:
 
 
 async def registration_user(telegram_id: int, group: str) -> bool:
-    user_data = await post_request_as_json(path=f"/v2/users",
+    user_data = await post_request_as_json(path=f"/v3/users",
                                            json={
                                                "telegramId": int(telegram_id),
                                                "group": group
                                            })
-    return not bool(user_data['error'])
+    return not parse_boolean(user_data.get('error', 'false'))
 
 
 async def edit_user(telegram_id: int, group: str) -> bool:
-    user_data = await patch_request_as_json(path=f"/user?telegramId={telegram_id}",
+    user_data = await patch_request_as_json(f"/v3/users/{telegram_id}/settings",
                                             json={
                                                 "group": group,
                                             })
-    return not bool(user_data['error'])
+    return not parse_boolean(user_data.get('error', 'false'))
 
 
 async def edit_user_settings(telegram_id: int, setting: str, new_value: bool) -> bool:
-    user_data = await patch_request_as_json(path=f"/user?telegramId={telegram_id}",
+    user_data = await patch_request_as_json(path=f"/v3/users/{telegram_id}/settings",
                                             json={
                                                 f"{setting}": new_value,
                                             })
-    return not bool(user_data['error'])
+    return not parse_boolean(user_data.get('error', 'false'))
 
 
 async def set_or_update_user_email(telegram_id: int, email: str) -> VerificationInfo:
-    response = await post_request(path=f"/v2/users/{telegram_id}/email", json={"email": email})
+    response = await post_request(path=f"/v3/users/{telegram_id}/settings/email", json={"email": email})
 
     if response.status_code == 400:
         raise InvalidEmailFormatException()
@@ -88,63 +86,31 @@ async def set_or_update_user_email(telegram_id: int, email: str) -> Verification
 
 
 async def delete_user_email(telegram_id: int):
-    await delete_request(path=f"/v2/users/{telegram_id}/email")
+    await delete_request(path=f"/v3/users/{telegram_id}/settings/email")
 
 
 async def get_user(telegram_id: int) -> dict:
-    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
+    user = await get_request_as_json(path=f"/v3/users/{telegram_id}")
 
     await raise_user_not_found_exception_when_exception_in_response(user)
 
-    return user["response"]
+    return user
 
 async def get_user_settings(telegram_id: int) -> dict | None:
-    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
+    user = await get_request_as_json(path=f"/v3/users/{telegram_id}")
 
     await raise_user_not_found_exception_when_exception_in_response(user)
 
-    return user["response"]["settings"]
-
-
-async def get_user_hidden_lessons(telegram_id: int) -> list[HiddenLesson]:
-    user = await get_request_as_json(path=f"/user?telegramId={telegram_id}")
-
-    await raise_user_not_found_exception_when_exception_in_response(user)
-
-    data = user["response"]["settings"]["hiddenLessons"]
-
-    return list(map(
-        lambda lesson: HiddenLesson(lesson["lesson"], LessonType[lesson["lessonType"]], lesson["subGroup"]), data
-    ))
-
-
-async def add_user_hidden_lesson(telegram_id: int, lesson: AvailableForHidingLesson) -> None:
-    data = {
-        "lesson": lesson.lesson,
-        "lessonType": lesson.lesson_type.name,
-        "subGroup": lesson.sub_group,
-    }
-
-    await post_request(path=f"/user/hidden-lessons?telegramId={telegram_id}", json=data)
-
-
-async def remove_user_hidden_lesson(telegram_id: int, lesson: AvailableForHidingLesson) -> None:
-    data = {
-        "lesson": lesson.lesson,
-        "lessonType": lesson.lesson_type.name,
-        "subGroup": lesson.sub_group,
-    }
-
-    await delete_request(path=f"/user/hidden-lessons?telegramId={telegram_id}", json=data)
+    return user["settings"]
 
 
 async def check_registration_user(telegram_id: int) -> bool:
-    response = await get_request(path=f"/user?telegramId={telegram_id}")
+    response = await get_request(path=f"/v3/users/{telegram_id}")
     return response.status_code == 200
 
 
 async def get_remote_schedule_link(telegram_id: int) -> RemoteScheduleConnectLink:
-    response = await get_request_as_json(path=f"/user/remote-schedule?telegramId={telegram_id}")
+    response = await get_request_as_json(path=f"/v3/users/{telegram_id}/remote-timetable")
 
     return RemoteScheduleConnectLink(response["direct"])
 

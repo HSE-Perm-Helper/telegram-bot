@@ -1,3 +1,5 @@
+from typing_extensions import deprecated
+
 from bot import bot
 from notification import notification_utils
 from notification.base_notification import BaseNotification

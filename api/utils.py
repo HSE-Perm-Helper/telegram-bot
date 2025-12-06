@@ -121,7 +121,14 @@ async def raise_schedule_exception_when_service_unavailable(response: Response):
         raise ScheduleServiceUnavailableException
 
 
+def has_error_in_response(data):
+    if isinstance(data, dict) and data.get("error", None):
+        return True
+    else:
+        return False
+
+
 async def raise_user_not_found_exception_when_exception_in_response(data):
-    if data["error"]:
+    if isinstance(data, dict) and data.get("error", None):
         if data["errorDescription"]["code"] == "UserNotFoundException":
             raise UserNotFoundException

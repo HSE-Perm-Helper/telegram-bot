@@ -10,18 +10,34 @@ services:
       - ${RD_PORT}
     volumes:
       - redis_data:/bitnami/redis/data
+    networks:
+      - internal
 
   hse-perm-helper-bot:
     image: 'hse-perm-helper-bot'
     container_name: hse-perm-helper-bot
     build: .
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
     restart: always
     env_file: .env
     depends_on:
       - redis
     volumes:
       - tg-bot-data:/app/save
+    networks:
+      - logging
+      - internal
 
 volumes:
   redis_data:
   tg-bot-data:
+
+networks:
+  internal:
+    name: internal
+  logging:
+    name: logging
+    external: true
