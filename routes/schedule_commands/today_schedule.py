@@ -22,8 +22,8 @@ async def get_today_lessons(message: Message, state: FSMContext):
     await message.delete()
 
     if len(lessons) == 0:
-        # await message.answer("Сегодня у тебя нет пар 😎")
-        await message.answer("Сегодня у тебя нет пар 🃏") # halloween
+        await message.answer("Сегодня у тебя нет пар 😎")
+        # await message.answer("Сегодня у тебя нет пар 🃏") # halloween
         return
 
     is_session = lessons[0]["parentScheduleType"] == ScheduleType.SESSION_SCHEDULE.value
