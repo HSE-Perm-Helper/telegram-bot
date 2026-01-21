@@ -1,11 +1,9 @@
 from aiogram import Router, types
-from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from api import user_service
-from decorator.decorators import typing_action, required_admin
+from decorator.decorators import typing_action
 
 router = Router()
 
@@ -55,7 +53,8 @@ async def send_help_message(message: types.Message):
     keyboard_markup_up.row(get_schedule_text_button)
     keyboard_markup_up.row(types.KeyboardButton(text="📅 На сегодня"), types.KeyboardButton(text="➡️ На завтра"))
     keyboard_markup_up.row(get_base_schedule_text_button, types.KeyboardButton(text="🏓 Расписание физ-ры"))
-    keyboard_markup_up.row(types.KeyboardButton(text="🖥️ Добавить в календарь"), types.KeyboardButton(text="⚙️ Настройки"))
+    keyboard_markup_up.row(types.KeyboardButton(text="🖥️ Добавить в календарь"), types.KeyboardButton(text="⚡️ Быстрый VPN от Вышкинцев"))
+    keyboard_markup_up.row(types.KeyboardButton(text="⚙️ Настройки"))
     keyboard_markup_up.row_width = 4
 
     keyboard = keyboard_markup_up.as_markup()

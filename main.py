@@ -12,7 +12,7 @@ from aiogram import types
 
 from bot import bot, dp
 from middleware.exception_handler_middleware import ExceptionHandlerMiddleware
-from routes import mailing, menu, registration, start, remote_schedule
+from routes import mailing, menu, registration, start, remote_schedule, partnership
 from routes.settings import settings_command, admin_settings
 from routes.schedule_commands import schedule_handle, today_schedule, tomorrow_schedule, sport_schedule
 from worker import workers
@@ -36,6 +36,7 @@ async def main():
     dp.include_router(tomorrow_schedule.router)
     dp.include_router(sport_schedule.router)
     dp.include_router(mailing.router)
+    dp.include_router(partnership.router)
     dp.include_router(menu.router)
     dp.include_router(admin_settings.router)
 
@@ -50,6 +51,7 @@ async def main():
         types.BotCommand(command='sport_schedule', description="Получить расписание физ-ры"),
         types.BotCommand(command='today', description="Получить расписание на сегодня"),
         types.BotCommand(command='tomorrow', description="Получить расписание на завтра"),
+        types.BotCommand(command='vpn', description="VPN от создателей бота")
     ], scope=types.BotCommandScopeDefault())
 
     await dp.start_polling(bot)
