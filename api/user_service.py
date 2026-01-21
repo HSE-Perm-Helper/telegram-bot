@@ -6,6 +6,7 @@ from mapper import verification_info_mapper
 from model.remote_schedule_connect_link import RemoteScheduleConnectLink
 from model.verification_info import VerificationInfo
 from util.utils import parse_boolean
+import structlog
 
 
 async def get_user_ids() -> list[int]:
@@ -54,7 +55,11 @@ async def registration_user(telegram_id: int, group: str) -> bool:
                                                "telegramId": int(telegram_id),
                                                "group": group
                                            })
-    return not parse_boolean(user_data.get('error', 'false'))
+    is_success = not parse_boolean(user_data.get('error', 'false'))
+    if not is_success:
+        structlog.get_logger().warn("Unsuccessful register user, response: {}".format(user_data))
+
+    return is_success
 
 
 async def edit_user(telegram_id: int, group: str) -> bool:
@@ -62,7 +67,12 @@ async def edit_user(telegram_id: int, group: str) -> bool:
                                             json={
                                                 "group": group,
                                             })
-    return not parse_boolean(user_data.get('error', 'false'))
+
+    is_success = not parse_boolean(user_data.get('error', 'false'))
+    if not is_success:
+        structlog.get_logger().warn("Unsuccessful edit user, response: {}".format(user_data))
+
+    return is_success
 
 
 async def edit_user_settings(telegram_id: int, setting: str, new_value: bool) -> bool:
